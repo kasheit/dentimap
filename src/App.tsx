@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronRight,
   FileText,
+  Hospital,
   LayoutGrid,
   MapPin,
   Search,
@@ -14,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Tooth } from '@/components/icons/Tooth';
 import { Sidebar, type NavKey } from '@/components/Sidebar';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { KpiCard } from '@/components/KpiCard';
@@ -384,7 +386,7 @@ function LandlordsView({ landlords, onSelect, expanded, onExpand }: LandlordsVie
                       className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-white dark:hover:bg-navy-700/60"
                     >
                       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-teal-600 shadow-sm dark:bg-navy-700 dark:text-teal-300">
-                        {location.assetType === 'asc' ? <Building2 className="h-4 w-4" /> : <Stethoscope className="h-4 w-4" />}
+                        {location.assetType === 'asc' ? <Hospital className="h-4 w-4" /> : <Tooth className="h-4 w-4" />}
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[13px] font-semibold text-navy-700 dark:text-navy-100">{location.name}</span>

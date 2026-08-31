@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Building2, MapPin, Stethoscope } from 'lucide-react';
+import { Hospital, MapPin } from 'lucide-react';
+import { Tooth } from '@/components/icons/Tooth';
 import type { Location, AssetType } from '@/types';
 import { assetTypeShort } from '@/lib/format';
 
@@ -107,9 +108,9 @@ export function LocationDirectory({
                   }`}
                 >
                   {loc.assetType === 'asc' ? (
-                    <Building2 className="h-5 w-5" strokeWidth={2} />
+                    <Hospital className="h-5 w-5" strokeWidth={2} />
                   ) : (
-                    <Stethoscope className="h-5 w-5" strokeWidth={2} />
+                    <Tooth className="h-5 w-5" />
                   )}
                 </span>
 

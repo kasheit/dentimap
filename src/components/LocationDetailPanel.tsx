@@ -3,17 +3,17 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowUpRight,
   BadgeCheck,
-  Building2,
   CalendarDays,
   FileText,
+  Hospital,
   Landmark,
   Layers,
   MapPin,
   Ruler,
-  Stethoscope,
   UserCog,
   X,
 } from 'lucide-react';
+import { Tooth } from '@/components/icons/Tooth';
 import type { Location } from '@/types';
 import { assetTypeLabel, formatCurrency, formatDate, formatNumber } from '@/lib/format';
 
@@ -122,9 +122,9 @@ export function LocationDetailPanel({
                   }`}
                 >
                   {location.assetType === 'asc' ? (
-                    <Building2 className="h-6 w-6" />
+                    <Hospital className="h-6 w-6" />
                   ) : (
-                    <Stethoscope className="h-6 w-6" />
+                    <Tooth className="h-6 w-6" />
                   )}
                 </div>
                 <p className="text-[13px] leading-relaxed text-navy-600 dark:text-navy-200">
