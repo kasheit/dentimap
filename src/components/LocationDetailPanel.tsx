@@ -100,10 +100,14 @@ export function LocationDetailPanel({
   const [draft, setDraft] = useState<Location | null>(location);
   const [saving, setSaving] = useState(false);
 
+  // Keyed on id only, not the whole `location` object: a save replaces
+  // `location` with a new reference for the same record, which must NOT
+  // reset in-progress edits on some other unrelated re-render.
   useEffect(() => {
     setDraft(location);
     setEditing(false);
     setSaving(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location?.id]);
 
   const active = location === null ? null : editing ? draft : location;

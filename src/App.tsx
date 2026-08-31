@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Activity,
   ArrowUpRight,
   Building2,
   ChevronDown,
   ChevronRight,
   FileText,
   Hospital,
-  LayoutGrid,
   MapPin,
   Search,
   ShieldCheck,
@@ -27,11 +25,9 @@ import { locations as seedLocations, priorYearPortfolioValue } from '@/data';
 import { loadLocations, updateLocation } from '@/lib/locations';
 import type { AssetType, Landlord, Location } from '@/types';
 import {
-  assetTypeLabel,
   assetTypeShort,
   formatCurrency,
   formatDateLong,
-  formatNumber,
   getGreeting,
   percentChange,
 } from '@/lib/format';
@@ -450,7 +446,7 @@ function ActivityView() {
     <>
       <PageHeading eyebrow="Audit trail" title="Activity log" description="A chronological record of important portfolio changes and decisions." />
       <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card dark:border-navy-700 dark:bg-navy-800">
-        {events.map(([date, title, location, time], i) => (
+        {events.map(([date, title, location, time]) => (
           <div key={title} className="flex gap-4 border-b border-slate-100 p-5 last:border-0 dark:border-navy-700">
             <div className="flex w-20 shrink-0 items-start gap-2 text-xs font-medium text-navy-400 dark:text-navy-300"><span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-teal-500" />{date}</div>
             <div className="flex-1"><p className="text-sm font-semibold text-navy-800 dark:text-white">{title}</p><p className="mt-1 text-[13px] text-navy-500 dark:text-navy-300">{location}</p></div>
