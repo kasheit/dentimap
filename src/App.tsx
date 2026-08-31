@@ -24,7 +24,7 @@ import { PortfolioGrowthPanel } from '@/components/PortfolioGrowthPanel';
 import { LocationDirectory } from '@/components/LocationDirectory';
 import { LocationDetailPanel } from '@/components/LocationDetailPanel';
 import { locations as seedLocations, priorYearPortfolioValue } from '@/data';
-import { loadLocations } from '@/lib/locations';
+import { loadLocations, updateLocation } from '@/lib/locations';
 import type { AssetType, Landlord, Location } from '@/types';
 import {
   assetTypeLabel,
@@ -172,6 +172,13 @@ function App() {
         onViewArchive={() => {
           setSelectedLocation(null);
           setActiveNav('documents');
+        }}
+        onSave={async (updated) => {
+          const persisted = await updateLocation(updated);
+          const next = persisted ?? updated;
+          setLocations((prev) => prev.map((loc) => (loc.id === next.id ? next : loc)));
+          setSelectedLocation(next);
+          return persisted !== null;
         }}
       />
     </div>

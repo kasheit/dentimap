@@ -44,6 +44,27 @@ function fromRow(row: LocationRow): Location {
   };
 }
 
+function toRow(location: Location): Omit<LocationRow, 'id'> {
+  return {
+    record_id: location.recordId,
+    name: location.name,
+    city: location.city,
+    state: location.state,
+    asset_type: location.assetType,
+    specialty: location.specialty,
+    date_established: location.dateEstablished,
+    operating_footprint_sq_ft: location.operatingFootprintSqFt,
+    landlord_entity: location.landlordEntity,
+    deed_book_page: location.deedBookPage,
+    previous_occupant: location.previousOccupant,
+    original_land_owner: location.originalLandOwner,
+    original_land_value: location.originalLandValue,
+    current_asset_valuation: location.currentAssetValuation,
+    status: location.status,
+    description: location.description,
+  };
+}
+
 /**
  * Falls back to the baked-in seed (src/data.ts) whenever Supabase isn't
  * configured or the request fails — same pattern as Synvarity's KV loader.
@@ -56,4 +77,21 @@ export async function loadLocations(): Promise<Location[]> {
     .order('record_id', { ascending: true });
   if (error || !data) return seedLocations;
   return (data as LocationRow[]).map(fromRow);
+}
+
+/**
+ * Persists an edited location to Supabase. Returns null (and leaves the
+ * database untouched) when Supabase isn't configured — callers should still
+ * update local state so single-session edits work against the seed data.
+ */
+export async function updateLocation(location: Location): Promise<Location | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('locations')
+    .update(toRow(location))
+    .eq('id', location.id)
+    .select()
+    .single();
+  if (error || !data) return null;
+  return fromRow(data as LocationRow);
 }
