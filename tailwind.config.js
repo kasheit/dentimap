@@ -7,7 +7,8 @@ export default {
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         display: ['Sora', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+        mono: ['Space Mono', 'ui-monospace', 'monospace'],
+        brand: ['Space Grotesk', 'Sora', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         navy: {

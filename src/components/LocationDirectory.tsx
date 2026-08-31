@@ -89,8 +89,10 @@ export function LocationDirectory({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: i * 0.03 }}
             >
-              <button
+              <motion.button
                 onClick={() => onSelect(loc)}
+                whileTap={{ scale: 0.985 }}
+                transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
                 className={`flex w-full items-center gap-4 px-5 py-4 text-left transition-colors ${
                   isSelected
                     ? 'bg-teal-50/70 dark:bg-teal-500/10'
@@ -135,7 +137,7 @@ export function LocationDirectory({
                 >
                   {assetTypeShort(loc.assetType)}
                 </span>
-              </button>
+              </motion.button>
             </motion.li>
           );
         })}

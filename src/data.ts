@@ -11,7 +11,7 @@ export const locations: Location[] = [
   {
     id: '1',
     recordId: 'VFD-001',
-    name: 'Village Family Dental — St. Pauls',
+    name: 'St. Pauls',
     city: 'St. Pauls',
     state: 'NC',
     assetType: 'dental',
@@ -31,7 +31,7 @@ export const locations: Location[] = [
   {
     id: '2',
     recordId: 'VFD-002',
-    name: 'Village Family Dental — Hope Mills',
+    name: 'Hope Mills',
     city: 'Hope Mills',
     state: 'NC',
     assetType: 'dental',
@@ -51,7 +51,7 @@ export const locations: Location[] = [
   {
     id: '3',
     recordId: 'VFD-003',
-    name: 'Village Family Dental — Fayetteville',
+    name: 'Fayetteville',
     city: 'Fayetteville',
     state: 'NC',
     assetType: 'dental',
@@ -71,7 +71,7 @@ export const locations: Location[] = [
   {
     id: '4',
     recordId: 'VFD-004',
-    name: 'Village Family Dental — Eastover',
+    name: 'Eastover',
     city: 'Eastover',
     state: 'NC',
     assetType: 'dental',
@@ -90,7 +90,7 @@ export const locations: Location[] = [
   {
     id: '5',
     recordId: 'VFD-005',
-    name: 'Village Family Dental — Raeford',
+    name: 'Raeford',
     city: 'Raeford',
     state: 'NC',
     assetType: 'dental',
@@ -109,7 +109,7 @@ export const locations: Location[] = [
   {
     id: '6',
     recordId: 'VFD-006',
-    name: 'Village Family Dental — Laurinburg',
+    name: 'Laurinburg',
     city: 'Laurinburg',
     state: 'NC',
     assetType: 'dental',
@@ -128,7 +128,7 @@ export const locations: Location[] = [
   {
     id: '7',
     recordId: 'VG-001',
-    name: 'Valleygate ASC — Fayetteville',
+    name: 'Fayetteville',
     city: 'Fayetteville',
     state: 'NC',
     assetType: 'asc',
@@ -148,7 +148,7 @@ export const locations: Location[] = [
   {
     id: '8',
     recordId: 'VG-002',
-    name: 'Valleygate ASC — Triad (Greensboro)',
+    name: 'Triad (Greensboro)',
     city: 'Greensboro',
     state: 'NC',
     assetType: 'asc',
@@ -167,7 +167,7 @@ export const locations: Location[] = [
   {
     id: '9',
     recordId: 'VG-003',
-    name: 'Valleygate ASC — The West',
+    name: 'The West',
     city: 'Unconfirmed',
     state: 'NC',
     assetType: 'asc',
@@ -186,7 +186,7 @@ export const locations: Location[] = [
   {
     id: '10',
     recordId: 'VG-004',
-    name: 'Valleygate ASC — Garner',
+    name: 'Garner',
     city: 'Garner',
     state: 'NC',
     assetType: 'asc',
@@ -206,7 +206,7 @@ export const locations: Location[] = [
   {
     id: '11',
     recordId: 'VG-005',
-    name: 'Valleygate ASC — S. Charlotte',
+    name: 'S. Charlotte',
     city: 'Charlotte',
     state: 'NC',
     assetType: 'asc',

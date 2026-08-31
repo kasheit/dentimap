@@ -65,8 +65,8 @@ export function Sidebar({
             transition={{ delay: 0.05 }}
             className="min-w-0"
           >
-            <p className="font-display text-sm font-semibold tracking-tight text-white">
-              VFD · Valleygate
+            <p className="font-brand text-lg font-bold tracking-tight text-white">
+              Dentimap
             </p>
             <p className="truncate text-[11px] font-medium uppercase tracking-[0.1em] text-navy-300">
               Clinical real estate

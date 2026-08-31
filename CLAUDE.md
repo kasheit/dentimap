@@ -63,7 +63,8 @@ Dentimap is an internal operations dashboard for "Asterion," a multi-location de
 ### Typography
 - `font-sans` = Inter (body, 400–700)
 - `font-display` = Sora (headings, 500–700)
-- `font-mono` = JetBrains Mono (record IDs, deed refs)
+- `font-mono` = Space Mono (record IDs, deed refs)
+- `font-brand` = Space Grotesk (sidebar wordmark "Dentimap" only — sister family to Space Mono)
 - Loaded via Google Fonts in `index.html`
 - `.label-eyebrow` utility class = 11px uppercase tracked label (use for field names like "ASSET CLASSIFICATION")
 

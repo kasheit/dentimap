@@ -63,15 +63,15 @@ export function LocationDetailPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             onClick={onClose}
             className="fixed inset-0 z-40 bg-navy-950/40 backdrop-blur-[2px]"
           />
           <motion.aside
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 360, damping: 40 }}
+            initial={{ x: '100%', opacity: 0.6 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '100%', opacity: 0.6 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             className="scrollbar-thin fixed inset-y-0 right-0 z-50 w-full max-w-[520px] overflow-y-auto bg-white shadow-panel dark:bg-navy-900"
           >
             {/* Header */}
