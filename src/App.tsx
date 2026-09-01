@@ -23,6 +23,7 @@ import { LocationDirectory } from '@/components/LocationDirectory';
 import { LocationDetailPanel } from '@/components/LocationDetailPanel';
 import { locations as seedLocations, priorYearPortfolioValue } from '@/data';
 import { loadLocations, updateLocation } from '@/lib/locations';
+import { supabase } from '@/lib/supabase';
 import type { AssetType, Landlord, Location } from '@/types';
 import {
   assetTypeShort,
@@ -104,6 +105,7 @@ function App() {
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed((value) => !value)}
         locationCount={locations.length}
+        onSignOut={() => supabase?.auth.signOut()}
       />
 
       <main className={`min-h-screen transition-[margin] duration-300 ${collapsed ? 'ml-[76px]' : 'ml-[264px]'}`}>

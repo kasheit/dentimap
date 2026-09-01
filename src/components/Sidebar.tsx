@@ -7,6 +7,7 @@ import {
   FileText,
   HelpCircle,
   LayoutGrid,
+  LogOut,
   MapPin,
   Settings,
   Stethoscope,
@@ -22,6 +23,7 @@ interface SidebarProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
   locationCount: number;
+  onSignOut: () => void;
 }
 
 interface NavItem {
@@ -45,6 +47,7 @@ export function Sidebar({
   collapsed,
   onToggleCollapse,
   locationCount,
+  onSignOut,
 }: SidebarProps) {
   return (
     <motion.aside
@@ -175,11 +178,18 @@ export function Sidebar({
             EH
           </div>
           {!collapsed && (
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-medium text-white">Eshan</p>
               <p className="truncate text-[11px] text-navy-300">Owner &amp; admin</p>
             </div>
           )}
+          <button
+            onClick={onSignOut}
+            title="Sign out"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-navy-400 transition-colors hover:bg-navy-700 hover:text-white"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
