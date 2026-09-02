@@ -22,6 +22,10 @@ export interface Location {
   currentAssetValuation: number;
   status: LocationStatus;
   description: string;
+  /** Free-form payer mix shares, e.g. "30% military", "35-40% Medicaid". */
+  payerMix: string[];
+  /** Staffing/rotation notes, e.g. how specialists rotate across offices. */
+  staffingNotes: string;
 }
 
 export interface Landlord {

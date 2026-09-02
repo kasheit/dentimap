@@ -13,7 +13,9 @@ import {
   MapPin,
   Pencil,
   Ruler,
+  Shuffle,
   UserCog,
+  Users,
   X,
 } from 'lucide-react';
 import { Tooth } from '@/components/icons/Tooth';
@@ -414,6 +416,68 @@ export function LocationDetailPanel({
                     />
                   ) : (
                     <Field label="Original land owner">{active.originalLandOwner}</Field>
+                  )}
+                </div>
+              </section>
+
+              {/* Patient base & staffing */}
+              <section>
+                <div className="mb-3 flex items-center gap-2">
+                  <Users className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                  <h3 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-navy-500 dark:text-navy-200">
+                    Patient base &amp; staffing
+                  </h3>
+                </div>
+                <div className="rounded-xl border border-slate-100 p-4 dark:border-navy-700">
+                  <p className="label-eyebrow">Payer mix</p>
+                  {editing ? (
+                    <input
+                      value={(draft?.payerMix ?? []).join(', ')}
+                      onChange={(e) =>
+                        set(
+                          'payerMix',
+                          e.target.value
+                            .split(',')
+                            .map((s) => s.trim())
+                            .filter(Boolean),
+                        )
+                      }
+                      placeholder="e.g. 30% military, 35-40% Medicaid"
+                      className={inputClass}
+                    />
+                  ) : active.payerMix.length > 0 ? (
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {active.payerMix.map((share) => (
+                        <span
+                          key={share}
+                          className="rounded-md bg-teal-50 px-2 py-0.5 text-[11px] font-semibold text-teal-700 dark:bg-teal-500/15 dark:text-teal-300"
+                        >
+                          {share}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-1.5 text-sm font-medium text-navy-400 dark:text-navy-400">
+                      Not reported
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex items-center gap-2">
+                    <Shuffle className="h-3.5 w-3.5 text-navy-400" />
+                    <p className="label-eyebrow">Staffing / rotation notes</p>
+                  </div>
+                  {editing ? (
+                    <textarea
+                      value={draft?.staffingNotes ?? ''}
+                      onChange={(e) => set('staffingNotes', e.target.value)}
+                      rows={2}
+                      placeholder="e.g. how specialists rotate through this office"
+                      className={`${inputClass} resize-none`}
+                    />
+                  ) : (
+                    <p className="mt-1.5 text-[13px] leading-relaxed text-navy-600 dark:text-navy-200">
+                      {active.staffingNotes || 'Not reported'}
+                    </p>
                   )}
                 </div>
               </section>

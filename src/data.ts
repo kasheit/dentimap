@@ -27,6 +27,9 @@ export const locations: Location[] = [
     status: 'Operating',
     description:
       'Founding office, opened 1985 — the practice’s first location, in a county the group never returned to.',
+    payerMix: ['30% military', '35-40% Medicaid'],
+    staffingNotes:
+      'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
   },
   {
     id: '2',
@@ -47,6 +50,9 @@ export const locations: Location[] = [
     status: 'Operating',
     description:
       'Opened 1993 — the first office in Cumberland County, four years ahead of the Fayetteville hub.',
+    payerMix: ['30% military', '35-40% Medicaid'],
+    staffingNotes:
+      'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
   },
   {
     id: '3',
@@ -67,6 +73,9 @@ export const locations: Location[] = [
     status: 'Operating',
     description:
       'Preparations began 1997; opened 1999. A specialty entity (Southeastern Dental Specialists) has been reported here but not mapped to a filing.',
+    payerMix: ['30% military', '35-40% Medicaid'],
+    staffingNotes:
+      'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
   },
   {
     id: '4',
@@ -86,6 +95,9 @@ export const locations: Location[] = [
     currentAssetValuation: 890000,
     status: 'Operating',
     description: 'Cumberland County office; opening date not yet confirmed.',
+    payerMix: ['30% military', '35-40% Medicaid'],
+    staffingNotes:
+      'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
   },
   {
     id: '5',
@@ -105,6 +117,9 @@ export const locations: Location[] = [
     currentAssetValuation: 760000,
     status: 'Operating',
     description: 'Hoke County office; opening date not yet confirmed.',
+    payerMix: ['30% military', '35-40% Medicaid'],
+    staffingNotes:
+      'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
   },
   {
     id: '6',
@@ -124,6 +139,9 @@ export const locations: Location[] = [
     currentAssetValuation: 810000,
     status: 'Operating',
     description: 'Scotland County office. Appears in one location list and not the other — unresolved record.',
+    payerMix: ['30% military', '35-40% Medicaid'],
+    staffingNotes:
+      'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
   },
   {
     id: '7',
@@ -144,6 +162,8 @@ export const locations: Location[] = [
     status: 'Operating',
     description:
       'Opened 2017 · SOS filing 1505302 · NPI issued Dec 2017 — one of two centers issued NPIs the same month.',
+    payerMix: [],
+    staffingNotes: '',
   },
   {
     id: '8',
@@ -163,6 +183,8 @@ export const locations: Location[] = [
     currentAssetValuation: 4700000,
     status: 'Operating',
     description: 'Opened 2017 · NPI issued Dec 2017 — the same month as Fayetteville.',
+    payerMix: [],
+    staffingNotes: '',
   },
   {
     id: '9',
@@ -182,6 +204,8 @@ export const locations: Location[] = [
     currentAssetValuation: 3400000,
     status: 'Operating',
     description: 'Reported, not yet independently sourced — location details unverified.',
+    payerMix: [],
+    staffingNotes: '',
   },
   {
     id: '10',
@@ -202,6 +226,8 @@ export const locations: Location[] = [
     status: 'Operating',
     description:
       'Opened 2025 (reported) — the first center reported to open its rooms to providers outside the group.',
+    payerMix: [],
+    staffingNotes: '',
   },
   {
     id: '11',
@@ -221,6 +247,8 @@ export const locations: Location[] = [
     currentAssetValuation: 5150000,
     status: 'Operating',
     description: 'Opened 2025 (reported).',
+    payerMix: [],
+    staffingNotes: '',
   },
 ];
 

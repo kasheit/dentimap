@@ -19,15 +19,18 @@ create table if not exists public.locations (
   current_asset_valuation bigint not null,
   status text not null check (status in ('Operating', 'Under renovation', 'Lease review', 'Acquisition pending')),
   description text not null default '',
+  payer_mix text[] not null default '{}',
+  staffing_notes text not null default '',
   created_at timestamptz not null default now()
 );
 
 alter table public.locations enable row level security;
 
--- Single-user app (Eshan is the only reader/writer) — anon key allows full access.
--- If this app ever gets more than one user, replace with auth-scoped policies.
-create policy "Allow all access to locations"
+-- Single-user app — only the owner (signed in via email OTP or passkey, see
+-- src/components/AuthGate.tsx) can read/write. See supabase/auth-lockdown.sql
+-- for the migration that replaced the original "allow all" policy with this.
+create policy "Only the owner can access locations"
   on public.locations
   for all
-  using (true)
-  with check (true);
+  using (auth.jwt() ->> 'email' = 'barnesnook610@gmail.com')
+  with check (auth.jwt() ->> 'email' = 'barnesnook610@gmail.com');

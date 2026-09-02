@@ -20,6 +20,8 @@ interface LocationRow {
   current_asset_valuation: number;
   status: Location['status'];
   description: string;
+  payer_mix: string[];
+  staffing_notes: string;
 }
 
 function fromRow(row: LocationRow): Location {
@@ -41,6 +43,8 @@ function fromRow(row: LocationRow): Location {
     currentAssetValuation: row.current_asset_valuation,
     status: row.status,
     description: row.description,
+    payerMix: row.payer_mix,
+    staffingNotes: row.staffing_notes,
   };
 }
 
@@ -62,6 +66,8 @@ function toRow(location: Location): Omit<LocationRow, 'id'> {
     current_asset_valuation: location.currentAssetValuation,
     status: location.status,
     description: location.description,
+    payer_mix: location.payerMix,
+    staffing_notes: location.staffingNotes,
   };
 }
 
