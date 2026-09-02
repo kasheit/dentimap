@@ -11,7 +11,7 @@ Dentimap is an internal operations dashboard tracking the real clinical real est
 - **Framer Motion** for animations and transitions
 - **Recharts** for data visualization (donut chart, bar chart)
 - **lucide-react** for icons (plus one custom icon, `src/components/icons/Tooth.tsx` — lucide has no tooth glyph)
-- **Supabase** (`@supabase/supabase-js`) for the `locations` table — see `supabase/schema.sql` and `supabase/seed.sql`. `src/data.ts` is now only the offline fallback seed, consulted when Supabase env vars are missing or a request fails (see `src/lib/locations.ts`)
+- **Supabase** (`@supabase/supabase-js`) for the `locations` and `courses` tables — see `supabase/schema.sql`/`seed.sql` and `supabase/add-courses.sql`. `src/data.ts`/`src/courses-data.ts` are offline fallback seeds, consulted when Supabase env vars are missing or a request fails
 
 ## Commands
 
@@ -28,7 +28,7 @@ Dentimap is an internal operations dashboard tracking the real clinical real est
 
 ### Entry points
 - `src/main.tsx` — React root
-- `src/App.tsx` — main app shell, holds all view state (active nav, selected location, filters, search) and renders the 5 views: PortfolioOverview, LocationsView, LandlordsView, DocumentsView, ActivityView
+- `src/App.tsx` — main app shell, holds all view state (active nav, selected location, filters, search) and renders 6 views: PortfolioOverview, LocationsView, LandlordsView, DocumentsView, ActivityView, CoursesView
 
 ### Data layer (`src/data.ts`, `src/types.ts`, `src/lib/locations.ts`)
 - `Location` interface: id, recordId (e.g. "VFD-001"), name, city, state, assetType ("dental"|"asc"|"dual"), specialty[], dateEstablished, operatingFootprintSqFt, landlordEntity, deedBookPage, previousOccupant, originalLandOwner, originalLandValue, currentAssetValuation, status, description
@@ -47,6 +47,8 @@ Dentimap is an internal operations dashboard tracking the real clinical real est
 - `LocationDirectory.tsx` — filterable list/table with tabs (All assets, Dental practices, ASCs, Dual-purpose), each row shows an icon (`Tooth` for dental, `Hospital` for ASC), name, city/state, badge
 - `LocationDetailPanel.tsx` — Framer Motion slide-in from right (not a modal). Has a read mode and an Edit mode (toggled by the header's Edit/Save/Cancel buttons) — editing covers every field except id/recordId/assetType, and Save calls `updateLocation()` then reports success back up to `App.tsx` so it can merge the result into state
 - `icons/Tooth.tsx` — custom filled icon (lucide has no tooth glyph), matches the app's icon usage pattern (`className` sizing, `currentColor`)
+- `CoursesView.tsx` — Eshan's personal prerequisite coursework tracker (completed/in-progress/needed columns), unrelated to the VFD/Valleygate real estate data. Lives under a "Personal" section break in the sidebar (see `Sidebar.tsx`'s `sectionBreak` field). Self-contained: loads/adds/updates/deletes its own state via `src/lib/courses.ts`, not routed through `App.tsx`'s location state
+- `PageHeading.tsx` — shared page-title block (eyebrow/title/description), used by LocationsView, LandlordsView, DocumentsView, ActivityView, and CoursesView
 
 ### Lib (`src/lib/`)
 - `format.ts` — currency/number/date formatters, time-aware greeting, asset type label helpers, percent change. `formatDate()` returns the input unchanged if it isn't a parseable date (covers the "Unknown" placeholder)

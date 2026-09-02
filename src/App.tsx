@@ -21,6 +21,8 @@ import { PortfolioMixPanel } from '@/components/PortfolioMixPanel';
 import { PortfolioGrowthPanel } from '@/components/PortfolioGrowthPanel';
 import { LocationDirectory } from '@/components/LocationDirectory';
 import { LocationDetailPanel } from '@/components/LocationDetailPanel';
+import { PageHeading } from '@/components/PageHeading';
+import { CoursesView } from '@/components/CoursesView';
 import { locations as seedLocations, priorYearPortfolioValue } from '@/data';
 import { loadLocations, updateLocation } from '@/lib/locations';
 import { supabase } from '@/lib/supabase';
@@ -161,6 +163,7 @@ function App() {
           )}
           {activeNav === 'documents' && <DocumentsView />}
           {activeNav === 'activity' && <ActivityView />}
+          {activeNav === 'courses' && <CoursesView />}
         </div>
       </main>
 
@@ -193,6 +196,8 @@ function navTitle(active: NavKey): string {
       return 'Documents';
     case 'activity':
       return 'Activity log';
+    case 'courses':
+      return 'Course planning';
     default:
       return 'Portfolio overview';
   }
@@ -322,18 +327,6 @@ function LocationsView({
         />
       </div>
     </>
-  );
-}
-
-function PageHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
-  return (
-    <div>
-      <p className="label-eyebrow">{eyebrow}</p>
-      <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-navy-800 dark:text-white lg:text-[34px]">
-        {title}
-      </h1>
-      <p className="mt-2 text-sm text-navy-500 dark:text-navy-300">{description}</p>
-    </div>
   );
 }
 

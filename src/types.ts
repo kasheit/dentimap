@@ -32,3 +32,12 @@ export interface Landlord {
   entity: string;
   locations: Location[];
 }
+
+export type CourseStatus = 'completed' | 'in-progress' | 'needed';
+
+export interface Course {
+  id: string;
+  name: string;
+  status: CourseStatus;
+  notes: string;
+}

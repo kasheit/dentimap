@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
+  GraduationCap,
   HelpCircle,
   LayoutGrid,
   LogOut,
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-export type NavKey = 'portfolio' | 'locations' | 'landlords' | 'documents' | 'activity';
+export type NavKey = 'portfolio' | 'locations' | 'landlords' | 'documents' | 'activity' | 'courses';
 
 interface SidebarProps {
   active: NavKey;
@@ -31,6 +32,7 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   badge?: number;
+  sectionBreak?: string;
 }
 
 const navItems: NavItem[] = [
@@ -39,6 +41,7 @@ const navItems: NavItem[] = [
   { key: 'landlords', label: 'Landlords', icon: Building2 },
   { key: 'documents', label: 'Documents', icon: FileText },
   { key: 'activity', label: 'Activity log', icon: Activity },
+  { key: 'courses', label: 'Course planning', icon: GraduationCap, sectionBreak: 'Personal' },
 ];
 
 export function Sidebar({
@@ -104,43 +107,52 @@ export function Sidebar({
           const Icon = item.icon;
           const badge = item.key === 'locations' ? locationCount : item.badge;
           return (
-            <button
-              key={item.key}
-              onClick={() => onNavigate(item.key)}
-              title={collapsed ? item.label : undefined}
-              className={`group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors ${
-                collapsed ? 'justify-center' : ''
-              } ${
-                isActive
-                  ? 'bg-teal-500/15 text-white'
-                  : 'text-navy-200 hover:bg-navy-700/50 hover:text-white'
-              }`}
-            >
-              {isActive && (
-                <motion.span
-                  layoutId="nav-active"
-                  className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-teal-400"
-                />
+            <div key={item.key}>
+              {item.sectionBreak && !collapsed && (
+                <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-navy-400">
+                  {item.sectionBreak}
+                </p>
               )}
-              <Icon
-                className={`h-[18px] w-[18px] shrink-0 ${
-                  isActive ? 'text-teal-300' : 'text-navy-300 group-hover:text-white'
+              {item.sectionBreak && collapsed && (
+                <div className="mx-3 mb-2 mt-3 border-t border-navy-700/60" />
+              )}
+              <button
+                onClick={() => onNavigate(item.key)}
+                title={collapsed ? item.label : undefined}
+                className={`group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors ${
+                  collapsed ? 'justify-center' : ''
+                } ${
+                  isActive
+                    ? 'bg-teal-500/15 text-white'
+                    : 'text-navy-200 hover:bg-navy-700/50 hover:text-white'
                 }`}
-                strokeWidth={2}
-              />
-              {!collapsed && <span className="flex-1 text-left">{item.label}</span>}
-              {!collapsed && badge !== undefined && (
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    isActive
-                      ? 'bg-teal-500/25 text-teal-200'
-                      : 'bg-navy-700/70 text-navy-300'
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-active"
+                    className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-teal-400"
+                  />
+                )}
+                <Icon
+                  className={`h-[18px] w-[18px] shrink-0 ${
+                    isActive ? 'text-teal-300' : 'text-navy-300 group-hover:text-white'
                   }`}
-                >
-                  {badge}
-                </span>
-              )}
-            </button>
+                  strokeWidth={2}
+                />
+                {!collapsed && <span className="flex-1 text-left">{item.label}</span>}
+                {!collapsed && badge !== undefined && (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                      isActive
+                        ? 'bg-teal-500/25 text-teal-200'
+                        : 'bg-navy-700/70 text-navy-300'
+                    }`}
+                  >
+                    {badge}
+                  </span>
+                )}
+              </button>
+            </div>
           );
         })}
       </nav>
