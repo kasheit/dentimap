@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { SectionCard } from '@/components/SectionCard';
 import { TierBadge } from '@/components/TierBadge';
 import { CompletionIndicator } from '@/components/CompletionIndicator';
 import { EditableText } from '@/components/EditableText';
+import { staggerContainer, staggerItem } from '@/lib/motion';
 import { timelineEntries as initialEntries } from '@/data';
 import { sourceTier } from '@/data';
 import type { CompletionState, TimelineEntry } from '@/types';
@@ -22,17 +24,21 @@ export function TimelineTab() {
       <div className="relative">
         <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border" />
 
-        <div className="space-y-6">
+        <motion.div className="space-y-6" variants={staggerContainer} initial="hidden" animate="visible">
           {entries.map((entry) => {
             const info = sourceTier(entry.badge.tier);
             return (
-              <div key={entry.id} className="relative pl-8">
+              <motion.div key={entry.id} variants={staggerItem} className="relative pl-8">
                 <div
                   className="absolute left-0 top-1.5 h-3.5 w-3.5 rounded-full ring-4"
                   style={{ backgroundColor: info.color, ['--tw-ring-color' as string]: info.bgColor }}
                 />
 
-                <div className="rounded-lg border border-border bg-nested p-4">
+                <motion.div
+                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className="rounded-lg border border-border bg-nested p-4 transition-colors duration-200 hover:border-text-muted"
+                >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="font-mono text-sm font-semibold text-text-primary">
@@ -52,11 +58,11 @@ export function TimelineTab() {
                   <div className="mt-4 border-t border-border pt-3">
                     <CompletionIndicator state={entry.completion} onChange={(s) => updateCompletion(entry.id, s)} />
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </SectionCard>
   );

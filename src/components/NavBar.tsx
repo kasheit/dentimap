@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { Building2, MapPin, DollarSign, Clock } from 'lucide-react';
 import type { TabId } from '@/types';
 
@@ -39,14 +40,19 @@ export function NavBar({ activeTab, onTabChange }: NavBarProps) {
               <button
                 key={id}
                 onClick={() => onTabChange(id)}
-                className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors ${
-                  active
-                    ? 'border-legal-base text-text-primary'
-                    : 'border-transparent text-text-muted hover:text-text-secondary'
+                className={`relative flex items-center gap-2 border-b-2 border-transparent px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
+                  active ? 'text-text-primary' : 'text-text-muted hover:text-text-secondary'
                 }`}
               >
                 <Icon className="h-4 w-4" />
                 {label}
+                {active && (
+                  <motion.div
+                    layoutId="nav-underline"
+                    className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-legal-base"
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  />
+                )}
               </button>
             );
           })}

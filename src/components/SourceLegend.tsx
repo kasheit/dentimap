@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Info, ChevronDown, FileText, Newspaper, HelpCircle } from 'lucide-react';
 import { sourceTiers } from '@/data';
 import type { ConfirmationTier } from '@/types';
@@ -27,18 +28,22 @@ export function SourceLegend() {
             Every data point carries one of three confirmation tiers
           </span>
         </div>
-        <ChevronDown
-          className={`h-4 w-4 text-text-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-        />
+        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}>
+          <ChevronDown className="h-4 w-4 text-text-muted" />
+        </motion.div>
       </button>
 
-      <div
-        className={`grid transition-all duration-300 ease-in-out ${
-          open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-        }`}
-      >
-        <div className="overflow-hidden">
-          <div className="border-t border-border px-5 py-4">
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="legend-content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-border px-5 py-4">
             <div className="grid gap-4 md:grid-cols-3">
               {sourceTiers.map((tier) => {
                 const Icon = tierIcons[tier.tier];
@@ -88,8 +93,9 @@ export function SourceLegend() {
               override rather than leaving it unfilled.
             </p>
           </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

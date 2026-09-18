@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Building2 } from 'lucide-react';
 import { SectionCard } from '@/components/SectionCard';
 import { TierBadge } from '@/components/TierBadge';
 import { CompletionIndicator } from '@/components/CompletionIndicator';
 import { FlagBanner } from '@/components/FlagBanner';
 import { EditableText } from '@/components/EditableText';
+import { staggerContainer, staggerItem } from '@/lib/motion';
 import {
   owners as initialOwners,
   ownedEntities as initialEntities,
@@ -49,7 +51,12 @@ export function CorporateLineageTab() {
   return (
     <div className="space-y-6">
       <SectionCard title="Beneficial owners" subtitle="Named in the Transaction Agreement — per-owner split withheld">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
           {ownerList.map((owner) => (
             <OwnerCard
               key={owner.id}
@@ -60,11 +67,16 @@ export function CorporateLineageTab() {
               onCompletion={(s) => updateOwnerCompletion(owner.id, s)}
             />
           ))}
-        </div>
+        </motion.div>
       </SectionCard>
 
       <SectionCard title="Owned entities" subtitle="Subsidiary and affiliated practice entities">
-        <div className="grid gap-4 md:grid-cols-2">
+        <motion.div
+          className="grid gap-4 md:grid-cols-2"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
           {entityList.map((entity) => (
             <OwnedEntityCard
               key={entity.id}
@@ -74,7 +86,7 @@ export function CorporateLineageTab() {
               onCompletion={(s) => updateEntityCompletion(entity.id, s)}
             />
           ))}
-        </div>
+        </motion.div>
       </SectionCard>
 
       <SectionCard title="Acquisition — Park Dental Partners (NASDAQ: PARK)" subtitle="August 2026 · definitive agreement">
@@ -159,7 +171,12 @@ function OwnerCard({ owner, onName, onRole, onNote, onCompletion }: {
   onCompletion: (s: CompletionState) => void;
 }) {
   return (
-    <div className={`rounded-lg border p-4 ${owner.distinct ? 'border-reported-base/30 bg-reported-bg/30' : 'border-border bg-nested'}`}>
+    <motion.div
+      variants={staggerItem}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      className={`rounded-lg border p-4 transition-colors duration-200 ${owner.distinct ? 'border-reported-base/30 bg-reported-bg/30' : 'border-border bg-nested hover:border-text-muted'}`}
+    >
       <p className="text-sm font-semibold text-text-primary">
         <EditableText value={owner.name} onChange={onName} className="text-sm font-semibold" inputClassName="text-sm font-semibold w-full" />
       </p>
@@ -177,7 +194,7 @@ function OwnerCard({ owner, onName, onRole, onNote, onCompletion }: {
       <div className="mt-4 border-t border-border pt-3">
         <CompletionIndicator state={owner.completion} onChange={onCompletion} />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -188,7 +205,12 @@ function OwnedEntityCard({ entity, onName, onField, onCompletion }: {
   onCompletion: (s: CompletionState) => void;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-nested p-4">
+    <motion.div
+      variants={staggerItem}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      className="rounded-lg border border-border bg-nested p-4 transition-colors duration-200 hover:border-text-muted"
+    >
       <p className="text-sm font-semibold text-text-primary">
         <EditableText value={entity.name} onChange={onName} className="text-sm font-semibold" inputClassName="text-sm font-semibold w-full" />
       </p>
@@ -208,6 +230,6 @@ function OwnedEntityCard({ entity, onName, onField, onCompletion }: {
       <div className="mt-4 border-t border-border pt-3">
         <CompletionIndicator state={entity.completion} onChange={onCompletion} />
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 import { SectionCard } from '@/components/SectionCard';
 import { TierBadge } from '@/components/TierBadge';
@@ -51,17 +52,18 @@ export function RealEstateTab() {
         {counties.map((c) => {
           const active = filter === c;
           return (
-            <button
+            <motion.button
               key={c}
               onClick={() => setFilter(c)}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+              whileTap={{ scale: 0.96 }}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors duration-200 ${
                 active
                   ? 'bg-legal-bg text-legal-text ring-1 ring-legal-base/40'
                   : 'bg-card text-text-secondary border border-border hover:border-text-muted'
               }`}
             >
               {c}
-            </button>
+            </motion.button>
           );
         })}
       </div>
@@ -82,8 +84,17 @@ export function RealEstateTab() {
               </tr>
             </thead>
             <tbody>
+              <AnimatePresence initial={false} mode="popLayout">
               {filteredRows.map((row) => (
-                <tr key={row.id} className="border-b border-border/50 hover:bg-nested/50 transition-colors">
+                <motion.tr
+                  key={row.id}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="border-b border-border/50 hover:bg-nested/50 transition-colors duration-200"
+                >
                   <td className="py-3 pr-4 align-top">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-3.5 w-3.5 text-text-muted flex-shrink-0" />
@@ -105,15 +116,25 @@ export function RealEstateTab() {
                   <td className="py-3 pr-4 align-top">
                     <TierBadge tier={row.badge.tier} label={row.badge.label} />
                   </td>
-                </tr>
+                </motion.tr>
               ))}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
 
-        <div className="lg:hidden space-y-3">
+        <motion.div className="lg:hidden space-y-3" layout>
+          <AnimatePresence initial={false} mode="popLayout">
           {filteredRows.map((row) => (
-            <div key={row.id} className="rounded-lg border border-border bg-nested p-4">
+            <motion.div
+              key={row.id}
+              layout
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="rounded-lg border border-border bg-nested p-4"
+            >
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-text-muted flex-shrink-0" />
                 <span className="text-sm font-semibold text-text-primary">{renderEditableCell(row, 'practice')}</span>
@@ -134,9 +155,10 @@ export function RealEstateTab() {
               <div className="mt-3 border-t border-border pt-3">
                 <CompletionIndicator state={row.completion} onChange={(s) => updateRowCompletion(row.id, s)} />
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+          </AnimatePresence>
+        </motion.div>
       </SectionCard>
     </div>
   );

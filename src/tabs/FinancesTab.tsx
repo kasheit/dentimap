@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { SectionCard } from '@/components/SectionCard';
 import { TierBadge } from '@/components/TierBadge';
 import { FlagBanner } from '@/components/FlagBanner';
 import { EditableText } from '@/components/EditableText';
+import { staggerContainer, staggerItem } from '@/lib/motion';
 import { Users, Building2 } from 'lucide-react';
 
 interface FinanceStat {
@@ -32,7 +34,12 @@ export function FinancesTab() {
   };
 
   const StatCard = ({ stat, onUpdate, icon }: { stat: FinanceStat; onUpdate: (patch: Partial<FinanceStat>) => void; icon: React.ReactNode }) => (
-    <div className="rounded-lg border border-border bg-nested p-6">
+    <motion.div
+      variants={staggerItem}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      className="rounded-lg border border-border bg-nested p-6 transition-colors duration-200 hover:border-text-muted"
+    >
       <div className="flex items-center gap-2 mb-3">
         {icon}
         <span className="text-sm font-medium text-text-secondary">
@@ -45,7 +52,7 @@ export function FinancesTab() {
       <p className="mt-2 text-xs text-text-muted">
         <EditableText value={stat.sublabel} onChange={(v) => onUpdate({ sublabel: v })} multiline className="text-xs" inputClassName="text-xs w-full" />
       </p>
-    </div>
+    </motion.div>
   );
 
   return (
@@ -54,11 +61,11 @@ export function FinancesTab() {
         <div className="mb-3">
           <TierBadge tier="reported" label="Secondary / reported" size="md" />
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
+        <motion.div className="grid gap-4 md:grid-cols-2" variants={staggerContainer} initial="hidden" animate="visible">
           {payerStats.map((stat) => (
             <StatCard key={stat.id} stat={stat} onUpdate={(patch) => updatePayer(stat.id, patch)} icon={<Users className="h-5 w-5 text-reported-text" />} />
           ))}
-        </div>
+        </motion.div>
         <p className="mt-4 text-xs text-text-muted leading-relaxed">
           <EditableText value={payerNote} onChange={setPayerNote} multiline className="text-xs" inputClassName="text-xs w-full" />
         </p>
@@ -68,7 +75,7 @@ export function FinancesTab() {
         <div className="mb-3">
           <TierBadge tier="reported" label="Secondary / reported" size="md" />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 mb-4">
+        <motion.div className="grid gap-4 md:grid-cols-2 mb-4" variants={staggerContainer} initial="hidden" animate="visible">
           {scaleStats.map((stat, i) => (
             <StatCard
               key={stat.id}
@@ -77,7 +84,7 @@ export function FinancesTab() {
               icon={<Building2 className={`h-5 w-5 ${i === 1 ? 'text-reported-text' : 'text-text-primary'}`} />}
             />
           ))}
-        </div>
+        </motion.div>
         <FlagBanner tier="reported" text={discrepancyText} />
       </SectionCard>
     </div>
