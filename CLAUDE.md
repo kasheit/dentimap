@@ -1,103 +1,68 @@
-# Dentimap — Clinical Real Estate Dashboard
+# Dentimap — VFD / Valleygate structural intelligence
 
 ## Project overview
 
-Dentimap is an internal operations dashboard tracking the real clinical real estate portfolio of Village Family Dental (VFD, dental practices) and Valleygate (ambulatory surgical centers). Single-user app for "Eshan" (Owner & Admin). Not a consumer product — institutional, enterprise real-estate/legal software aesthetic.
+Dentimap is an investigative dashboard mapping the corporate structure, real estate, finances, and acquisition timeline of Village Family Dental (VFD) and Valleygate, following VFD's acquisition by Park Dental Partners (NASDAQ: PARK). Single-user tool for "Eshan". Every data point carries a confirmation-tier badge (legal / reported / unverified) so speculative structural mapping is never confused with sourced fact.
 
 ## Tech stack
 
-- **React 18 + TypeScript + Vite** (build tool)
-- **Tailwind CSS** for styling (class-based dark mode via `.dark` on `<html>`)
-- **Framer Motion** for animations and transitions
-- **Recharts** for data visualization (donut chart, bar chart)
-- **lucide-react** for icons (plus one custom icon, `src/components/icons/Tooth.tsx` — lucide has no tooth glyph)
-- **Supabase** (`@supabase/supabase-js`) for the `locations` and `courses` tables — see `supabase/schema.sql`/`seed.sql` and `supabase/add-courses.sql`. `src/data.ts`/`src/courses-data.ts` are offline fallback seeds, consulted when Supabase env vars are missing or a request fails
+- **React 18 + TypeScript + Vite**
+- **Tailwind CSS** for styling (dark theme only)
+- **lucide-react** for icons
+- Fully static — all data lives in `src/data.ts`, no backend. `@supabase/supabase-js` is an unused leftover dependency from the bolt.new starter template.
 
 ## Commands
 
 - `npm run dev` — start dev server (Vite)
 - `npm run build` — production build
-- `npm run typecheck` — `tsc --noEmit` type checking
+- `npm run typecheck` — `tsc --noEmit`
 - `npm run lint` — ESLint
 
 ## Path alias
 
-`@/` maps to `src/` (configured in `vite.config.ts` and `tsconfig.app.json`). Always use `@/` imports, never deep relative paths.
+`@/` maps to `src/` (configured in `vite.config.ts` and `tsconfig.app.json`).
 
 ## Architecture
 
 ### Entry points
 - `src/main.tsx` — React root
-- `src/App.tsx` — main app shell, holds all view state (active nav, selected location, filters, search) and renders 6 views: PortfolioOverview, LocationsView, LandlordsView, DocumentsView, ActivityView, CoursesView
+- `src/App.tsx` — app shell, holds `activeTab` state, renders `NavBar` + `SourceLegend` + one of the four tabs
 
-### Data layer (`src/data.ts`, `src/types.ts`, `src/lib/locations.ts`)
-- `Location` interface: id, recordId (e.g. "VFD-001"), name, city, state, assetType ("dental"|"asc"|"dual"), specialty[], dateEstablished, operatingFootprintSqFt, landlordEntity, deedBookPage, previousOccupant, originalLandOwner, originalLandValue, currentAssetValuation, status, description
-- 11 real locations (6 VFD dental practices, 5 Valleygate ASCs), sourced from the Synvarity card-spread dataset (`C:\Users\eshan\synvarity`). `dateEstablished` is the literal string `"Unknown"` on several records where the opening date isn't confirmed — `formatDate()` passes that through as-is rather than parsing it as a date
-- `src/lib/locations.ts` — `loadLocations()` fetches from Supabase, falling back to the seed in `src/data.ts` if unconfigured/failing; `updateLocation()` persists an edited record
-- `landlords` (in `src/data.ts`, and re-derived from live state in `App.tsx`'s `deriveLandlords`) groups locations by `landlordEntity`, sorted by location count descending. Several locations have `landlordEntity: "Not yet identified"` — a real gap, not a placeholder bug
-- `portfolioValueGrowth` — 12 months of trailing portfolio value (in $M)
-- `priorYearPortfolioValue` — scalar for YoY comparison (in $M)
+### Tabs (`src/tabs/`)
+- `CorporateLineageTab.tsx` — beneficial owners, owned entities, acquisition consideration line items, the Village Care Group filing
+- `RealEstateTab.tsx` — per-practice real estate matrix (simulated PINs, land/building value, landlord entity), filterable by county
+- `FinancesTab.tsx` — payer mix, network scale (reported office count vs. job-listing count discrepancy)
+- `TimelineTab.tsx` — milestone tracker from 1985 founding through the 2026 PARK acquisition
+
+### Data layer (`src/data.ts`, `src/types.ts`)
+- `ConfirmationTier` = `'legal' | 'reported' | 'unverified'` — the core sourcing model. `sourceTiers` defines color/label/examples per tier; `sourceTier(tier)` looks one up
+- `owners`, `ownedEntities`, `acquisitionLineItems`, `acquisitionWithheldNote`, `villageCareGroup` — corporate lineage data
+- `realEstateRows` — per-site real estate matrix; `counties` — filter list
+- `timelineEntries` — acquisition timeline
+- Every record carries a `badge: ConfirmationBadge` (tier + label) and a `completion: CompletionState` (fieldsFilled/fieldsTotal/manuallyCompleted)
 
 ### Components (`src/components/`)
-- `Sidebar.tsx` — collapsible fixed-left nav. Brand "Dentimap" (font-brand/Space Grotesk), workspace switcher "Eshan's workspace", nav items (Portfolio overview, Locations w/ count badge, Landlords, Documents, Activity log), bottom (Settings, Help center, user profile). Exports `NavKey` type.
-- `ThemeToggle.tsx` — light/dark toggle, persists to localStorage key `dentimap-theme`
-- `KpiCard.tsx` — animated KPI card with label, value, sublabel, optional change indicator
-- `PortfolioMixPanel.tsx` — Recharts donut chart showing asset composition (dental/asc/dual) with center total and legend
-- `PortfolioGrowthPanel.tsx` — Recharts bar chart, trailing 12 months
-- `LocationDirectory.tsx` — filterable list/table with tabs (All assets, Dental practices, ASCs, Dual-purpose), each row shows an icon (`Tooth` for dental, `Hospital` for ASC), name, city/state, badge
-- `LocationDetailPanel.tsx` — Framer Motion slide-in from right (not a modal). Has a read mode and an Edit mode (toggled by the header's Edit/Save/Cancel buttons) — editing covers every field except id/recordId/assetType, and Save calls `updateLocation()` then reports success back up to `App.tsx` so it can merge the result into state
-- `icons/Tooth.tsx` — custom filled icon (lucide has no tooth glyph), matches the app's icon usage pattern (`className` sizing, `currentColor`)
-- `CoursesView.tsx` — Eshan's personal prerequisite coursework tracker (completed/in-progress/needed columns), unrelated to the VFD/Valleygate real estate data. Lives under a "Personal" section break in the sidebar (see `Sidebar.tsx`'s `sectionBreak` field). Self-contained: loads/adds/updates/deletes its own state via `src/lib/courses.ts`, not routed through `App.tsx`'s location state
-- `PageHeading.tsx` — shared page-title block (eyebrow/title/description), used by LocationsView, LandlordsView, DocumentsView, ActivityView, and CoursesView
-
-### Lib (`src/lib/`)
-- `format.ts` — currency/number/date formatters, time-aware greeting, asset type label helpers, percent change. `formatDate()` returns the input unchanged if it isn't a parseable date (covers the "Unknown" placeholder)
-- `useTheme.ts` — theme hook with localStorage persistence and system preference fallback
-- `supabase.ts` — client instance, `null` when `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` aren't set
-- `locations.ts` — `loadLocations()` / `updateLocation()`, see Data layer above
+- `NavBar.tsx` — top nav with brand wordmark + 4 tab buttons
+- `SourceLegend.tsx` — collapsible legend explaining the three confirmation tiers
+- `TierBadge.tsx` — renders a `ConfirmationBadge` as a colored pill
+- `FlagBanner.tsx` — warning banner (e.g. "no confirmed real-estate holding entity found")
+- `SectionCard.tsx` — shared card container
+- `CompletionIndicator.tsx` — progress bar + "mark complete" control for a record's `CompletionState`
+- `EditableText.tsx` — inline-editable text field
 
 ## Design system
 
-### Colors (Tailwind config)
-- **navy** — primary dark/sidebar color (50–950 ramp, sidebar uses `navy-800`)
-- **teal** — accent color for status, charts, interactive highlights (50–950 ramp, primary `#1ba877`)
-- **accent** — shorthand teal variants
-- Light mode: white/slate main content, navy sidebar
-- Dark mode: `navy-950` background, `navy-800` cards, same teal accent
-- NEVER use purple/indigo/violet hues
-
-### Typography
-- `font-sans` = Inter (body, 400–700)
-- `font-display` = Sora (headings, 500–700)
-- `font-mono` = Space Mono (record IDs, deed refs)
-- `font-brand` = Space Grotesk (sidebar wordmark "Dentimap" only — sister family to Space Mono)
-- Loaded via Google Fonts in `index.html`
-- `.label-eyebrow` utility class = 11px uppercase tracked label (use for field names like "ASSET CLASSIFICATION")
-
-### Spacing & layout
-- 8px spacing system
-- Sidebar: 264px expanded, 76px collapsed
-- Max content width: 1500px
-- Cards: `rounded-2xl`, `shadow-card`, hover `shadow-card-hover`
-- Detail panel: `shadow-panel`, max-width 520px
-
-### Animations
-- KPI cards: fade/slide in on load (staggered)
-- Detail panel: slide in from right with spring easing
-- Donut/bar charts: animate in
-- Nav active indicator: `layoutId` shared layout animation
-- Theme toggle: spring-animated thumb
-- All interactive rows/cards have hover states
+- Dark theme only, `bg-page` background
+- Tier colors are hardcoded per-tier in `src/data.ts` (`color`/`bgColor`/`textColor`) rather than as Tailwind theme tokens — legal = teal/green, reported = amber, unverified = red
+- Max content width: `max-w-7xl`
 
 ## Conventions
 
 - Import icons from `lucide-react`
-- Use Framer Motion `motion.*` for animated elements
-- Recharts tooltip formatters must accept `unknown` type (not `number`) to satisfy Recharts 3.x types
-- Keep files focused and at manageable size
 - No comments unless explaining a non-obvious constraint
+- Never state a fact without a `ConfirmationBadge` — the unverified/simulated tier exists precisely so speculative structure (e.g. simulated parcel PINs) is visually distinct from filed/reported fact
 
 ## Known issues / notes
 
-- Build produces a chunk size warning (>500kB) due to Recharts — acceptable for this app, could code-split if needed
-- The PortfolioOverview's LocationDirectory passes `onFilterChange={() => undefined}` (filter tabs are visual-only on the overview; full filtering lives in LocationsView)
+- `@supabase/supabase-js` in `package.json` is unused dead weight from the starter template
+- No `public/vite.svg` present — the favicon link in `index.html` 404s harmlessly

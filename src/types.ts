@@ -1,43 +1,82 @@
-export type AssetType = 'dental' | 'asc' | 'dual';
+export type ConfirmationTier = 'legal' | 'reported' | 'unverified';
 
-export type Specialty = 'Ortho' | 'OMFS' | 'General' | 'Pediatric';
+export interface ConfirmationBadge {
+  tier: ConfirmationTier;
+  label: string;
+}
 
-export type LocationStatus = 'Operating' | 'Under renovation' | 'Lease review' | 'Acquisition pending';
+export interface CompletionState {
+  fieldsFilled: number;
+  fieldsTotal: number;
+  manuallyCompleted: boolean;
+}
 
-export interface Location {
+export interface Owner {
   id: string;
-  recordId: string;
   name: string;
-  city: string;
-  state: string;
-  assetType: AssetType;
-  specialty: Specialty[];
-  dateEstablished: string;
-  operatingFootprintSqFt: number;
+  role: string;
+  badge: ConfirmationBadge;
+  note?: string;
+  distinct?: boolean;
+  completion: CompletionState;
+}
+
+export interface OwnedEntity {
+  id: string;
+  name: string;
+  badge: ConfirmationBadge;
+  fields: { label: string; value: string }[];
+  completion: CompletionState;
+}
+
+export interface AcquisitionLineItem {
+  id: string;
+  label: string;
+  value: string;
+  note?: string;
+  badge: ConfirmationBadge;
+}
+
+export interface VillageCareGroup {
+  badge: ConfirmationBadge;
+  filingFacts: { label: string; value: string }[];
+  interpretiveNote: string;
+  interpretiveBadge: ConfirmationBadge;
+  completion: CompletionState;
+}
+
+export interface RealEstateRow {
+  id: string;
+  practice: string;
+  specialty: string;
+  county: string;
+  simulatedPin: string;
+  landValue: string;
+  buildingValue: string;
   landlordEntity: string;
-  deedBookPage: string;
-  previousOccupant: string;
-  originalLandOwner: string;
-  originalLandValue: number;
-  currentAssetValuation: number;
-  status: LocationStatus;
-  description: string;
-  /** Free-form payer mix shares, e.g. "30% military", "35-40% Medicaid". */
-  payerMix: string[];
-  /** Staffing/rotation notes, e.g. how specialists rotate across offices. */
-  staffingNotes: string;
+  landlordType: 'doctor' | 'corporate' | 'villagecare';
+  badge: ConfirmationBadge;
+  completion: CompletionState;
 }
 
-export interface Landlord {
-  entity: string;
-  locations: Location[];
-}
-
-export type CourseStatus = 'completed' | 'in-progress' | 'needed';
-
-export interface Course {
+export interface TimelineEntry {
   id: string;
+  date: string;
+  title: string;
+  description: string;
+  badge: ConfirmationBadge;
+  completion: CompletionState;
+}
+
+export type TabId = 'corporate' | 'realestate' | 'finances' | 'timeline';
+
+export interface SourceTierInfo {
+  tier: ConfirmationTier;
   name: string;
-  status: CourseStatus;
-  notes: string;
+  shortName: string;
+  color: string;
+  bgColor: string;
+  textColor: string;
+  description: string;
+  examples: string[];
 }
