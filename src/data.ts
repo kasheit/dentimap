@@ -30,6 +30,7 @@ export const locations: Location[] = [
     payerMix: ['30% military', '35-40% Medicaid'],
     staffingNotes:
       'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
+    noPullNeeded: false,
   },
   {
     id: '2',
@@ -53,6 +54,7 @@ export const locations: Location[] = [
     payerMix: ['30% military', '35-40% Medicaid'],
     staffingNotes:
       'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
+    noPullNeeded: false,
   },
   {
     id: '3',
@@ -76,6 +78,7 @@ export const locations: Location[] = [
     payerMix: ['30% military', '35-40% Medicaid'],
     staffingNotes:
       'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
+    noPullNeeded: false,
   },
   {
     id: '4',
@@ -98,6 +101,7 @@ export const locations: Location[] = [
     payerMix: ['30% military', '35-40% Medicaid'],
     staffingNotes:
       'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
+    noPullNeeded: false,
   },
   {
     id: '5',
@@ -120,6 +124,7 @@ export const locations: Location[] = [
     payerMix: ['30% military', '35-40% Medicaid'],
     staffingNotes:
       'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
+    noPullNeeded: false,
   },
   {
     id: '6',
@@ -142,6 +147,7 @@ export const locations: Location[] = [
     payerMix: ['30% military', '35-40% Medicaid'],
     staffingNotes:
       'Pediatric dentists rotate across VFD\'s offices — reported as 11 offices group-wide, though only 6 are on file here.',
+    noPullNeeded: false,
   },
   {
     id: '7',
@@ -164,6 +170,7 @@ export const locations: Location[] = [
       'Opened 2017 · SOS filing 1505302 · NPI issued Dec 2017 — one of two centers issued NPIs the same month.',
     payerMix: [],
     staffingNotes: '',
+    noPullNeeded: false,
   },
   {
     id: '8',
@@ -185,6 +192,7 @@ export const locations: Location[] = [
     description: 'Opened 2017 · NPI issued Dec 2017 — the same month as Fayetteville.',
     payerMix: [],
     staffingNotes: '',
+    noPullNeeded: false,
   },
   {
     id: '9',
@@ -206,6 +214,7 @@ export const locations: Location[] = [
     description: 'Reported, not yet independently sourced — location details unverified.',
     payerMix: [],
     staffingNotes: '',
+    noPullNeeded: false,
   },
   {
     id: '10',
@@ -228,6 +237,7 @@ export const locations: Location[] = [
       'Opened 2025 (reported) — the first center reported to open its rooms to providers outside the group.',
     payerMix: [],
     staffingNotes: '',
+    noPullNeeded: false,
   },
   {
     id: '11',
@@ -249,6 +259,7 @@ export const locations: Location[] = [
     description: 'Opened 2025 (reported).',
     payerMix: [],
     staffingNotes: '',
+    noPullNeeded: false,
   },
 ];
 

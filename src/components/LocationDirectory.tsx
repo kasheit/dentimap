@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Hospital, MapPin } from 'lucide-react';
 import { Tooth } from '@/components/icons/Tooth';
+import { DataStatusBadge } from '@/components/DataStatusBadge';
 import type { Location, AssetType } from '@/types';
 import { assetTypeShort } from '@/lib/format';
 
@@ -130,6 +131,8 @@ export function LocationDirectory({
                     </span>
                   </div>
                 </div>
+
+                <DataStatusBadge location={loc} />
 
                 <span
                   className={`hidden shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-block ${typeBadgeClass(

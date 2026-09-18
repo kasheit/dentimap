@@ -31,7 +31,7 @@ Dentimap is an internal operations dashboard tracking the real clinical real est
 - `src/App.tsx` — main app shell, holds all view state (active nav, selected location, filters, search) and renders 6 views: PortfolioOverview, LocationsView, LandlordsView, DocumentsView, ActivityView, CoursesView
 
 ### Data layer (`src/data.ts`, `src/types.ts`, `src/lib/locations.ts`)
-- `Location` interface: id, recordId (e.g. "VFD-001"), name, city, state, assetType ("dental"|"asc"|"dual"), specialty[], dateEstablished, operatingFootprintSqFt, landlordEntity, deedBookPage, previousOccupant, originalLandOwner, originalLandValue, currentAssetValuation, status, description
+- `Location` interface: id, recordId (e.g. "VFD-001"), name, city, state, assetType ("dental"|"asc"|"dual"), specialty[], dateEstablished, operatingFootprintSqFt, landlordEntity, deedBookPage, previousOccupant, originalLandOwner, originalLandValue, currentAssetValuation, status, description, noPullNeeded (manual "don't chase this data further" override, see Components below)
 - 11 real locations (6 VFD dental practices, 5 Valleygate ASCs), sourced from the Synvarity card-spread dataset (`C:\Users\eshan\synvarity`). `dateEstablished` is the literal string `"Unknown"` on several records where the opening date isn't confirmed — `formatDate()` passes that through as-is rather than parsing it as a date
 - `src/lib/locations.ts` — `loadLocations()` fetches from Supabase, falling back to the seed in `src/data.ts` if unconfigured/failing; `updateLocation()` persists an edited record
 - `landlords` (in `src/data.ts`, and re-derived from live state in `App.tsx`'s `deriveLandlords`) groups locations by `landlordEntity`, sorted by location count descending. Several locations have `landlordEntity: "Not yet identified"` — a real gap, not a placeholder bug
@@ -44,8 +44,9 @@ Dentimap is an internal operations dashboard tracking the real clinical real est
 - `KpiCard.tsx` — animated KPI card with label, value, sublabel, optional change indicator
 - `PortfolioMixPanel.tsx` — Recharts donut chart showing asset composition (dental/asc/dual) with center total and legend
 - `PortfolioGrowthPanel.tsx` — Recharts bar chart, trailing 12 months
-- `LocationDirectory.tsx` — filterable list/table with tabs (All assets, Dental practices, ASCs, Dual-purpose), each row shows an icon (`Tooth` for dental, `Hospital` for ASC), name, city/state, badge
-- `LocationDetailPanel.tsx` — Framer Motion slide-in from right (not a modal). Has a read mode and an Edit mode (toggled by the header's Edit/Save/Cancel buttons) — editing covers every field except id/recordId/assetType, and Save calls `updateLocation()` then reports success back up to `App.tsx` so it can merge the result into state
+- `LocationDirectory.tsx` — filterable list/table with tabs (All assets, Dental practices, ASCs, Dual-purpose), each row shows an icon (`Tooth` for dental, `Hospital` for ASC), name, city/state, a `DataStatusBadge`, and an asset-type badge
+- `LocationDetailPanel.tsx` — Framer Motion slide-in from right (not a modal). Has a read mode and an Edit mode (toggled by the header's Edit/Save/Cancel buttons) — editing covers every field except id/recordId/assetType, and Save calls `updateLocation()` then reports success back up to `App.tsx` so it can merge the result into state. In read mode it also shows a "Data completeness" section (see below)
+- `CompletionIndicator.tsx` / `DataStatusBadge.tsx` / `EditableText.tsx` — the data-pull-tracking trio, ported and re-themed from a companion Synvarity-style research tool (`.bolt` reference app) that tracked per-field confirmation tiers. `src/lib/completeness.ts`'s `dataCompleteness()` checks a fixed set of "gap" fields (landlord entity, date established, deed reference, previous occupant, original land owner) against known placeholder values ("Not yet identified", "Unknown", "On file — pending retrieval"); `CompletionIndicator` renders that as a progress bar plus a manual **"No pull needed" / Reset** override (persisted as `Location.noPullNeeded`, for a location Eshan has decided not to chase further); `DataStatusBadge` is the compact pill version (Complete / N gaps / No pull needed) shown on directory rows and the detail panel header; `EditableText` is click-to-edit-inline text (commits on blur/Enter, Escape cancels) used for the gap fields themselves in the detail panel's read mode, so a quick fix doesn't require opening full Edit mode
 - `icons/Tooth.tsx` — custom filled icon (lucide has no tooth glyph), matches the app's icon usage pattern (`className` sizing, `currentColor`)
 - `CoursesView.tsx` — Eshan's personal prerequisite coursework tracker (completed/in-progress/needed columns), unrelated to the VFD/Valleygate real estate data. Lives under a "Personal" section break in the sidebar (see `Sidebar.tsx`'s `sectionBreak` field). Self-contained: loads/adds/updates/deletes its own state via `src/lib/courses.ts`, not routed through `App.tsx`'s location state
 - `PageHeading.tsx` — shared page-title block (eyebrow/title/description), used by LocationsView, LandlordsView, DocumentsView, ActivityView, and CoursesView
@@ -55,6 +56,7 @@ Dentimap is an internal operations dashboard tracking the real clinical real est
 - `useTheme.ts` — theme hook with localStorage persistence and system preference fallback
 - `supabase.ts` — client instance, `null` when `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` aren't set
 - `locations.ts` — `loadLocations()` / `updateLocation()`, see Data layer above
+- `completeness.ts` — `dataCompleteness()`, the gap-field check backing `CompletionIndicator`/`DataStatusBadge`
 
 ## Design system
 

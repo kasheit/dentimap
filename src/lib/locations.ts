@@ -22,6 +22,7 @@ interface LocationRow {
   description: string;
   payer_mix: string[];
   staffing_notes: string;
+  no_pull_needed: boolean;
 }
 
 function fromRow(row: LocationRow): Location {
@@ -45,6 +46,7 @@ function fromRow(row: LocationRow): Location {
     description: row.description,
     payerMix: row.payer_mix,
     staffingNotes: row.staffing_notes,
+    noPullNeeded: row.no_pull_needed,
   };
 }
 
@@ -68,6 +70,7 @@ function toRow(location: Location): Omit<LocationRow, 'id'> {
     description: location.description,
     payer_mix: location.payerMix,
     staffing_notes: location.staffingNotes,
+    no_pull_needed: location.noPullNeeded,
   };
 }
 

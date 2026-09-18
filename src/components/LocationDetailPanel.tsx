@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   CalendarDays,
   Check,
+  ClipboardCheck,
   FileText,
   Hospital,
   Landmark,
@@ -19,7 +20,11 @@ import {
   X,
 } from 'lucide-react';
 import { Tooth } from '@/components/icons/Tooth';
+import { EditableText } from '@/components/EditableText';
+import { CompletionIndicator } from '@/components/CompletionIndicator';
+import { DataStatusBadge } from '@/components/DataStatusBadge';
 import type { Location, LocationStatus } from '@/types';
+import { dataCompleteness } from '@/lib/completeness';
 import { assetTypeLabel, formatCurrency, formatDate, formatNumber } from '@/lib/format';
 
 interface LocationDetailPanelProps {
@@ -59,6 +64,27 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <p className="label-eyebrow">{label}</p>
       <div className="mt-1.5 text-sm font-medium text-navy-800 dark:text-white">{children}</div>
+    </div>
+  );
+}
+
+function QuickField({
+  label,
+  value,
+  onChange,
+  mono,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  mono?: boolean;
+}) {
+  return (
+    <div>
+      <p className="label-eyebrow">{label}</p>
+      <div className="mt-1">
+        <EditableText value={value} onChange={onChange} mono={mono} className="text-sm font-medium" />
+      </div>
     </div>
   );
 }
@@ -123,6 +149,14 @@ export function LocationDetailPanel({
     const ok = await onSave(draft);
     setSaving(false);
     if (ok) setEditing(false);
+  };
+
+  // Commits a single field immediately, independent of the full edit form —
+  // used by the "Data completeness" quick-fix fields and the "no pull
+  // needed" toggle, both of which should save on the spot.
+  const handleQuickSave = (patch: Partial<Location>) => {
+    if (!location) return;
+    void onSave({ ...location, ...patch });
   };
 
   return (
@@ -247,6 +281,7 @@ export function LocationDetailPanel({
                 <span className="rounded-full bg-slate-100 px-2.5 py-1 font-mono text-[11px] font-semibold text-navy-600 dark:bg-navy-700 dark:text-navy-200">
                   {active.recordId}
                 </span>
+                <DataStatusBadge location={active} />
               </div>
             </div>
 
@@ -279,6 +314,55 @@ export function LocationDetailPanel({
                   </p>
                 )}
               </div>
+
+              {/* Data completeness */}
+              {!editing && (
+                <section>
+                  <div className="mb-3 flex items-center gap-2">
+                    <ClipboardCheck className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                    <h3 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-navy-500 dark:text-navy-200">
+                      Data completeness
+                    </h3>
+                  </div>
+                  <div className="space-y-4 rounded-xl border border-slate-100 p-4 dark:border-navy-700">
+                    <CompletionIndicator
+                      state={dataCompleteness(active)}
+                      noPullNeeded={active.noPullNeeded}
+                      onToggleNoPullNeeded={() =>
+                        handleQuickSave({ noPullNeeded: !active.noPullNeeded })
+                      }
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <QuickField
+                        label="Landlord entity"
+                        value={active.landlordEntity}
+                        onChange={(v) => handleQuickSave({ landlordEntity: v })}
+                      />
+                      <QuickField
+                        label="Date opened"
+                        value={active.dateEstablished}
+                        onChange={(v) => handleQuickSave({ dateEstablished: v })}
+                      />
+                      <QuickField
+                        label="Title deed reference"
+                        value={active.deedBookPage}
+                        onChange={(v) => handleQuickSave({ deedBookPage: v })}
+                        mono
+                      />
+                      <QuickField
+                        label="Previous occupant"
+                        value={active.previousOccupant}
+                        onChange={(v) => handleQuickSave({ previousOccupant: v })}
+                      />
+                      <QuickField
+                        label="Original land owner"
+                        value={active.originalLandOwner}
+                        onChange={(v) => handleQuickSave({ originalLandOwner: v })}
+                      />
+                    </div>
+                  </div>
+                </section>
+              )}
 
               {/* Asset profile */}
               <section>

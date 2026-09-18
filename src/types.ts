@@ -26,6 +26,12 @@ export interface Location {
   payerMix: string[];
   /** Staffing/rotation notes, e.g. how specialists rotate across offices. */
   staffingNotes: string;
+  /**
+   * Manual override: "I don't need to pull more data for this location."
+   * Marks it complete regardless of how many of its tracked fields still
+   * carry a placeholder value (see `src/lib/completeness.ts`).
+   */
+  noPullNeeded: boolean;
 }
 
 export interface Landlord {
