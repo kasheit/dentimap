@@ -28,7 +28,7 @@ export function DeedsView() {
   const stat = (label: string, value: string, tone = '') => (
     <div className="bg-dm-surface px-5 py-4">
       <div className="label">{label}</div>
-      <div className={`mt-1.5 font-mono text-xl font-semibold ${tone}`}>{value}</div>
+      <div className={`mt-1.5 tnum text-xl font-semibold ${tone}`}>{value}</div>
     </div>
   );
 
@@ -54,7 +54,7 @@ export function DeedsView() {
         <button className={`btn ${onlyFlagged ? 'btn-primary' : ''}`} onClick={() => setOnlyFlagged((f) => !f)}>
           <AlertTriangle className="h-3.5 w-3.5" /> Mismatches only
         </button>
-        <span className="ml-auto font-mono text-[11px] text-dm-dim">{rows.length} shown</span>
+        <span className="ml-auto tnum text-[11px] text-dm-dim">{rows.length} shown</span>
       </div>
 
       <div className="scroll-thin overflow-x-auto rounded-xl border border-dm-border bg-dm-surface">
@@ -74,7 +74,7 @@ export function DeedsView() {
           <tbody>
             {rows.map(({ d, prop }) => (
               <tr key={d.id} className="border-b border-dm-border/60 align-top transition-colors last:border-0 hover:bg-dm-hover">
-                <td className="whitespace-nowrap px-4 py-3 font-mono text-xs">{fmtDate(d.recordingDate)}</td>
+                <td className="whitespace-nowrap px-4 py-3 tnum text-xs">{fmtDate(d.recordingDate)}</td>
                 <td className="px-4 py-3">
                   {prop ? (
                     <button className="text-left font-medium transition-colors hover:text-dm-blue" onClick={() => openProperty(prop.id)}>{prop.name}</button>
@@ -95,8 +95,8 @@ export function DeedsView() {
                     <span>{d.grantee}</span>
                   </div>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 font-mono text-xs">{usd(d.consideration)}</td>
-                <td className="whitespace-nowrap px-4 py-3 font-mono text-xs">
+                <td className="whitespace-nowrap px-4 py-3 tnum text-xs">{usd(d.consideration)}</td>
+                <td className="whitespace-nowrap px-4 py-3 tnum text-xs">
                   {d.isFormulaVerified ? (
                     <span className="inline-flex items-center gap-1.5 text-dm-green"><CheckCircle2 className="h-3.5 w-3.5" /> {usd(d.exciseTaxStamps, 2)}</span>
                   ) : (

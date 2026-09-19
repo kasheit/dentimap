@@ -21,7 +21,7 @@ function Row({ p, active, onClick }: { p: Property; active: boolean; onClick: ()
         <span className={`text-[13px] font-medium ${active ? 'text-dm-text' : 'text-dm-muted group-hover:text-dm-text'}`}>{p.name}</span>
         <StatusPill status={p.status} />
       </div>
-      <div className="mt-0.5 font-mono text-[11px] text-dm-dim">
+      <div className="mt-0.5 tnum text-[11px] text-dm-dim">
         {p.address.city}, {p.address.state} · {p.address.county.replace(' County', '')}
       </div>
     </button>
@@ -74,7 +74,7 @@ export function Sidebar() {
     <button
       key={id}
       onClick={() => setFilter(id)}
-      className={`whitespace-nowrap rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors ${
+      className={`whitespace-nowrap rounded-full border px-2.5 py-1 tnum text-[11px] transition-colors ${
         filter === id ? 'border-dm-blue/40 bg-dm-blue/10 text-dm-blue' : 'border-dm-border text-dm-dim hover:text-dm-muted'
       }`}
     >

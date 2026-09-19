@@ -7,6 +7,22 @@ import { DeedsView } from '@/views/DeedsView';
 import { EntitiesView } from '@/views/EntitiesView';
 import { PropertiesView } from '@/views/PropertiesView';
 
+function UndoToast() {
+  const { lastDeleted, undoDelete, dismissUndo } = useDentimap();
+  useEffect(() => {
+    if (!lastDeleted) return;
+    const t = setTimeout(dismissUndo, 8000);
+    return () => clearTimeout(t);
+  }, [lastDeleted, dismissUndo]);
+  if (!lastDeleted) return null;
+  return (
+    <div className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-lg border border-dm-border bg-dm-raised px-4 py-2.5 text-[13px] shadow-xl shadow-black/40">
+      <span className="text-dm-muted">Instrument removed</span>
+      <button className="font-medium text-dm-blue hover:underline" onClick={undoDelete}>Undo</button>
+    </div>
+  );
+}
+
 function Shell() {
   const tab = useDentimap((s) => s.tab);
   const setTab = useDentimap((s) => s.setTab);
@@ -33,6 +49,7 @@ function Shell() {
       {tab === 'properties' && <PropertiesView />}
       {tab === 'entities' && <EntitiesView />}
       {tab === 'deeds' && <DeedsView />}
+      <UndoToast />
     </div>
   );
 }

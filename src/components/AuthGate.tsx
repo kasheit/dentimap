@@ -32,7 +32,7 @@ function AuthShell({ children }: { children: ReactNode }) {
         <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-dm-blue/30 bg-dm-blue/10 text-dm-blue">
           <MapPin className="h-5 w-5" />
         </div>
-        <h1 className="mt-4 font-mono text-lg font-semibold tracking-[0.2em]">DENTIMAP</h1>
+        <h1 className="mt-4 tnum text-lg font-semibold tracking-[0.2em]">DENTIMAP</h1>
         <p className="mt-1 text-sm text-dm-muted">Owner access only.</p>
         {children}
       </div>
@@ -195,7 +195,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
             inputMode="numeric"
             autoFocus
             placeholder="123456"
-            className="field mt-3 py-2 text-center font-mono text-lg tracking-[0.3em]"
+            className="field mt-3 py-2 text-center tnum text-lg tracking-[0.3em]"
           />
           <button onClick={verifyCode} disabled={verifying || code.length < 6} className={primary}>
             {verifying ? 'Verifying…' : 'Verify & sign in'}

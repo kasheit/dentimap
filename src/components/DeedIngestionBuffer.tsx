@@ -41,7 +41,7 @@ function Token({ label, value }: { label: string; value?: string | number }) {
   const found = value !== undefined && value !== '';
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-[11px] ${
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 tnum text-[11px] ${
         found ? 'border-dm-blue/25 bg-dm-blue/[0.06] text-dm-blue' : 'border-dm-border text-dm-dim line-through decoration-dm-border'
       }`}
     >
@@ -107,7 +107,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
     <div className="rounded-lg border border-dm-border bg-dm-bg">
       <div className="flex items-center justify-between gap-3 border-b border-dm-border px-4 py-2.5">
         <span className="flex items-center gap-2 text-xs font-medium text-dm-muted">
-          <ClipboardPaste className="h-3.5 w-3.5 text-dm-blue" /> Raw clipboard ingestion buffer
+          <ClipboardPaste className="h-3.5 w-3.5" /> Paste county record
         </span>
         <button
           className="text-[11px] text-dm-blue transition-colors hover:text-dm-text"
@@ -116,7 +116,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
             parse(SAMPLE_PASTE);
           }}
         >
-          Try sample paste
+          Load example
         </button>
       </div>
       <div className="space-y-3 p-4">
@@ -138,7 +138,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
         />
         <div className="flex flex-wrap items-center gap-2">
           <button className="btn btn-primary" disabled={!raw.trim()} onClick={() => parse(raw)}>
-            <Sparkles className="h-3.5 w-3.5" /> Auto-parse &amp; re-order chain
+            <Sparkles className="h-3.5 w-3.5" /> Parse
           </button>
           {(raw || draft) && (
             <button className="btn" onClick={clear}>
@@ -171,7 +171,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <label className="space-y-1">
                 <span className="label">Recording date</span>
-                <input type="date" className="field font-mono" value={draft.recordingDate} onChange={(e) => set('recordingDate', e.target.value)} />
+                <input type="date" className="field tnum" value={draft.recordingDate} onChange={(e) => set('recordingDate', e.target.value)} />
               </label>
               <label className="space-y-1">
                 <span className="label">Deed type</span>
@@ -199,23 +199,23 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
               </label>
               <label className="space-y-1">
                 <span className="label">Consideration (USD)</span>
-                <input inputMode="decimal" className="field font-mono" value={draft.consideration} onChange={(e) => set('consideration', e.target.value)} />
+                <input inputMode="decimal" className="field tnum" value={draft.consideration} onChange={(e) => set('consideration', e.target.value)} />
               </label>
               <label className="space-y-1">
                 <span className="label">Excise stamps (USD)</span>
-                <input inputMode="decimal" className="field font-mono" value={draft.exciseTaxStamps} onChange={(e) => set('exciseTaxStamps', e.target.value)} />
+                <input inputMode="decimal" className="field tnum" value={draft.exciseTaxStamps} onChange={(e) => set('exciseTaxStamps', e.target.value)} />
               </label>
               <label className="space-y-1">
                 <span className="label">Instrument #</span>
-                <input className="field font-mono" value={draft.instrumentNumber} onChange={(e) => set('instrumentNumber', e.target.value)} />
+                <input className="field font-mono text-[13px]" value={draft.instrumentNumber} onChange={(e) => set('instrumentNumber', e.target.value)} />
               </label>
               <label className="space-y-1">
                 <span className="label">Book</span>
-                <input className="field font-mono" value={draft.book} onChange={(e) => set('book', e.target.value)} />
+                <input className="field font-mono text-[13px]" value={draft.book} onChange={(e) => set('book', e.target.value)} />
               </label>
               <label className="space-y-1">
                 <span className="label">Page</span>
-                <input className="field font-mono" value={draft.page} onChange={(e) => set('page', e.target.value)} />
+                <input className="field font-mono text-[13px]" value={draft.page} onChange={(e) => set('page', e.target.value)} />
               </label>
               <label className="space-y-1 sm:col-span-2 lg:col-span-2">
                 <span className="label">Source</span>
@@ -227,7 +227,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
               {canCheck ? (
                 <FormulaChip consideration={consideration} stamps={stamps} ok={!!ok} expected={expectedExcise(consideration)} />
               ) : (
-                <span className="font-mono text-[11px] text-dm-dim">Enter consideration and excise stamps to check the $1 / $500 formula.</span>
+                <span className="tnum text-[11px] text-dm-dim">Enter consideration and excise stamps to check the $1 / $500 formula.</span>
               )}
               <button className="btn btn-primary" disabled={!canAdd} onClick={commit} title={canAdd ? '' : 'Needs a recording date, grantor and grantee'}>
                 <Plus className="h-3.5 w-3.5" /> Add to title chain

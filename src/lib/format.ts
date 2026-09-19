@@ -41,8 +41,8 @@ export const statusLabel: Record<FacilityStatus, string> = {
 };
 
 export const facilityTypeLabel: Record<FacilityType, string> = {
-  valleygate_asc: 'Multidisciplinary Surgical Facility',
-  vfd_practice: 'Affiliated Clinical Practice',
+  valleygate_asc: 'Valleygate ASC',
+  vfd_practice: 'VFD practice',
   affiliate: 'Affiliate',
 };
 

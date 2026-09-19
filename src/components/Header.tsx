@@ -16,21 +16,21 @@ function SyncBadge() {
   const message = useDentimap((s) => s.syncMessage);
   if (sync === 'off') {
     return (
-      <span className="hidden items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-dm-dim md:flex" title="Saved in this browser only">
+      <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-dim md:flex" title="Saved in this browser only">
         <CloudOff className="h-3.5 w-3.5" /> Local
       </span>
     );
   }
   if (sync === 'error') {
     return (
-      <span className="hidden items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-dm-amber md:flex" title={message}>
+      <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-amber md:flex" title={message}>
         <CloudOff className="h-3.5 w-3.5" /> Local · sync off
       </span>
     );
   }
   const busy = sync === 'connecting' || sync === 'saving';
   return (
-    <span className="hidden items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-dm-green md:flex">
+    <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-green md:flex">
       {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Cloud className="h-3.5 w-3.5" />}
       {busy ? 'Syncing' : 'Synced'}
     </span>
@@ -86,8 +86,8 @@ export function Header() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-dm-blue/30 bg-dm-blue/10 text-dm-blue">
             <MapPin className="h-4 w-4" />
           </div>
-          <span className="font-mono text-[15px] font-semibold tracking-[0.22em]">DENTIMAP</span>
-          <span className="hidden rounded-full border border-dm-border bg-dm-surface px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-dm-muted sm:inline">
+          <span className="text-[15px] font-semibold tracking-[0.12em]">DENTIMAP</span>
+          <span className="hidden rounded-full border border-dm-border bg-dm-surface px-2.5 py-0.5 tnum text-[11px] text-dm-muted sm:inline">
             {properties.length} Facilities
           </span>
         </div>
@@ -110,7 +110,7 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-3">
           <SyncBadge />
-          <kbd className="hidden rounded border border-dm-border px-1.5 py-0.5 font-mono text-[10px] text-dm-dim xl:inline">Ctrl K</kbd>
+          <kbd className="hidden rounded border border-dm-border px-1.5 py-0.5 tnum text-[11px] text-dm-dim xl:inline">Ctrl K</kbd>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
           <button className="btn" onClick={() => fileRef.current?.click()} title="Import a Dentimap JSON export">
             <Upload className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Import</span>
@@ -150,7 +150,7 @@ export function Header() {
         </div>
       </div>
       {notice && (
-        <div className="border-t border-dm-border bg-dm-surface px-6 py-1.5 text-center font-mono text-[11px] text-dm-muted">{notice}</div>
+        <div className="border-t border-dm-border bg-dm-surface px-6 py-1.5 text-center tnum text-[11px] text-dm-muted">{notice}</div>
       )}
     </header>
   );

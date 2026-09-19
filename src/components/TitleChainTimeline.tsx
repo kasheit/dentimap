@@ -24,21 +24,17 @@ export function TitleChainTimeline({ deeds }: { deeds: DeedRecord[] }) {
           <li key={d.id} className="relative">
             <span
               className={`absolute -left-6 top-4 h-[15px] w-[15px] rounded-full border-2 bg-dm-bg ${
-                current ? 'border-dm-blue shadow-[0_0_0_4px_rgba(56,189,248,0.12)]' : 'border-dm-dim'
+                current ? 'border-dm-text' : 'border-dm-dim'
               }`}
             />
             <article className="rounded-lg border border-dm-border bg-dm-bg p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-sm font-medium">{fmtDate(d.recordingDate)}</span>
-                    <span className="rounded border border-dm-border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-dm-muted">
-                      {deedTypeLabel[d.deedType]}
-                    </span>
+                    <span className="tnum text-sm font-medium">{fmtDate(d.recordingDate)}</span>
+                    <span className="text-xs text-dm-muted">{deedTypeLabel[d.deedType]}</span>
                     {current && (
-                      <span className="rounded border border-dm-blue/30 bg-dm-blue/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-dm-blue">
-                        Present holding
-                      </span>
+                      <span className="text-[11px] font-medium text-dm-text">Current holder</span>
                     )}
                   </div>
                   <div className="mt-1 font-mono text-[11px] text-dm-dim">
@@ -51,7 +47,7 @@ export function TitleChainTimeline({ deeds }: { deeds: DeedRecord[] }) {
                   <VerifyChip state={d.confidence} />
                   {arming === d.id ? (
                     <button className="btn border-dm-red/40 text-dm-red" onClick={() => { deleteDeed(d.id); setArming(null); }} onBlur={() => setArming(null)} autoFocus>
-                      Confirm delete
+                      Remove?
                     </button>
                   ) : (
                     <button className="rounded p-1.5 text-dm-dim transition-colors hover:bg-dm-hover hover:text-dm-red" title="Remove instrument" onClick={() => setArming(d.id)}>
@@ -70,11 +66,11 @@ export function TitleChainTimeline({ deeds }: { deeds: DeedRecord[] }) {
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 {!isPlat || d.consideration > 0 ? (
                   <>
-                    <span className="font-mono text-base font-semibold text-dm-text">{usd(d.consideration)}</span>
+                    <span className="tnum text-base font-semibold text-dm-text">{usd(d.consideration)}</span>
                     <FormulaChip consideration={d.consideration} stamps={d.exciseTaxStamps} ok={d.isFormulaVerified} expected={expectedExcise(d.consideration)} />
                   </>
                 ) : (
-                  <span className="font-mono text-[11px] text-dm-dim">No consideration — plat / subdivision record</span>
+                  <span className="tnum text-[11px] text-dm-dim">No consideration — plat / subdivision record</span>
                 )}
               </div>
 

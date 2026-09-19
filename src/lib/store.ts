@@ -9,6 +9,7 @@ export type SyncStatus = 'off' | 'connecting' | 'synced' | 'saving' | 'error';
 
 interface State extends DentimapData {
   selectedPropertyId: string;
+  lastDeleted: DeedRecord | null;
   tab: TabId;
   sync: SyncStatus;
   syncMessage?: string;
@@ -18,6 +19,8 @@ interface State extends DentimapData {
   updateProperty: (id: string, patch: Partial<Property>) => void;
   addDeed: (d: DeedRecord) => void;
   deleteDeed: (id: string) => void;
+  undoDelete: () => void;
+  dismissUndo: () => void;
   updateEntity: (id: string, patch: Partial<LegalEntity>) => void;
   importData: (d: DentimapData) => void;
   reset: () => void;
@@ -48,6 +51,7 @@ export const useDentimap = create<State>()(
       ...structuredClone(seedData),
       selectedPropertyId: seedData.properties[0].id,
       tab: 'properties',
+      lastDeleted: null,
       sync: 'off',
       setTab: (tab) => set({ tab }),
       select: (selectedPropertyId) => set({ selectedPropertyId }),
@@ -55,7 +59,10 @@ export const useDentimap = create<State>()(
       updateProperty: (id, patch) =>
         set((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
       addDeed: (d) => set((s) => ({ deeds: [...s.deeds, d] })),
-      deleteDeed: (id) => set((s) => ({ deeds: s.deeds.filter((d) => d.id !== id) })),
+      deleteDeed: (id) =>
+        set((s) => ({ lastDeleted: s.deeds.find((d) => d.id === id) ?? null, deeds: s.deeds.filter((d) => d.id !== id) })),
+      undoDelete: () => set((s) => (s.lastDeleted ? { deeds: [...s.deeds, s.lastDeleted], lastDeleted: null } : {})),
+      dismissUndo: () => set({ lastDeleted: null }),
       updateEntity: (id, patch) =>
         set((s) => ({ entities: s.entities.map((e) => (e.id === id ? { ...e, ...patch } : e)) })),
       importData: (d) =>
