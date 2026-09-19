@@ -79,7 +79,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         <dl className="grid gap-x-10 sm:grid-cols-2">
           <div>
             <Fact label="Parcel PIN" mono>{p.address.parcelPin || '—'}</Fact>
-            <Fact label="County">{p.address.county}</Fact>
+            <Fact label="County">{p.address.county.replace(/\s+County$/i, '')}</Fact>
             <Fact label="Address">{addressLine(p.address)}</Fact>
           </div>
           <div>
