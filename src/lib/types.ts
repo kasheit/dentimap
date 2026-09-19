@@ -10,6 +10,16 @@ export type DeedType =
   | 'other';
 export type EntityType = 'landlord_holding' | 'clinical_operator' | 'mso' | 'land_trust';
 
+export type NoteTag = 'note' | 'question' | 'follow_up';
+
+export interface NoteEntry {
+  id: string;
+  text: string;
+  tag: NoteTag;
+  createdAt: string;
+  resolved?: boolean;
+}
+
 export interface Property {
   id: string;
   name: string;
@@ -38,7 +48,8 @@ export interface Property {
   };
   landlordEntityId?: string;
   operatingEntityId?: string;
-  notes?: string;
+  notes?: string; // legacy single-field notes, superseded by noteLog
+  noteLog?: NoteEntry[];
   photoUrl?: string;
 }
 

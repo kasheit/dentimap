@@ -22,6 +22,8 @@ interface State extends DentimapData {
   undoDelete: () => void;
   dismissUndo: () => void;
   updateEntity: (id: string, patch: Partial<LegalEntity>) => void;
+  linkProperty: (entityId: string, propertyId: string) => void;
+  unlinkProperty: (entityId: string, propertyId: string) => void;
   importData: (d: DentimapData) => void;
   reset: () => void;
 }
@@ -65,6 +67,35 @@ export const useDentimap = create<State>()(
       dismissUndo: () => set({ lastDeleted: null }),
       updateEntity: (id, patch) =>
         set((s) => ({ entities: s.entities.map((e) => (e.id === id ? { ...e, ...patch } : e)) })),
+      linkProperty: (entityId, propertyId) =>
+        set((s) => {
+          const ent = s.entities.find((e) => e.id === entityId);
+          if (!ent) return {};
+          const role =
+            ent.entityType === 'landlord_holding' ? 'landlordEntityId' : ent.entityType === 'clinical_operator' ? 'operatingEntityId' : null;
+          const prev = role ? s.properties.find((p) => p.id === propertyId)?.[role] : undefined;
+          return {
+            entities: s.entities.map((e) => {
+              if (e.id === entityId)
+                return e.associatedPropertyIds.includes(propertyId) ? e : { ...e, associatedPropertyIds: [...e.associatedPropertyIds, propertyId] };
+              // a property has one landlord and one operator, so drop it from the entity it is replacing
+              if (prev && e.id === prev) return { ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== propertyId) };
+              return e;
+            }),
+            properties: role ? s.properties.map((p) => (p.id === propertyId ? { ...p, [role]: entityId } : p)) : s.properties,
+          };
+        }),
+      unlinkProperty: (entityId, propertyId) =>
+        set((s) => ({
+          entities: s.entities.map((e) =>
+            e.id === entityId ? { ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== propertyId) } : e,
+          ),
+          properties: s.properties.map((p) =>
+            p.id === propertyId
+              ? { ...p, landlordEntityId: p.landlordEntityId === entityId ? undefined : p.landlordEntityId, operatingEntityId: p.operatingEntityId === entityId ? undefined : p.operatingEntityId }
+              : p,
+          ),
+        })),
       importData: (d) =>
         set({
           properties: d.properties,

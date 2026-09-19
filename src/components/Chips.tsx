@@ -4,12 +4,14 @@ import type { FacilityStatus, VerificationState } from '@/lib/types';
 import { statusLabel } from '@/lib/format';
 
 export function Card({
+  id,
   title,
   icon,
   action,
   children,
   className = '',
 }: {
+  id?: string;
   title: string;
   icon?: ReactNode;
   action?: ReactNode;
@@ -17,7 +19,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={`rounded-xl border border-dm-border bg-dm-surface ${className}`}>
+    <section id={id} className={`scroll-mt-28 rounded-xl border border-dm-border bg-dm-surface ${className}`}>
       <header className="flex items-center justify-between gap-3 border-b border-dm-border px-5 py-3">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-dm-text">
           {icon}
