@@ -1,45 +1,46 @@
-import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { NavBar } from '@/components/NavBar';
-import { SourceLegend } from '@/components/SourceLegend';
-import { CorporateLineageTab } from '@/tabs/CorporateLineageTab';
-import { RealEstateTab } from '@/tabs/RealEstateTab';
-import { FinancesTab } from '@/tabs/FinancesTab';
-import { TimelineTab } from '@/tabs/TimelineTab';
-import { tabContentVariants } from '@/lib/motion';
-import type { TabId } from '@/types';
+import { useEffect } from 'react';
+import { AuthGate } from '@/components/AuthGate';
+import { Header } from '@/components/Header';
+import { FOCUS_SEARCH } from '@/components/Sidebar';
+import { startSync, useDentimap } from '@/lib/store';
+import { DeedsView } from '@/views/DeedsView';
+import { EntitiesView } from '@/views/EntitiesView';
+import { PropertiesView } from '@/views/PropertiesView';
 
-const tabComponents: Record<TabId, React.ComponentType> = {
-  corporate: CorporateLineageTab,
-  realestate: RealEstateTab,
-  finances: FinancesTab,
-  timeline: TimelineTab,
-};
+function Shell() {
+  const tab = useDentimap((s) => s.tab);
+  const setTab = useDentimap((s) => s.setTab);
 
-function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('corporate');
-  const ActiveTabComponent = tabComponents[activeTab];
+  useEffect(() => {
+    startSync();
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (useDentimap.getState().tab !== 'properties') setTab('properties');
+        setTimeout(() => window.dispatchEvent(new Event(FOCUS_SEARCH)), 0);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [setTab]);
 
   return (
-    <div className="min-h-screen bg-page">
-      <NavBar activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="mx-auto max-w-7xl px-6 py-8 space-y-6">
-        <SourceLegend />
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            variants={tabContentVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <ActiveTabComponent />
-          </motion.div>
-        </AnimatePresence>
-      </main>
+    <div className="min-h-screen bg-dm-bg">
+      <Header />
+      {tab === 'properties' && <PropertiesView />}
+      {tab === 'entities' && <EntitiesView />}
+      {tab === 'deeds' && <DeedsView />}
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthGate>
+      <Shell />
+    </AuthGate>
+  );
+}

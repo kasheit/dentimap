@@ -3,35 +3,25 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
-        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
-      },
       colors: {
-        page: '#1B1E23',
-        card: '#22262C',
-        nested: '#272B32',
-        border: '#333A42',
-        text: {
-          primary: '#ECEFF2',
-          secondary: '#9BA5B0',
-          muted: '#6B7480',
+        dm: {
+          bg: '#0a0e16',
+          surface: '#111317',
+          raised: '#151922',
+          border: '#232730',
+          hover: '#181b22',
+          text: '#f8fafc',
+          muted: '#94a3b8',
+          dim: '#64748b',
+          blue: '#38bdf8',
+          green: '#34d399',
+          amber: '#fbbf24',
+          red: '#f87171',
         },
-        legal: {
-          base: '#2F7A6B',
-          bg: '#17251F',
-          text: '#6FCBB0',
-        },
-        reported: {
-          base: '#C98A2E',
-          bg: '#2A2013',
-          text: '#E3AE5E',
-        },
-        unverified: {
-          base: '#8A3A3A',
-          bg: '#241717',
-          text: '#D08080',
-        },
+      },
+      fontFamily: {
+        sans: ['"Hanken Grotesk"', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', '"Fira Code"', 'ui-monospace', 'monospace'],
       },
     },
   },

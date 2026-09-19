@@ -1,28 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  html {
+    color-scheme: dark;
+  }
   body {
-    @apply bg-page text-text-primary font-sans antialiased;
+    @apply bg-dm-bg font-sans text-dm-text antialiased;
+  }
+  ::selection {
+    background: rgba(56, 189, 248, 0.3);
+  }
+}
+
+@layer components {
+  .field {
+    @apply w-full rounded-md border border-dm-border bg-dm-bg px-2.5 py-1.5 text-sm text-dm-text outline-none transition-colors placeholder:text-dm-dim focus:border-dm-blue/60;
+  }
+  .btn {
+    @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-xs font-medium text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply border-dm-blue/40 bg-dm-blue/10 text-dm-blue hover:bg-dm-blue/20 hover:text-dm-blue;
+  }
+  .label {
+    @apply font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-dm-dim;
   }
 }
 
 @layer utilities {
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #333A42;
-    border-radius: 3px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #4a525c;
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #232730 transparent;
   }
 }

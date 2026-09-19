@@ -1,0 +1,305 @@
+{
+  "properties": [
+    {
+      "id": "vg-garner",
+      "name": "Valleygate - Garner",
+      "facilityType": "valleygate_asc",
+      "status": "pipeline_fitout",
+      "address": {
+        "street": "305 Timber Dr.",
+        "city": "Garner",
+        "state": "NC",
+        "zip": "27529",
+        "county": "Wake County",
+        "parcelPin": "0041289"
+      },
+      "metrics": {
+        "projectInvestment": 4650000,
+        "currentAssessedValue": 1450000,
+        "targetOpening": "October 2025"
+      },
+      "clinicalSpecs": {
+        "operatingRooms": 3,
+        "pacuBays": 6,
+        "outpatientSharePercent": 100,
+        "specialties": [
+          "Pediatric Dental",
+          "ENT",
+          "Plastics",
+          "Ophthalmology"
+        ],
+        "licensure": "NC DHHS Approved"
+      },
+      "landlordEntityId": "entity-vfd-re",
+      "operatingEntityId": "entity-valleygate-asc"
+    },
+    {
+      "id": "vg-fayetteville",
+      "name": "Valleygate - Fayetteville",
+      "facilityType": "valleygate_asc",
+      "status": "active",
+      "address": {
+        "street": "2038 Litho Place",
+        "city": "Fayetteville",
+        "state": "NC",
+        "zip": "28304",
+        "county": "Cumberland County",
+        "parcelPin": "0419-72-8812"
+      },
+      "clinicalSpecs": {
+        "operatingRooms": 4,
+        "specialties": [
+          "Pediatric Dental",
+          "General Anesthesia"
+        ]
+      },
+      "landlordEntityId": "entity-vfd-re"
+    },
+    {
+      "id": "vg-greensboro",
+      "name": "Valleygate - Greensboro",
+      "facilityType": "valleygate_asc",
+      "status": "active",
+      "address": {
+        "street": "510 Hickory Ridge Drive",
+        "city": "Greensboro",
+        "state": "NC",
+        "zip": "27409",
+        "county": "Guilford County",
+        "parcelPin": "7812-44-1102"
+      }
+    },
+    {
+      "id": "vg-charlotte",
+      "name": "Valleygate - Charlotte",
+      "facilityType": "valleygate_asc",
+      "status": "active",
+      "address": {
+        "street": "8415 Medical Plaza Dr.",
+        "city": "Charlotte",
+        "state": "NC",
+        "zip": "28262",
+        "county": "Mecklenburg County",
+        "parcelPin": "049-11-209"
+      }
+    },
+    {
+      "id": "vg-south-charlotte",
+      "name": "Valleygate - South Charlotte",
+      "facilityType": "valleygate_asc",
+      "status": "pipeline_fitout",
+      "address": {
+        "street": "13515 Steele Creek Road",
+        "city": "Charlotte",
+        "state": "NC",
+        "zip": "28273",
+        "county": "Mecklenburg County",
+        "parcelPin": "201-44-901"
+      }
+    },
+    {
+      "id": "vg-asheville",
+      "name": "Valleygate - Asheville",
+      "facilityType": "valleygate_asc",
+      "status": "pipeline_pending",
+      "address": {
+        "street": "1088 Sweeten Creek Road",
+        "city": "Asheville",
+        "state": "NC",
+        "zip": "28803",
+        "county": "Buncombe County",
+        "parcelPin": "9647-81-0021"
+      }
+    },
+    {
+      "id": "vg-wilmington",
+      "name": "Valleygate - Wilmington",
+      "facilityType": "valleygate_asc",
+      "status": "pipeline_pending",
+      "address": {
+        "street": "1709 South 16th Street",
+        "city": "Wilmington",
+        "state": "NC",
+        "zip": "28401",
+        "county": "New Hanover County",
+        "parcelPin": "3118-09-4102"
+      }
+    },
+    {
+      "id": "vg-west-columbia",
+      "name": "Valleygate - West Columbia",
+      "facilityType": "valleygate_asc",
+      "status": "active",
+      "address": {
+        "street": "3225 Sunset Blvd.",
+        "city": "West Columbia",
+        "state": "SC",
+        "zip": "29072",
+        "county": "Lexington County",
+        "parcelPin": "004412-01-09"
+      }
+    },
+    {
+      "id": "vfd-fayetteville",
+      "name": "VFD - Fayetteville (Main)",
+      "facilityType": "vfd_practice",
+      "status": "active",
+      "address": {
+        "street": "2029 Valleygate Dr, Ste 201",
+        "city": "Fayetteville",
+        "state": "NC",
+        "zip": "28304",
+        "county": "Cumberland County",
+        "parcelPin": "0419-72-9901"
+      }
+    },
+    {
+      "id": "vfd-eastover",
+      "name": "VFD - Eastover",
+      "facilityType": "vfd_practice",
+      "status": "active",
+      "address": {
+        "street": "3551 Dunn Rd, Ste 102",
+        "city": "Eastover",
+        "state": "NC",
+        "zip": "28312",
+        "county": "Cumberland County",
+        "parcelPin": "0459-12-8840"
+      }
+    },
+    {
+      "id": "vfd-hope-mills",
+      "name": "VFD - Hope Mills",
+      "facilityType": "vfd_practice",
+      "status": "active",
+      "address": {
+        "street": "5710 Rockfish Rd",
+        "city": "Hope Mills",
+        "state": "NC",
+        "zip": "28348",
+        "county": "Cumberland County",
+        "parcelPin": "0404-98-3310"
+      }
+    },
+    {
+      "id": "vfd-laurinburg",
+      "name": "VFD - Laurinburg",
+      "facilityType": "vfd_practice",
+      "status": "active",
+      "address": {
+        "street": "109 McAlpine Dr",
+        "city": "Laurinburg",
+        "state": "NC",
+        "zip": "28352",
+        "county": "Scotland County",
+        "parcelPin": "0102-44-1920"
+      }
+    },
+    {
+      "id": "vfd-raeford",
+      "name": "VFD - Raeford",
+      "facilityType": "vfd_practice",
+      "status": "active",
+      "address": {
+        "street": "104 W. Southern Ave",
+        "city": "Raeford",
+        "state": "NC",
+        "zip": "28376",
+        "county": "Hoke County",
+        "parcelPin": "4940-11-2091"
+      }
+    },
+    {
+      "id": "vfd-st-pauls",
+      "name": "VFD - St. Pauls",
+      "facilityType": "vfd_practice",
+      "status": "active",
+      "address": {
+        "street": "312 W. McLean St",
+        "city": "St. Pauls",
+        "state": "NC",
+        "zip": "28384",
+        "county": "Robeson County",
+        "parcelPin": "9102-12-0044"
+      }
+    }
+  ],
+  "deeds": [
+    {
+      "id": "deed-garner-1",
+      "propertyId": "vg-garner",
+      "recordingDate": "2011-11-18",
+      "instrumentNumber": "Plat Book 112, Page 45",
+      "deedType": "subdivision_plat",
+      "grantor": "Garner Commercial Holdings LLC",
+      "grantee": "Lot 4, Phase II Commercial Subdivision",
+      "consideration": 0,
+      "exciseTaxStamps": 0,
+      "isFormulaVerified": true,
+      "confidence": "verified",
+      "source": "Wake County Register of Deeds"
+    },
+    {
+      "id": "deed-garner-2",
+      "propertyId": "vg-garner",
+      "recordingDate": "2018-06-03",
+      "instrumentNumber": "2018011409",
+      "book": "12891",
+      "page": "114",
+      "deedType": "special_warranty_deed",
+      "grantor": "Corridor Parkway Holdings Inc",
+      "grantee": "Cabarrus Medical Land Trust",
+      "consideration": 980000,
+      "exciseTaxStamps": 1960,
+      "isFormulaVerified": true,
+      "confidence": "verified",
+      "source": "Wake County Register of Deeds"
+    },
+    {
+      "id": "deed-garner-3",
+      "propertyId": "vg-garner",
+      "recordingDate": "2021-10-14",
+      "instrumentNumber": "2021038291",
+      "book": "14209",
+      "page": "382",
+      "deedType": "warranty_deed",
+      "grantor": "Cabarrus Medical Land Trust",
+      "grantee": "VFD Real Estate Partners LLC",
+      "consideration": 1450000,
+      "exciseTaxStamps": 2900,
+      "isFormulaVerified": true,
+      "confidence": "verified",
+      "source": "Wake & Cumberland County Cross-Recording"
+    }
+  ],
+  "entities": [
+    {
+      "id": "entity-vfd-re",
+      "name": "VFD Real Estate Partners LLC",
+      "sosId": "1984210",
+      "entityType": "landlord_holding",
+      "jurisdiction": "North Carolina",
+      "formationDate": "2018-06-14",
+      "registeredAgentOrManagers": [
+        "Dr. J. Ryan",
+        "Dr. T. James"
+      ],
+      "associatedPropertyIds": [
+        "vg-garner",
+        "vg-fayetteville",
+        "vfd-fayetteville",
+        "vfd-eastover"
+      ]
+    },
+    {
+      "id": "entity-valleygate-asc",
+      "name": "Valleygate ASC Concord LLC",
+      "sosId": "2198044",
+      "entityType": "clinical_operator",
+      "jurisdiction": "North Carolina",
+      "associatedPropertyIds": [
+        "vg-garner"
+      ]
+    }
+  ]
+}
