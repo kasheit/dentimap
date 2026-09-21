@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from './supabase';
-import type { ActivityEntry, DeedRecord, DentimapData, LegalEntity, Property } from './types';
+import type { ActivityEntry, DeedRecord, DentimapData, LegalEntity, Person, Property } from './types';
 
-export type TabId = 'properties' | 'matrix' | 'entities' | 'deeds';
+export type TabId = 'properties' | 'matrix' | 'entities' | 'people' | 'deeds';
 export type SyncStatus = 'off' | 'connecting' | 'synced' | 'saving' | 'error' | 'conflict';
 
 interface State {
@@ -11,6 +11,8 @@ interface State {
   deeds: DeedRecord[];
   entities: LegalEntity[];
   activity: ActivityEntry[];
+  people: Person[];
+  selectedPersonId: string;
   selectedPropertyId: string;
   lastDeleted: DeedRecord | null;
   tab: TabId;
@@ -18,6 +20,12 @@ interface State {
   syncMessage?: string;
   setTab: (t: TabId) => void;
   select: (id: string) => void;
+  openPerson: (id: string) => void;
+  selectPerson: (id: string) => void;
+  addPerson: (p: Person) => void;
+  addPeople: (p: Person[]) => void;
+  updatePerson: (id: string, patch: Partial<Person>) => void;
+  deletePerson: (id: string) => void;
   openProperty: (id: string) => void;
   addProperty: (p: Property) => void;
   updateProperty: (id: string, patch: Partial<Property>, logText?: string) => void;
@@ -45,7 +53,8 @@ export function isValidData(d: unknown): d is DentimapData {
     Array.isArray(x.entities) &&
     x.properties.every((p) => p && typeof p.id === 'string' && typeof p.name === 'string' && p.address) &&
     x.deeds.every((e) => e && typeof e.id === 'string' && typeof e.propertyId === 'string') &&
-    x.entities.every((e) => e && typeof e.id === 'string' && typeof e.name === 'string')
+    x.entities.every((e) => e && typeof e.id === 'string' && typeof e.name === 'string') &&
+    (x.people === undefined || (Array.isArray(x.people) && x.people.every((e) => e && typeof e.id === 'string' && typeof e.name === 'string')))
   );
 }
 
@@ -54,6 +63,7 @@ const pick = (s: State): DentimapData => ({
   deeds: s.deeds,
   entities: s.entities,
   activity: s.activity,
+  people: s.people,
 });
 
 const uid = (p: string) => `${p}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
@@ -70,12 +80,33 @@ export const useDentimap = create<State>()(
       deeds: [],
       entities: [],
       activity: [],
+      people: [],
+      selectedPersonId: '',
       selectedPropertyId: '',
       tab: 'properties',
       lastDeleted: null,
       sync: 'off',
       setTab: (tab) => set({ tab }),
       select: (selectedPropertyId) => set({ selectedPropertyId }),
+      openPerson: (selectedPersonId) => set({ selectedPersonId, tab: 'people' }),
+      selectPerson: (selectedPersonId) => set({ selectedPersonId }),
+      addPerson: (p) => set((s) => ({ people: [...s.people, p], selectedPersonId: p.id, tab: 'people', activity: logged(s.activity, `Person added: ${p.name}`) })),
+      addPeople: (list) =>
+        set((s) => ({
+          people: [...s.people, ...list],
+          selectedPersonId: s.selectedPersonId || list[0]?.id || '',
+          activity: logged(s.activity, `Added ${list.length} ${list.length === 1 ? 'person' : 'people'}`),
+        })),
+      updatePerson: (id, patch) => set((s) => ({ people: s.people.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
+      deletePerson: (id) =>
+        set((s) => {
+          const rest = s.people.filter((x) => x.id !== id);
+          return {
+            people: rest,
+            selectedPersonId: s.selectedPersonId === id ? (rest[0]?.id ?? '') : s.selectedPersonId,
+            activity: logged(s.activity, `Person deleted: ${s.people.find((x) => x.id === id)?.name ?? id}`),
+          };
+        }),
       openProperty: (selectedPropertyId) => set({ selectedPropertyId, tab: 'properties' }),
 
       addProperty: (p) =>
@@ -92,6 +123,7 @@ export const useDentimap = create<State>()(
             properties: rest,
             deeds: s.deeds.filter((d) => d.propertyId !== id),
             entities: s.entities.map((e) => ({ ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== id) })),
+            people: s.people.map((x) => ({ ...x, propertyIds: x.propertyIds.filter((y) => y !== id), actions: x.actions.map((a) => (a.propertyId === id ? { ...a, propertyId: undefined } : a)) })),
             selectedPropertyId: s.selectedPropertyId === id ? (rest[0]?.id ?? '') : s.selectedPropertyId,
             activity: logged(s.activity, `Facility deleted: ${nameOf(s, id)}`),
           };
@@ -123,6 +155,7 @@ export const useDentimap = create<State>()(
       deleteEntity: (id) =>
         set((s) => ({
           entities: s.entities.filter((e) => e.id !== id),
+          people: s.people.map((x) => ({ ...x, entityIds: x.entityIds.filter((y) => y !== id) })),
           properties: s.properties.map((p) => ({
             ...p,
             landlordEntityId: p.landlordEntityId === id ? undefined : p.landlordEntityId,
@@ -177,6 +210,7 @@ export const useDentimap = create<State>()(
             properties,
             deeds: merge(s.deeds, d.deeds),
             entities: merge(s.entities, d.entities),
+            people: merge(s.people, d.people ?? []),
             selectedPropertyId: properties.some((p) => p.id === s.selectedPropertyId) ? s.selectedPropertyId : (properties[0]?.id ?? ''),
             activity: logged(s.activity, `Imported file: ${added} new, ${updated} updated`),
           };
@@ -245,6 +279,7 @@ async function pull(): Promise<string | null> {
       deeds: d.deeds,
       entities: d.entities,
       activity: d.activity ?? [],
+      people: d.people ?? [],
       selectedPropertyId: d.properties.some((p) => p.id === sel) ? sel : (d.properties[0]?.id ?? ''),
     });
     applyingRemote = false;
@@ -284,7 +319,7 @@ export async function startSync() {
   let timer: ReturnType<typeof setTimeout> | undefined;
   useDentimap.subscribe((s, prev) => {
     if (applyingRemote || s.sync === 'conflict') return;
-    if (s.properties === prev.properties && s.deeds === prev.deeds && s.entities === prev.entities && s.activity === prev.activity) return;
+    if (s.properties === prev.properties && s.deeds === prev.deeds && s.entities === prev.entities && s.activity === prev.activity && s.people === prev.people) return;
     set({ sync: 'saving' });
     clearTimeout(timer);
     timer = setTimeout(async () => {

@@ -40,6 +40,7 @@ export function completionFor(p: Property, deedsAll: DeedRecord[]): Completion {
   const items: CompletionItem[] = [
     { key: 'legalName', label: 'Legal name', level: levelFor(!!p.legalName, m('legalName')) },
     { key: 'dbaName', label: 'Doing business as', level: levelFor(!!p.dbaName, m('dbaName')) },
+    { key: 'firstFiling', label: 'First filing date', level: levelFor(!!p.firstFilingDate, m('firstFilingDate')) },
     { key: 'sosId', label: 'Business SOS ID', level: levelFor(!!p.sosId, m('sosId')) },
     { key: 'address', label: 'Address', level: levelFor(!!(p.address.street && p.address.city && p.address.zip), m('address')) },
     { key: 'county', label: 'County', level: levelFor(!!p.address.county, m('county')) },

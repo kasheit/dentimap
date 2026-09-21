@@ -10,6 +10,31 @@ export type DeedType =
   | 'other';
 export type EntityType = 'landlord_holding' | 'clinical_operator' | 'mso' | 'land_trust';
 export type NoteTag = 'note' | 'question' | 'follow_up';
+export type PersonRole = 'owner' | 'doctor' | 'attorney' | 'registered_agent';
+
+/** One dated thing a person did, with where we learned it. */
+export interface PersonAction {
+  id: string;
+  date: string;
+  text: string;
+  propertyId?: string;
+  source?: string;
+  state: VerificationState;
+}
+
+export interface Person {
+  id: string;
+  name: string;
+  roles: PersonRole[];
+  title?: string;
+  /** Why this person matters to the network. */
+  relevance?: string;
+  status: 'active' | 'former';
+  entityIds: string[];
+  propertyIds: string[];
+  actions: PersonAction[];
+  notes?: string;
+}
 
 export interface NoteEntry {
   id: string;
@@ -30,6 +55,7 @@ export type SourcedField =
   | 'legalName'
   | 'dbaName'
   | 'sosId'
+  | 'firstFilingDate'
   | 'address'
   | 'county'
   | 'parcelPin'
@@ -47,6 +73,8 @@ export interface Property {
   dbaName?: string;
   /** Secretary of State ID of the business at this location. */
   sosId?: string;
+  /** Date of the business's first filing (ISO). */
+  firstFilingDate?: string;
   facilityType: FacilityType;
   status: FacilityStatus;
   address: {
@@ -124,4 +152,5 @@ export interface DentimapData {
   deeds: DeedRecord[];
   entities: LegalEntity[];
   activity?: ActivityEntry[];
+  people?: Person[];
 }

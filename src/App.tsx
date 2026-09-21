@@ -6,6 +6,7 @@ import { startSync, useDentimap } from '@/lib/store';
 import { DeedsView } from '@/views/DeedsView';
 import { EntitiesView } from '@/views/EntitiesView';
 import { MatrixView } from '@/views/MatrixView';
+import { PeopleView } from '@/views/PeopleView';
 import { PropertiesView } from '@/views/PropertiesView';
 
 function UndoToast() {
@@ -68,6 +69,7 @@ function Shell() {
       {tab === 'properties' && <PropertiesView />}
       {tab === 'matrix' && <MatrixView />}
       {tab === 'entities' && <EntitiesView />}
+      {tab === 'people' && <PeopleView />}
       {tab === 'deeds' && <DeedsView />}
       <UndoToast />
     </div>

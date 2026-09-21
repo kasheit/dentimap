@@ -45,6 +45,7 @@ export function OwnershipChain({ property, deeds }: { property: Property; deeds:
         <Named label="Legal name" value={property.legalName} meta={meta.legalName} />
         <Named label="Doing business as" value={property.dbaName} meta={meta.dbaName} />
         <Named label="Business SOS ID" value={property.sosId} meta={meta.sosId} mono />
+        <Named label="First filing" value={property.firstFilingDate ? fmtDate(property.firstFilingDate) : undefined} meta={meta.firstFilingDate} />
       </Step>
       <Step role="Property owner of record" last>
         {holder ? (

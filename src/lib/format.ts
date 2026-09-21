@@ -1,4 +1,4 @@
-import type { DeedType, EntityType, FacilityStatus, FacilityType } from './types';
+import type { DeedType, EntityType, FacilityStatus, FacilityType, PersonRole } from './types';
 
 export const usd = (n?: number, digits = 0) =>
   n === undefined
@@ -55,3 +55,10 @@ export const entityTypeLabel: Record<EntityType, string> = {
 
 export const addressLine = (a: { street: string; city: string; state: string; zip: string }) =>
   `${a.street}, ${a.city}, ${a.state} ${a.zip}`;
+
+export const personRoleLabel: Record<PersonRole, string> = {
+  owner: 'Owner',
+  doctor: 'Doctor',
+  attorney: 'Attorney',
+  registered_agent: 'Registered agent',
+};

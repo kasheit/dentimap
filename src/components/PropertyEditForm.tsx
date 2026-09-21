@@ -8,6 +8,7 @@ type Draft = {
   legalName: string;
   dbaName: string;
   sosId: string;
+  firstFilingDate: string;
   facilityType: FacilityType;
   status: FacilityStatus;
   street: string;
@@ -46,6 +47,7 @@ function toDraft(p: Property): Draft {
     legalName: p.legalName ?? '',
     dbaName: p.dbaName ?? '',
     sosId: p.sosId ?? '',
+    firstFilingDate: p.firstFilingDate ?? '',
     facilityType: p.facilityType,
     status: p.status,
     street: p.address.street,
@@ -68,7 +70,7 @@ function toDraft(p: Property): Draft {
 }
 
 const blank: FieldMeta = { state: 'unknown' };
-const META_KEYS: SourcedField[] = ['legalName', 'dbaName', 'sosId', 'address', 'county', 'parcelPin', 'assessedValue', 'projectInvestment', 'landlord', 'operator'];
+const META_KEYS: SourcedField[] = ['legalName', 'dbaName', 'sosId', 'firstFilingDate', 'address', 'county', 'parcelPin', 'assessedValue', 'projectInvestment', 'landlord', 'operator'];
 const toMeta = (p: Property): MetaDraft =>
   Object.fromEntries(META_KEYS.map((k) => [k, p.meta?.[k] ?? blank])) as MetaDraft;
 
@@ -99,6 +101,7 @@ function toPatch(d: Draft, meta: MetaDraft, p: Property): Partial<Property> {
     legalName: text(d.legalName),
     dbaName: text(d.dbaName),
     sosId: text(d.sosId),
+    firstFilingDate: text(d.firstFilingDate),
     facilityType: d.facilityType,
     status: d.status,
     address: { street: d.street.trim(), city: d.city.trim(), state: d.state.trim(), zip: d.zip.trim(), county: withCounty(d.county), parcelPin: d.parcelPin.trim() },
@@ -177,6 +180,12 @@ export function PropertyEditForm({
           <div className="space-y-2 sm:col-span-2">
             <Field label="Business SOS ID (Secretary of State)">{input('sosId', 'font-mono')}</Field>
             <SourceRow label="Business SOS ID" meta={meta.sosId} onMeta={setM('sosId')} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Field label="Date of first filing">
+              <input type="date" className="field" value={d.firstFilingDate} onChange={(e) => set('firstFilingDate', e.target.value)} />
+            </Field>
+            <SourceRow label="First filing date" meta={meta.firstFilingDate} onMeta={setM('firstFilingDate')} />
           </div>
           <Field label="Type">
             <select className="field" value={d.facilityType} onChange={(e) => set('facilityType', e.target.value as FacilityType)}>

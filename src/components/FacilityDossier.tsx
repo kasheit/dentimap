@@ -7,6 +7,7 @@ import { Card, Fact, Group, StatusPill } from './Chips';
 import { OwnershipChain } from './CorporateEntities';
 import { DeedIngestionBuffer } from './DeedIngestionBuffer';
 import { HistoryLog } from './HistoryLog';
+import { KeyPeople } from './KeyPeople';
 import { NotesLog } from './NotesLog';
 import { RecordCard } from './RecordCard';
 import { TitleChainTimeline } from './TitleChainTimeline';
@@ -52,6 +53,10 @@ export function FacilityDossier({ property: p }: { property: Property }) {
 
       <Card id="ownership" title="Ownership">
         <OwnershipChain property={p} deeds={propDeeds} />
+      </Card>
+
+      <Card id="people" title="Key people">
+        <KeyPeople property={p} />
       </Card>
 
       <Card id="title" title="Title chain" action={<span className="text-[13px] text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>

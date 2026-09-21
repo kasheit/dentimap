@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Building2, Table2, CloudOff, FileText, Landmark } from 'lucide-react';
+import { AlertTriangle, Users, Building2, Table2, CloudOff, FileText, Landmark } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { isValidData, useDentimap } from '@/lib/store';
 import type { TabId } from '@/lib/store';
@@ -9,6 +9,7 @@ const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
   { id: 'properties', label: 'Properties & Facilities', icon: Building2 },
   { id: 'matrix', label: 'Real Estate Matrix', icon: Table2 },
   { id: 'entities', label: 'Ownership Entities', icon: Landmark },
+  { id: 'people', label: 'People', icon: Users },
   { id: 'deeds', label: 'Deeds & Title Registry', icon: FileText },
 ];
 
@@ -55,8 +56,8 @@ export function Header() {
   }, [notice]);
 
   const snapshot = () => {
-    const { properties, deeds, entities } = useDentimap.getState();
-    return { properties, deeds, entities };
+    const { properties, deeds, entities, people, activity } = useDentimap.getState();
+    return { properties, deeds, entities, people, activity };
   };
 
   const onImport = async (file?: File) => {
