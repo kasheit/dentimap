@@ -12,15 +12,14 @@ export function Card({
 }: {
   id?: string;
   title: string;
-  icon?: ReactNode;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <section id={id} className={`scroll-mt-20 border-t border-dm-border pt-5 ${className}`}>
-      <header className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-[18px] font-semibold text-dm-text">{title}</h2>
+    <section id={id} className={`scroll-mt-20 min-w-0 rounded-xl border border-dm-border bg-dm-surface p-5 ${className}`}>
+      <header className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="text-[15px] font-semibold text-dm-text">{title}</h2>
         {action}
       </header>
       <div>{children}</div>
@@ -147,15 +146,15 @@ export function LevelLabel({
   );
 }
 
-/** One detail as a single line: label, value, and a status in a fixed right-hand column. */
+/** One detail: label and value on one line, with its confirmation status at the right. */
 export function DetailRow({ label, value, mono, status }: { label: string; value?: ReactNode; mono?: boolean; status?: ReactNode }) {
   return (
-    <div className="grid gap-x-4 gap-y-1 border-b border-dm-border/50 py-2.5 last:border-0 sm:grid-cols-[10rem_1fr_7.5rem] sm:items-baseline">
-      <div className="text-[13px] text-dm-dim">{label}</div>
-      <div className={`min-w-0 break-words font-medium ${mono ? 'font-mono text-[14px]' : 'text-[15px]'}`}>
+    <div className="grid grid-cols-[6rem_minmax(0,1fr)_auto] items-baseline gap-x-3 border-b border-dm-border/60 py-2 last:border-0">
+      <div className="text-[12px] text-dm-dim">{label}</div>
+      <div className={`min-w-0 break-words font-medium ${mono ? 'font-mono text-[13px]' : 'text-[14px]'}`}>
         {value || <span className="font-normal text-dm-dim">—</span>}
       </div>
-      <div className="sm:text-right">{status}</div>
+      {status ? <div className="max-w-[11rem] text-right">{status}</div> : <div />}
     </div>
   );
 }

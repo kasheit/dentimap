@@ -2,7 +2,7 @@ import { fmtDate } from '@/lib/format';
 import { sortedDeeds } from '@/lib/store';
 import type { DeedRecord, Property, SourcedField } from '@/lib/types';
 import { ConfirmLabel } from './ConfirmLabel';
-import { LevelLabel } from './Chips';
+import { DetailRow, LevelLabel } from './Chips';
 
 function SubHeading({ children, first }: { children: React.ReactNode; first?: boolean }) {
   return (
@@ -12,17 +12,7 @@ function SubHeading({ children, first }: { children: React.ReactNode; first?: bo
   );
 }
 
-function Row({ label, value, mono, status }: { label: string; value?: React.ReactNode; mono?: boolean; status: React.ReactNode }) {
-  return (
-    <div className="grid gap-x-4 gap-y-1 border-b border-dm-border/50 py-2.5 last:border-0 sm:grid-cols-[9rem_1fr_auto] sm:items-baseline">
-      <div className="text-[13px] text-dm-dim">{label}</div>
-      <div className={`min-w-0 break-words ${mono ? 'font-mono text-[14px]' : 'text-[15px]'} font-medium`}>
-        {value || <span className="font-normal text-dm-dim">—</span>}
-      </div>
-      <div className="sm:text-right">{status}</div>
-    </div>
-  );
-}
+const Row = DetailRow;
 
 export function OwnershipChain({ property, deeds }: { property: Property; deeds: DeedRecord[] }) {
   const conveyances = sortedDeeds(deeds.filter((d) => d.deedType !== 'subdivision_plat'));

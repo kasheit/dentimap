@@ -5,8 +5,23 @@
 @tailwind utilities;
 
 @layer base {
+  /* Clinical light theme: cool off-white canvas, white panels, ink text, one steel-blue accent (matches the logo). */
+  :root {
+    --dm-bg: 244 247 250;
+    --dm-surface: 255 255 255;
+    --dm-raised: 255 255 255;
+    --dm-border: 217 225 232;
+    --dm-hover: 236 241 245;
+    --dm-text: 16 33 48;
+    --dm-muted: 62 84 104;
+    --dm-dim: 92 113 132;
+    --dm-blue: 26 99 148;
+    --dm-green: 15 122 88;
+    --dm-amber: 154 96 0;
+    --dm-red: 184 50 50;
+  }
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
   body {
     @apply bg-dm-bg font-sans text-[14px] leading-relaxed text-dm-text antialiased;
@@ -17,7 +32,7 @@
     letter-spacing: -0.015em;
   }
   ::selection {
-    background: rgba(126, 176, 255, 0.28);
+    background: rgb(var(--dm-blue) / 0.18);
   }
 }
 
@@ -34,6 +49,20 @@
   .label {
     @apply text-[13px] font-medium text-dm-dim;
   }
+  /* small-caps style eyebrow for table heads and group titles */
+  .eyebrow {
+    @apply text-[11px] font-medium uppercase tracking-[0.08em] text-dm-dim;
+  }
+  /* text filter tab with a blue underline when active */
+  .tab-chip {
+    @apply whitespace-nowrap text-[13px] text-dm-dim transition-colors hover:text-dm-muted;
+  }
+  .tab-chip[aria-pressed='true'] {
+    @apply text-dm-text underline decoration-dm-blue decoration-2 underline-offset-[6px];
+  }
+  .kbd {
+    @apply rounded border border-dm-border bg-dm-bg px-1 font-mono text-[11px] leading-4 text-dm-dim;
+  }
 }
 
 @layer utilities {
@@ -42,6 +71,6 @@
   }
   .scroll-thin {
     scrollbar-width: thin;
-    scrollbar-color: #242930 transparent;
+    scrollbar-color: rgb(var(--dm-border)) transparent;
   }
 }

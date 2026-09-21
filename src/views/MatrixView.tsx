@@ -63,11 +63,6 @@ export function MatrixView() {
 
   const onSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: 1 }));
 
-  const chip = (active: boolean) =>
-    `text-[13px] transition-colors ${
-      active ? 'text-dm-text underline decoration-dm-blue decoration-2 underline-offset-[6px]' : 'text-dm-dim hover:text-dm-muted'
-    }`;
-
   return (
     <main className="mx-auto max-w-[1680px] p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
@@ -78,23 +73,23 @@ export function MatrixView() {
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5" role="group" aria-label="Filter by county">
           <span className="label">County</span>
           {counties.map((c) => (
-            <button key={c} className={chip(county === c)} onClick={() => setCounty(c)}>{c.replace(/ County$/, '')}</button>
+            <button key={c} aria-pressed={county === c} className="tab-chip" onClick={() => setCounty(c)}>{c.replace(/ County$/, '')}</button>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5" role="group" aria-label="Filter by type">
           <span className="label">Type</span>
           {types.map((t) => (
-            <button key={t} className={chip(type === t)} onClick={() => setType(t)}>
+            <button key={t} aria-pressed={type === t} className="tab-chip" onClick={() => setType(t)}>
               {t === 'All' ? 'All' : facilityTypeLabel[t as keyof typeof facilityTypeLabel]}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-dm-border bg-dm-surface scroll-thin">
+      <div className="max-h-[calc(100vh-13rem)] overflow-auto rounded-xl border border-dm-border bg-dm-surface scroll-thin">
         <table className="w-full min-w-[820px] border-collapse text-[13px]">
-          <thead>
-            <tr className="border-b border-dm-border text-[13px] text-dm-dim">
+          <thead className="sticky top-0 z-10 bg-dm-surface">
+            <tr className="eyebrow border-b border-dm-border bg-dm-surface">
               <SortHead label="Location" k="name" sort={sort} onSort={onSort} />
               <SortHead label="County" k="county" sort={sort} onSort={onSort} />
               <th className="px-4 py-3 text-left font-medium">Parcel PIN</th>

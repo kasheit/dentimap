@@ -70,7 +70,7 @@ export function NotesLog({ property }: { property: Property }) {
             {log.length} {log.length === 1 ? 'entry' : 'entries'}
             {open > 0 && <> · <span className="text-dm-amber">{open} open</span></>}
           </p>
-          <ul className="mt-2 divide-y divide-dm-border/70">
+          <ul className="scroll-thin mt-2 max-h-72 divide-y divide-dm-border/70 overflow-y-auto pr-1">
             {log.map((n) => {
               const legacy = n.id === 'legacy';
               const actionable = n.tag !== 'note';
@@ -81,7 +81,7 @@ export function NotesLog({ property }: { property: Property }) {
                       type="checkbox"
                       checked={!!n.resolved}
                       onChange={() => editReal((x) => (x.id === n.id ? { ...x, resolved: !x.resolved } : x), n.resolved ? 'Note reopened' : 'Note resolved')}
-                      className="mt-1 h-3.5 w-3.5 accent-[#7eb0ff]"
+                      className="mt-1 h-3.5 w-3.5 accent-dm-blue"
                       aria-label="Mark resolved"
                     />
                   ) : (

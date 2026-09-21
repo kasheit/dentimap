@@ -79,9 +79,9 @@ export function Header() {
   const menuItem = 'flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text';
 
   return (
-    <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
+    <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-surface/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-150" draggable={false} />
+        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none" draggable={false} />
 
         <nav className="order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto">
           {tabs.map(({ id, label, icon: Icon }) => (
@@ -115,7 +115,7 @@ export function Header() {
             </button>
           )}
           <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))} title="Search everything (Ctrl K)">
-            Search
+            Search <span className="kbd hidden md:inline">Ctrl K</span>
           </button>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
           <button className="btn" onClick={() => fileRef.current?.click()} title="Import a Dentimap JSON export">
@@ -126,7 +126,7 @@ export function Header() {
               Export
             </button>
             {menu && (
-              <div className="absolute right-0 mt-1.5 w-52 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-2xl shadow-black/50">
+              <div className="absolute right-0 mt-1.5 w-52 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-lg shadow-dm-text/10">
                 <button className={menuItem} onClick={() => { exportJson(snapshot()); setDue(false); setMenu(false); }}>
                   Full backup (JSON)
                 </button>

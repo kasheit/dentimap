@@ -159,7 +159,7 @@ function Profile({ person }: { person: Person }) {
             <div className="flex flex-wrap gap-x-5 gap-y-2">
               {ROLES.map((r) => (
                 <label key={r} className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" className="accent-[#7eb0ff]" checked={d.roles.includes(r)} onChange={() => toggleRole(r)} />
+                  <input type="checkbox" className="accent-dm-blue" checked={d.roles.includes(r)} onChange={() => toggleRole(r)} />
                   {personRoleLabel[r]}
                 </label>
               ))}

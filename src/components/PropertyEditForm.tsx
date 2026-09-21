@@ -204,6 +204,7 @@ export function PropertyEditForm({
   return (
     <Card
       id="record"
+      className="col-span-full"
       title="Edit location"
       action={
         <div className="flex gap-2">

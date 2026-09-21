@@ -24,7 +24,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
 
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
+    <div className="mx-auto w-full max-w-[1500px] space-y-5">
       <header className="min-w-0">
         <div className="flex items-center gap-3 text-[13px] text-dm-muted">
           <span>{facilityTypeLabel[p.facilityType]}</span>
@@ -49,27 +49,33 @@ export function FacilityDossier({ property: p }: { property: Property }) {
       </header>
 
 
-      <RecordCard p={p} />
+      <div className="grid items-start gap-5 lg:grid-cols-2 2xl:grid-cols-3">
+        <RecordCard p={p} />
 
-      <Card id="ownership" title="Ownership">
-        <OwnershipChain property={p} deeds={propDeeds} />
-      </Card>
-
-      <Card id="people" title="Key people">
-        <KeyPeople property={p} />
-      </Card>
-
-      <Card id="title" title="Title chain" action={<span className="text-[13px] text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>
-        <div className="space-y-6">
-          <DeedIngestionBuffer property={p} />
-          <TitleChainTimeline deeds={propDeeds} />
+        <div className="min-w-0 space-y-5">
+          <Card id="ownership" title="Ownership">
+            <OwnershipChain property={p} deeds={propDeeds} />
+          </Card>
+          <Card id="people" title="Key people">
+            <KeyPeople property={p} />
+          </Card>
         </div>
-      </Card>
 
+        <Card id="notes" title="Notes" className="lg:col-span-2 2xl:col-span-1" action={openNotes > 0 ? <span className="text-[13px] text-dm-amber">{openNotes} open</span> : undefined}>
+          <NotesLog property={p} />
+        </Card>
+
+        <Card id="title" title="Title chain" className="lg:col-span-2 2xl:col-span-3" action={<span className="text-[13px] text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>
+          <div className="space-y-6">
+            <DeedIngestionBuffer property={p} />
+            <TitleChainTimeline deeds={propDeeds} />
+          </div>
+        </Card>
+      </div>
 
       {hasSpecs && cs && (
-        <details id="specs" className="border-t border-dm-border pt-5">
-          <summary className="cursor-pointer list-none text-[18px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">Specifications</summary>
+        <details id="specs" className="rounded-xl border border-dm-border bg-dm-surface p-5">
+          <summary className="cursor-pointer list-none text-[15px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">Specifications</summary>
           <div className="mt-4">
           <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
             {(cs.operatingRooms !== undefined || cs.pacuBays !== undefined || cs.outpatientSharePercent !== undefined) && (
@@ -95,12 +101,8 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         </details>
       )}
 
-      <Card id="notes" title="Notes" action={openNotes > 0 ? <span className="text-[13px] text-dm-amber">{openNotes} open</span> : undefined}>
-        <NotesLog property={p} />
-      </Card>
-
-      <details id="history" className="border-t border-dm-border pt-5">
-        <summary className="cursor-pointer list-none text-[18px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">
+      <details id="history" className="rounded-xl border border-dm-border bg-dm-surface p-5">
+        <summary className="cursor-pointer list-none text-[15px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">
           Activity <span className="ml-1 text-[13px] font-normal text-dm-dim">{activityCount}</span>
         </summary>
         <div className="mt-4">

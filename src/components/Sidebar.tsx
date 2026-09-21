@@ -126,28 +126,28 @@ export function Sidebar() {
     <button
       key={id}
       onClick={() => setFilter(id)}
-      className={`whitespace-nowrap tnum text-[13px] transition-colors ${
-        filter === id ? 'text-dm-text underline decoration-dm-blue decoration-2 underline-offset-[6px]' : 'text-dm-dim hover:text-dm-muted'
-      }`}
+      aria-pressed={filter === id}
+      className="tab-chip tnum"
     >
       {label} ({counts[id]})
     </button>
   );
 
   return (
-    <aside onKeyDown={onKeyDown} className="flex min-h-0 flex-col border-b border-dm-border bg-dm-bg lg:w-96 lg:shrink-0 lg:border-b-0 lg:border-r">
+    <aside onKeyDown={onKeyDown} className="flex min-h-0 flex-col border-b border-dm-border bg-dm-bg lg:w-80 lg:shrink-0 lg:border-b-0 lg:border-r">
       <div className="space-y-3 border-b border-dm-border p-4">
         <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dm-dim" />
-          <input
-            ref={inputRef}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search locations, PINs"
-            className="field pl-9"
-          />
-        </div>
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dm-dim" />
+            <input
+              ref={inputRef}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search locations, PINs"
+              className="field pl-9 pr-8"
+            />
+            <span className="kbd pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2">/</span>
+          </div>
           <button className="btn shrink-0 px-2.5" onClick={create} title="Add a location" aria-label="Add a location">
             <Plus className="h-4 w-4" />
           </button>
@@ -171,7 +171,7 @@ export function Sidebar() {
       <div ref={listRef} className="scroll-thin max-h-72 flex-1 space-y-5 overflow-y-auto p-3 lg:max-h-none">
         {groups.map((g) => (
           <div key={g.title}>
-            <h3 className="label mb-1.5 px-3">{g.title}</h3>
+            <h3 className="eyebrow mb-1.5 px-3">{g.title}</h3>
             <div className="space-y-0.5">
               {g.items.map((p) => (
                 <Row key={p.id} p={p} percent={completionFor(p, deeds).percent} issues={attentionFor(p, deeds).issues} active={p.id === selectedPropertyId} onClick={() => select(p.id)} />
