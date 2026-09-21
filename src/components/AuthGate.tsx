@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { Fingerprint, Loader2, MapPin } from 'lucide-react';
+import { Fingerprint, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -29,11 +29,10 @@ function AuthShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-dm-bg px-4">
       <div className="w-full max-w-sm rounded-xl border border-dm-border bg-dm-surface p-8">
-        <h1 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-          <MapPin className="h-5 w-5 text-dm-blue" />
-          Dentimap
+        <h1>
+          <img src="/dentimap-logo.png" alt="Dentimap" className="h-10 w-auto" />
         </h1>
-        <p className="mt-1 text-sm text-dm-muted">Owner access only.</p>
+        <p className="mt-3 text-sm text-dm-muted">Owner access only.</p>
         {children}
       </div>
     </div>

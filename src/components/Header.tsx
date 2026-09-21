@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Building2, Cloud, Table2, CloudOff, Download, FileText, Landmark, Loader2, LogOut, MapPin, Upload } from 'lucide-react';
+import { AlertTriangle, Building2, Cloud, Table2, CloudOff, Download, FileText, Landmark, Loader2, LogOut, Upload } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { isValidData, useDentimap } from '@/lib/store';
 import type { TabId } from '@/lib/store';
@@ -90,10 +90,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <span className="flex items-center gap-2 text-[15px] font-semibold tracking-tight">
-          <MapPin className="h-4 w-4 text-dm-blue" />
-          Dentimap
-        </span>
+        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none" draggable={false} />
 
         <nav className="order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto">
           {tabs.map(({ id, label, icon: Icon }) => (
