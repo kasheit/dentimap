@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import { compactUsd, facilityTypeLabel, fmtDate, statusLabel } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { DeedRecord, FacilityStatus, Property } from '@/lib/types';
@@ -8,7 +8,7 @@ type SortKey = 'name' | 'county' | 'assessed' | 'investment';
 
 const statusTone: Record<FacilityStatus, string> = {
   active: 'text-dm-green',
-  pipeline_fitout: 'text-dm-blue',
+  pipeline_fitout: 'text-dm-amber',
   pipeline_pending: 'text-dm-amber',
   closed: 'text-dm-dim',
 };
@@ -22,12 +22,12 @@ function latestDeed(deeds: DeedRecord[], propertyId: string) {
 
 function SortHead({ label, k, sort, onSort, right }: { label: string; k: SortKey; sort: { key: SortKey; dir: 1 | -1 }; onSort: (k: SortKey) => void; right?: boolean }) {
   const active = sort.key === k;
-  const Icon = !active ? ArrowUpDown : sort.dir === 1 ? ArrowUp : ArrowDown;
+  const Icon = sort.dir === 1 ? ArrowUp : ArrowDown;
   return (
     <th className={`px-4 py-3 font-medium ${right ? 'text-right' : 'text-left'}`} aria-sort={active ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'}>
       <button onClick={() => onSort(k)} className={`inline-flex items-center gap-1.5 transition-colors hover:text-dm-text ${active ? 'text-dm-text' : ''}`}>
         {label}
-        <Icon className={`h-3 w-3 ${active ? 'text-dm-blue' : 'opacity-50'}`} />
+        {active && <Icon className="h-3 w-3" />}
       </button>
     </th>
   );

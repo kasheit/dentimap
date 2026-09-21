@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Search } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, Search } from 'lucide-react';
 import { attentionFor } from '@/lib/attention';
 import { completionFor } from '@/lib/completion';
 import { addressLine, compactUsd, facilityTypeLabel } from '@/lib/format';
@@ -8,25 +8,27 @@ import type { FacilityStatus, Property } from '@/lib/types';
 import { StatusPill } from './Chips';
 
 type TypeFilter = 'all' | 'valleygate_asc' | 'vfd_practice' | 'attention';
-type StatusFilter = 'all' | 'active' | 'pipeline' | 'closed';
+type StatusFilter = 'all' | 'active' | 'notopen' | 'closed';
 type SortKey = 'type' | 'name' | 'city' | 'status' | 'complete';
 
 export const FOCUS_SEARCH = 'dentimap:focus-search';
 
+const statusNames: Record<StatusFilter, string> = { all: 'All', active: 'Active', notopen: 'Not open yet', closed: 'Closed' };
+
 const TYPE_ORDER = { valleygate_asc: 0, vfd_practice: 1, affiliate: 2 } as const;
-const STATUS_ORDER: Record<FacilityStatus, number> = { active: 0, pipeline_fitout: 1, pipeline_pending: 2, closed: 3 };
-const statusGroup = (s: FacilityStatus): StatusFilter => (s === 'active' ? 'active' : s === 'closed' ? 'closed' : 'pipeline');
+const STATUS_ORDER: Record<FacilityStatus, number> = { active: 0, pipeline_fitout: 1, pipeline_pending: 1, closed: 2 };
+const statusGroup = (s: FacilityStatus): StatusFilter => (s === 'active' ? 'active' : s === 'closed' ? 'closed' : 'notopen');
 
 export const byType = (a: Property, b: Property) => TYPE_ORDER[a.facilityType] - TYPE_ORDER[b.facilityType];
 
 function Head({ label, k, sort, onSort, right }: { label: string; k: SortKey; sort: { key: SortKey; dir: 1 | -1 }; onSort: (k: SortKey) => void; right?: boolean }) {
   const active = sort.key === k;
-  const Icon = !active ? ArrowUpDown : sort.dir === 1 ? ArrowUp : ArrowDown;
+  const Icon = sort.dir === 1 ? ArrowUp : ArrowDown;
   return (
     <th className={`px-4 py-3 font-medium ${right ? 'text-right' : 'text-left'}`} aria-sort={active ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'}>
       <button onClick={() => onSort(k)} className={`inline-flex items-center gap-1.5 uppercase tracking-[0.08em] transition-colors hover:text-dm-text ${active ? 'text-dm-text' : ''}`}>
         {label}
-        <Icon className={`h-3 w-3 ${active ? 'text-dm-text' : 'opacity-50'}`} />
+        {active && <Icon className="h-3 w-3" />}
       </button>
     </th>
   );
@@ -55,7 +57,7 @@ export function LocationsTable() {
       properties.map((p) => {
         const a = attentionFor(p, deeds);
         const c = completionFor(p, deeds);
-        return { p, percent: c.percent, counts: c.counts, issues: a.issues, needs: a.issues.length > 0 || a.pipeline };
+        return { p, percent: c.percent, counts: c.counts, issues: a.issues, needs: a.issues.length > 0 };
       }),
     [properties, deeds],
   );
@@ -84,7 +86,7 @@ export function LocationsTable() {
       status: {
         all: rows.length,
         active: rows.filter((r) => statusGroup(r.p.status) === 'active').length,
-        pipeline: rows.filter((r) => statusGroup(r.p.status) === 'pipeline').length,
+        notopen: rows.filter((r) => statusGroup(r.p.status) === 'notopen').length,
         closed: rows.filter((r) => statusGroup(r.p.status) === 'closed').length,
       } as Record<StatusFilter, number>,
     }),
@@ -167,7 +169,7 @@ export function LocationsTable() {
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dm-dim" />
             <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, city, PIN" className="field w-64 pl-9" />
           </div>
-          <button className="btn" onClick={create} title="Add a location">
+          <button className="btn" onClick={create}>
             <Plus className="h-4 w-4" /> Add
           </button>
         </div>
@@ -176,7 +178,7 @@ export function LocationsTable() {
       <div className="mb-4 grid grid-cols-2 overflow-hidden rounded-lg border border-dm-border bg-dm-surface sm:grid-cols-4">
         {kpis.map(([label, value]) => (
           <div key={label} className="border-dm-border px-4 py-3 [&:not(:last-child)]:sm:border-r">
-            <div className="eyebrow">{label}</div>
+            <div className="text-label text-dm-dim">{label}</div>
             <div className="tnum mt-0.5 font-mono text-2xl font-medium">{value}</div>
           </div>
         ))}
@@ -184,7 +186,16 @@ export function LocationsTable() {
 
       <div className="mb-4 flex flex-wrap items-center gap-x-8 gap-y-3">
         {chips('Type', ['all', 'valleygate_asc', 'vfd_practice', 'attention'] as const, { all: 'All', valleygate_asc: 'Valleygate', vfd_practice: 'VFD', attention: 'Needs attention' }, type, setType, counts.type)}
-        {chips('Status', ['all', 'active', 'pipeline', 'closed'] as const, { all: 'All', active: 'Active', pipeline: 'Pipeline', closed: 'Closed' }, status, setStatus, counts.status)}
+        <label className="flex items-center gap-2 text-label text-dm-dim">
+          Status
+          <select className="rounded-md border border-dm-border bg-dm-bg px-2 py-1 text-label text-dm-muted outline-none focus:border-dm-muted" value={status} onChange={(e) => setStatus(e.target.value as StatusFilter)}>
+            {(['all', 'active', 'notopen', 'closed'] as StatusFilter[]).map((id) => (
+              <option key={id} value={id}>
+                {statusNames[id]} ({counts.status[id]})
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]" onKeyDown={onKeyDown}>
@@ -214,7 +225,6 @@ export function LocationsTable() {
                         {p.name}
                         {issues.length > 0 && <i className="ml-2 inline-block h-1.5 w-1.5 rounded-full bg-dm-amber align-middle" title={issues.join(' · ')} />}
                       </div>
-                      <div className="text-dm-dim">{facilityTypeLabel[p.facilityType]}</div>
                     </td>
                     <td className="px-4 py-2.5 text-dm-muted">
                       {p.address.city || '—'}
@@ -241,22 +251,20 @@ export function LocationsTable() {
         {preview && (
           <aside className="hidden space-y-4 rounded-lg border border-dm-border bg-dm-surface p-5 lg:sticky lg:top-20 lg:block" aria-label="Location preview">
             <div>
-              <StatusPill status={preview.p.status} />
-              <h2 className="mt-2 text-title font-semibold">{preview.p.name}</h2>
+              <h2 className="text-title font-semibold">{preview.p.name}</h2>
               <p className="mt-0.5 text-label text-dm-dim">
                 {facilityTypeLabel[preview.p.facilityType]}
                 {preview.p.dbaName ? ` · d/b/a ${preview.p.dbaName}` : ''}
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-dm-border bg-dm-border">
+            <div className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-dm-border bg-dm-border">
               {[
                 ['Assessed', compactUsd(preview.p.metrics?.currentAssessedValue)],
                 ['Investment', compactUsd(preview.p.metrics?.projectInvestment)],
                 ['Last sale', compactUsd(preview.p.lastSale?.price)],
-                ['Complete', `${preview.percent}%`],
               ].map(([label, value]) => (
                 <div key={label} className="bg-dm-surface px-3 py-2">
-                  <div className="eyebrow">{label}</div>
+                  <div className="text-label text-dm-dim">{label}</div>
                   <div className="tnum mt-0.5 font-mono text-title font-medium">{value}</div>
                 </div>
               ))}

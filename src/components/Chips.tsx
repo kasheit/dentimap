@@ -29,7 +29,7 @@ export function Panel({
 
 const statusDot: Record<FacilityStatus, string> = {
   active: 'bg-dm-green',
-  pipeline_fitout: 'bg-dm-blue',
+  pipeline_fitout: 'bg-dm-amber',
   pipeline_pending: 'bg-dm-amber',
   closed: 'bg-dm-dim',
 };

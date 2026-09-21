@@ -6,7 +6,7 @@ import { DetailRow, LevelLabel } from './Chips';
 
 function SubHeading({ children, first }: { children: React.ReactNode; first?: boolean }) {
   return (
-    <div className={`eyebrow ${first ? '' : 'mt-6'} mb-1 border-b border-dm-border/70 pb-1.5`}>
+    <div className={`text-label font-medium text-dm-muted ${first ? '' : 'mt-6'} mb-1 border-b border-dm-border/70 pb-1.5`}>
       {children}
     </div>
   );

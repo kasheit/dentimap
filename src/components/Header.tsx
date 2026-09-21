@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Users, Building2, Table2, CloudOff, FileText, Landmark } from 'lucide-react';
-import { backupDue, exportCsv, exportJson } from '@/lib/exporters';
+import { exportCsv, exportJson } from '@/lib/exporters';
 import { OPEN_SEARCH_EVENT } from './SearchPalette';
 import { isValidData, useDentimap } from '@/lib/store';
 import type { TabId } from '@/lib/store';
@@ -36,8 +36,7 @@ function SyncBadge() {
 }
 
 export function Header() {
-  const { tab, setTab, importData, properties } = useDentimap();
-  const [due, setDue] = useState(() => backupDue());
+  const { tab, setTab, importData } = useDentimap();
   const [menu, setMenu] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -101,24 +100,12 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-3">
           <SyncBadge />
-          {due && properties.length > 0 && (
-            <button
-              className="hidden text-label text-dm-amber transition-colors hover:text-dm-text md:inline"
-              title="No backup in over a week"
-              onClick={() => {
-                exportJson(snapshot());
-                setDue(false);
-                setNotice('Backup downloaded.');
-              }}
-            >
-              Back up
-            </button>
-          )}
-          <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))} title="Search">
+          {notice && <span className="hidden tnum text-label text-dm-dim md:inline">{notice}</span>}
+          <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))}>
             Search
           </button>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
-          <button className="btn" onClick={() => fileRef.current?.click()} title="Import a JSON backup">
+          <button className="btn" onClick={() => fileRef.current?.click()}>
             Import
           </button>
           <div className="relative" ref={menuRef}>
@@ -127,7 +114,7 @@ export function Header() {
             </button>
             {menu && (
               <div className="absolute right-0 mt-1.5 w-52 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-lg shadow-black/60">
-                <button className={menuItem} onClick={() => { exportJson(snapshot()); setDue(false); setMenu(false); }}>
+                <button className={menuItem} onClick={() => { exportJson(snapshot()); setMenu(false); }}>
                   Full backup (JSON)
                 </button>
                 {(['properties', 'deeds', 'entities'] as const).map((w) => (
@@ -146,9 +133,6 @@ export function Header() {
           </div>
         </div>
       </div>
-      {notice && (
-        <div className="border-t border-dm-border bg-dm-surface px-6 py-1.5 text-center tnum text-label text-dm-muted">{notice}</div>
-      )}
     </header>
   );
 }

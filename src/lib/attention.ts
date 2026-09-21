@@ -3,7 +3,6 @@ import type { DeedRecord, Property } from './types';
 
 export interface Attention {
   issues: string[];
-  pipeline: boolean;
 }
 
 export function attentionFor(p: Property, deeds: DeedRecord[]): Attention {
@@ -13,5 +12,5 @@ export function attentionFor(p: Property, deeds: DeedRecord[]): Attention {
   if (chainBreaks(sortedDeeds(mine)).length) issues.push('Title chain gap');
   const open = (p.noteLog ?? []).filter((n) => n.tag !== 'note' && !n.resolved).length;
   if (open) issues.push(`${open} open note${open === 1 ? '' : 's'}`);
-  return { issues, pipeline: p.status === 'pipeline_fitout' || p.status === 'pipeline_pending' };
+  return { issues };
 }
