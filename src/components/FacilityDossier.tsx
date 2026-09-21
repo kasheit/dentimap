@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ExternalLink, Pencil } from 'lucide-react';
 import { addressLine, compactUsd, facilityTypeLabel } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
@@ -7,6 +7,7 @@ import { Card, StatusPill } from './Chips';
 import { OwnershipChain } from './CorporateEntities';
 import { DeedIngestionBuffer } from './DeedIngestionBuffer';
 import { NotesLog } from './NotesLog';
+import { PropertyEditForm } from './PropertyEditForm';
 import { TitleChainTimeline } from './TitleChainTimeline';
 
 function Fact({ label, children, mono }: { label: string; children: React.ReactNode; mono?: boolean }) {
@@ -36,7 +37,8 @@ const SECTIONS = [
 ] as const;
 
 export function FacilityDossier({ property: p }: { property: Property }) {
-  const { deeds, entities } = useDentimap();
+  const { deeds, entities, updateProperty } = useDentimap();
+  const [editing, setEditing] = useState(false);
   const propDeeds = useMemo(() => deeds.filter((d) => d.propertyId === p.id), [deeds, p.id]);
   const landlord = entities.find((e) => e.id === p.landlordEntityId);
   const operator = entities.find((e) => e.id === p.operatingEntityId);
@@ -60,9 +62,16 @@ export function FacilityDossier({ property: p }: { property: Property }) {
           </div>
           <h1 className="mt-1.5 text-[28px] font-semibold leading-tight">{p.name}</h1>
         </div>
-        <a className="btn" href={mapUrl} target="_blank" rel="noreferrer">
-          <ExternalLink className="h-3.5 w-3.5" /> Open in Maps
-        </a>
+        <div className="flex gap-2">
+          {!editing && (
+            <button className="btn" onClick={() => setEditing(true)}>
+              <Pencil className="h-3.5 w-3.5" /> Edit
+            </button>
+          )}
+          <a className="btn" href={mapUrl} target="_blank" rel="noreferrer">
+            <ExternalLink className="h-3.5 w-3.5" /> Open in Maps
+          </a>
+        </div>
       </header>
 
       <nav className="sticky top-[53px] z-30 -mx-1 flex gap-1 overflow-x-auto border-b border-dm-border bg-dm-bg/95 px-1 backdrop-blur scroll-thin" aria-label="Sections">
@@ -75,22 +84,33 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         ))}
       </nav>
 
+      {editing ? (
+        <PropertyEditForm
+          property={p}
+          onCancel={() => setEditing(false)}
+          onSave={(patch) => {
+            updateProperty(p.id, patch);
+            setEditing(false);
+          }}
+        />
+      ) : (
       <Card id="record" title="Record">
-        <dl className="grid gap-x-10 sm:grid-cols-2">
-          <div>
-            <Fact label="Parcel PIN" mono>{p.address.parcelPin || '—'}</Fact>
-            <Fact label="County">{p.address.county.replace(/\s+County$/i, '')}</Fact>
-            <Fact label="Address">{addressLine(p.address)}</Fact>
-          </div>
-          <div>
-            <Fact label="Assessed value">{compactUsd(m?.currentAssessedValue)}</Fact>
-            <Fact label="Project investment">{compactUsd(m?.projectInvestment)}</Fact>
-            <Fact label={m?.targetOpening ? 'Target opening' : 'Footprint'}>
-              {m?.targetOpening ?? (m?.footprintSqFt ? `${m.footprintSqFt.toLocaleString()} sq ft` : '—')}
-            </Fact>
-          </div>
-        </dl>
-      </Card>
+          <dl className="grid gap-x-10 sm:grid-cols-2">
+            <div>
+              <Fact label="Parcel PIN" mono>{p.address.parcelPin || '—'}</Fact>
+              <Fact label="County">{p.address.county.replace(/\s+County$/i, '')}</Fact>
+              <Fact label="Address">{addressLine(p.address)}</Fact>
+            </div>
+            <div>
+              <Fact label="Assessed value">{compactUsd(m?.currentAssessedValue)}</Fact>
+              <Fact label="Project investment">{compactUsd(m?.projectInvestment)}</Fact>
+              <Fact label={m?.targetOpening ? 'Target opening' : 'Footprint'}>
+                {m?.targetOpening ?? (m?.footprintSqFt ? `${m.footprintSqFt.toLocaleString()} sq ft` : '—')}
+              </Fact>
+            </div>
+          </dl>
+        </Card>
+      )}
 
       <Card id="ownership" title="Ownership & control">
         <OwnershipChain deeds={propDeeds} landlord={landlord} operator={operator} />
@@ -103,6 +123,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         </div>
       </Card>
 
+      {!editing && (
       <Card id="specs" title="Specifications">
         {hasSpecs && cs ? (
           <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
@@ -129,6 +150,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
           <p className="text-[13px] text-dm-dim">No clinical specifications on file for this facility.</p>
         )}
       </Card>
+      )}
 
       <Card
         id="notes"
