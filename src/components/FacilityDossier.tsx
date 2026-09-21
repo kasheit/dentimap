@@ -36,7 +36,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
 
       <RecordCard p={p} />
 
-      <Card id="ownership" title="Ownership & control">
+      <Card id="ownership" title="Ownership">
         <OwnershipChain business={p} deeds={propDeeds} landlord={landlord} operator={operator} />
       </Card>
 
