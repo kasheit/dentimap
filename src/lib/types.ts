@@ -26,7 +26,16 @@ export interface FieldMeta {
   asOf?: string;
 }
 
-export type SourcedField = 'parcelPin' | 'assessedValue' | 'projectInvestment';
+export type SourcedField =
+  | 'legalName'
+  | 'dbaName'
+  | 'address'
+  | 'county'
+  | 'parcelPin'
+  | 'assessedValue'
+  | 'projectInvestment'
+  | 'landlord'
+  | 'operator';
 
 export interface Property {
   id: string;

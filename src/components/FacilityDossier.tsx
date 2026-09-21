@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { completionFor } from '@/lib/completion';
 import { facilityTypeLabel } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
@@ -13,6 +14,7 @@ import { TitleChainTimeline } from './TitleChainTimeline';
 
 export function FacilityDossier({ property: p }: { property: Property }) {
   const { deeds, entities } = useDentimap();
+  const completion = completionFor(p, deeds, entities);
   const propDeeds = useMemo(() => deeds.filter((d) => d.propertyId === p.id), [deeds, p.id]);
   const landlord = entities.find((e) => e.id === p.landlordEntityId);
   const operator = entities.find((e) => e.id === p.operatingEntityId);
@@ -31,13 +33,27 @@ export function FacilityDossier({ property: p }: { property: Property }) {
           <StatusPill status={p.status} />
         </div>
         <h1 className="mt-1.5 text-[28px] font-semibold leading-tight">{p.name}</h1>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px]">
+          <div className="flex items-center gap-2" title="Confirmed counts fully, unconfirmed counts half, missing counts zero">
+            <div className="h-1.5 w-28 overflow-hidden rounded-full bg-dm-border">
+              <div className="flex h-full">
+                <div className="bg-dm-green" style={{ width: `${(completion.counts.confirmed / completion.items.length) * 100}%` }} />
+                <div className="bg-dm-amber" style={{ width: `${(completion.counts.partial / completion.items.length) * 100}%` }} />
+              </div>
+            </div>
+            <span className="tnum font-medium">{completion.percent}% complete</span>
+          </div>
+          <span className="text-dm-dim">
+            <span className="text-dm-green">{completion.counts.confirmed} confirmed</span> · <span className="text-dm-amber">{completion.counts.partial} unconfirmed</span> · <span className="text-dm-red">{completion.counts.missing} missing</span>
+          </span>
+        </div>
       </header>
 
 
       <RecordCard p={p} />
 
       <Card id="ownership" title="Ownership">
-        <OwnershipChain business={p} deeds={propDeeds} landlord={landlord} operator={operator} />
+        <OwnershipChain property={p} deeds={propDeeds} landlord={landlord} operator={operator} />
       </Card>
 
       <Card id="title" title="Title chain" action={<span className="text-[13px] text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>

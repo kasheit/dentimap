@@ -109,3 +109,21 @@ export function Group({ title, children }: { title: string; children: ReactNode 
     </div>
   );
 }
+
+const levelStyle = {
+  confirmed: { dot: 'bg-dm-green', text: 'text-dm-green', label: 'Confirmed' },
+  partial: { dot: 'bg-dm-amber', text: 'text-dm-amber', label: 'Unconfirmed' },
+  missing: { dot: 'bg-dm-red', text: 'text-dm-red', label: 'Missing' },
+} as const;
+
+/** Green = confirmed from records, yellow = present but not fully confirmed, red = nothing there. */
+export function LevelLabel({ level, detail }: { level: 'confirmed' | 'partial' | 'missing'; detail?: ReactNode }) {
+  const s = levelStyle[level];
+  return (
+    <span className="inline-flex flex-wrap items-center justify-end gap-x-1.5 text-[12px]">
+      <i className={`inline-block h-1.5 w-1.5 rounded-full ${s.dot}`} />
+      <span className={s.text}>{s.label}</span>
+      {detail && <span className="text-dm-dim">· {detail}</span>}
+    </span>
+  );
+}

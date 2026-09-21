@@ -66,11 +66,9 @@ function toDraft(p: Property): Draft {
 }
 
 const blank: FieldMeta = { state: 'unknown' };
-const toMeta = (p: Property): MetaDraft => ({
-  parcelPin: p.meta?.parcelPin ?? blank,
-  assessedValue: p.meta?.assessedValue ?? blank,
-  projectInvestment: p.meta?.projectInvestment ?? blank,
-});
+const META_KEYS: SourcedField[] = ['legalName', 'dbaName', 'address', 'county', 'parcelPin', 'assessedValue', 'projectInvestment', 'landlord', 'operator'];
+const toMeta = (p: Property): MetaDraft =>
+  Object.fromEntries(META_KEYS.map((k) => [k, p.meta?.[k] ?? blank])) as MetaDraft;
 
 function toPatch(d: Draft, meta: MetaDraft, p: Property): Partial<Property> {
   const specialties = d.specialties.split(',').map((s) => s.trim()).filter(Boolean);
@@ -103,7 +101,7 @@ function toPatch(d: Draft, meta: MetaDraft, p: Property): Partial<Property> {
     address: { street: d.street.trim(), city: d.city.trim(), state: d.state.trim(), zip: d.zip.trim(), county: withCounty(d.county), parcelPin: d.parcelPin.trim() },
     parcelUrl: text(d.parcelUrl),
     metrics,
-    meta: { parcelPin: keep('parcelPin'), assessedValue: keep('assessedValue'), projectInvestment: keep('projectInvestment') },
+    meta: Object.fromEntries(META_KEYS.map((k) => [k, keep(k)]).filter(([, v]) => v !== undefined)) as Property['meta'],
     clinicalSpecs: hasSpecs ? specs : undefined,
   };
 }
@@ -165,8 +163,14 @@ export function PropertyEditForm({
       <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Facility name (how it appears in Dentimap)" span="sm:col-span-2">{input('name')}</Field>
-          <Field label="Legal name (on business documents)">{input('legalName')}</Field>
-          <Field label="Doing business as (trade name)">{input('dbaName')}</Field>
+          <div className="space-y-2">
+            <Field label="Legal name (on business documents)">{input('legalName')}</Field>
+            <SourceRow label="Legal name" meta={meta.legalName} onMeta={setM('legalName')} />
+          </div>
+          <div className="space-y-2">
+            <Field label="Doing business as (trade name)">{input('dbaName')}</Field>
+            <SourceRow label="Doing business as" meta={meta.dbaName} onMeta={setM('dbaName')} />
+          </div>
           <Field label="Type">
             <select className="field" value={d.facilityType} onChange={(e) => set('facilityType', e.target.value as FacilityType)}>
               {(Object.keys(facilityTypeLabel) as FacilityType[]).map((k) => <option key={k} value={k}>{facilityTypeLabel[k]}</option>)}
@@ -186,7 +190,9 @@ export function PropertyEditForm({
             <Field label="City" span="sm:col-span-3">{input('city')}</Field>
             <Field label="State" span="sm:col-span-1">{input('state')}</Field>
             <Field label="ZIP" span="sm:col-span-2">{input('zip')}</Field>
-            <Field label="County" span="sm:col-span-3">{input('county')}</Field>
+            <div className="sm:col-span-6"><SourceRow label="Address" meta={meta.address} onMeta={setM('address')} /></div>
+            <Field label="County" span="sm:col-span-6">{input('county')}</Field>
+            <div className="sm:col-span-6"><SourceRow label="County" meta={meta.county} onMeta={setM('county')} /></div>
             <Field label="Parcel PIN" span="sm:col-span-3">{input('parcelPin', 'font-mono')}</Field>
             <div className="sm:col-span-6"><SourceRow label="Parcel PIN" meta={meta.parcelPin} onMeta={setM('parcelPin')} /></div>
             <Field label="County parcel record link (optional)" span="sm:col-span-6">{input('parcelUrl')}</Field>
@@ -217,6 +223,21 @@ export function PropertyEditForm({
             <Field label="Outpatient share (%)">{input('outpatientSharePercent', 'tnum')}</Field>
             <Field label="Licensure" span="sm:col-span-3">{input('licensure')}</Field>
             <Field label="Services (comma-separated)" span="sm:col-span-3">{input('specialties')}</Field>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="mb-1 text-[13px] font-semibold">Ownership links</h3>
+          <p className="mb-3 text-xs text-dm-dim">Landlord and operator are linked from Ownership Entities. Set how well each is confirmed.</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <span className="label block">Landlord</span>
+              <SourceRow label="Landlord" meta={meta.landlord} onMeta={setM('landlord')} />
+            </div>
+            <div className="space-y-2">
+              <span className="label block">Operator</span>
+              <SourceRow label="Operator" meta={meta.operator} onMeta={setM('operator')} />
+            </div>
           </div>
         </div>
 

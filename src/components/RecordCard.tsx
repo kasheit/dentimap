@@ -1,24 +1,16 @@
 import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
+import { levelFor } from '@/lib/completion';
 import { addressLine, compactUsd, fmtDate } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { FieldMeta, Property } from '@/lib/types';
-import { Card, Fact } from './Chips';
+import { Card, Fact, LevelLabel } from './Chips';
 import { PropertyEditForm } from './PropertyEditForm';
 
-function SourceNote({ meta, hasValue }: { meta?: FieldMeta; hasValue: boolean }) {
-  if (!hasValue) return null;
-  if (!meta || (meta.state === 'unknown' && !meta.source && !meta.asOf)) return null;
-  const tone = meta.state === 'verified' ? 'text-dm-green' : meta.state === 'unverified' ? 'text-dm-amber' : 'text-dm-dim';
-  const label = meta.state === 'verified' ? 'Verified' : meta.state === 'unverified' ? 'Unverified' : 'Source';
-  return (
-    <span className="text-dm-dim">
-      <span className={tone}>{label}</span>
-      {meta.source && <> · {meta.source}</>}
-      {meta.asOf && <> · as of {fmtDate(meta.asOf)}</>}
-    </span>
-  );
-}
+const detail = (meta?: FieldMeta) => {
+  const parts = [meta?.source, meta?.asOf ? `as of ${fmtDate(meta.asOf)}` : undefined].filter(Boolean);
+  return parts.length ? parts.join(' · ') : undefined;
+};
 
 export function RecordCard({ p }: { p: Property }) {
   const { updateProperty, deleteProperty } = useDentimap();
@@ -26,12 +18,7 @@ export function RecordCard({ p }: { p: Property }) {
   const [editing, setEditing] = useState(!p.address.street && !p.address.city);
   const m = p.metrics;
   const meta = p.meta ?? {};
-  const dash = <span className="text-dm-dim">—</span>;
-  const unsourced = [
-    [!!p.address.parcelPin, meta.parcelPin],
-    [m?.currentAssessedValue !== undefined, meta.assessedValue],
-    [m?.projectInvestment !== undefined, meta.projectInvestment],
-  ].filter(([has, mt]) => has && (!mt || ((mt as { state: string; source?: string; asOf?: string }).state === 'unknown' && !(mt as { source?: string }).source && !(mt as { asOf?: string }).asOf))).length;
+  const label = (has: boolean, mt?: FieldMeta) => <LevelLabel level={levelFor(has, mt)} detail={has ? detail(mt) : undefined} />;
 
   if (editing) {
     return (
@@ -49,29 +36,26 @@ export function RecordCard({ p }: { p: Property }) {
     );
   }
 
+  const hasAddress = !!(p.address.street && p.address.city && p.address.zip);
+
   return (
     <Card
       id="record"
       title="Record"
       action={
-        <div className="flex items-center gap-4">
-          {unsourced > 0 && <span className="text-[13px] text-dm-dim">{unsourced} unsourced</span>}
-          <button className="btn" onClick={() => setEditing(true)}>Edit</button>
-        </div>
+        <button className="btn" onClick={() => setEditing(true)}>Edit</button>
       }
     >
       <dl className="grid gap-x-10 sm:grid-cols-2">
         <div>
-          <Fact label="Legal name">{p.legalName || dash}</Fact>
-          <Fact label="Doing business as">{p.dbaName || dash}</Fact>
-          <Fact label="Address">{addressLine(p.address)}</Fact>
-          <Fact label="County">{p.address.county.replace(/\s+County$/i, '') || '—'}</Fact>
+          <Fact label="Address" sub={label(hasAddress, meta.address)}>{hasAddress ? addressLine(p.address) : '—'}</Fact>
+          <Fact label="County" sub={label(!!p.address.county, meta.county)}>{p.address.county.replace(/\s+County$/i, '') || '—'}</Fact>
           <Fact
             label="Parcel PIN"
             mono
             sub={
               <>
-                <SourceNote meta={meta.parcelPin} hasValue={!!p.address.parcelPin} />
+                {label(!!p.address.parcelPin, meta.parcelPin)}
                 {p.parcelUrl && (
                   <a href={p.parcelUrl} target="_blank" rel="noreferrer" className="ml-3 inline-flex items-center gap-1 text-dm-blue hover:underline">
                     County record <ExternalLink className="h-3 w-3" />
@@ -84,12 +68,10 @@ export function RecordCard({ p }: { p: Property }) {
           </Fact>
         </div>
         <div>
-          <Fact label="Assessed value" sub={<SourceNote meta={meta.assessedValue} hasValue={m?.currentAssessedValue !== undefined} />}>
+          <Fact label="Assessed value" sub={label(m?.currentAssessedValue !== undefined, meta.assessedValue)}>
             {compactUsd(m?.currentAssessedValue)}
           </Fact>
-          <Fact label="Project investment" sub={<SourceNote meta={meta.projectInvestment} hasValue={m?.projectInvestment !== undefined} />}>
-            {compactUsd(m?.projectInvestment)}
-          </Fact>
+          <Fact label="Project investment">{compactUsd(m?.projectInvestment)}</Fact>
           <Fact label="Footprint">{m?.footprintSqFt ? `${m.footprintSqFt.toLocaleString()} sq ft` : '—'}</Fact>
           <Fact label="Target opening">{m?.targetOpening ?? '—'}</Fact>
         </div>

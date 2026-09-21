@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import { attentionFor } from '@/lib/attention';
+import { completionFor } from '@/lib/completion';
 import { newId, useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
 import { StatusPill } from './Chips';
@@ -12,7 +13,7 @@ const STATUS_ORDER = { active: 0, pipeline_fitout: 1, pipeline_pending: 2, close
 
 export const FOCUS_SEARCH = 'dentimap:focus-search';
 
-function Row({ p, active, onClick, issues }: { p: Property; active: boolean; onClick: () => void; issues: string[] }) {
+function Row({ p, active, onClick, issues, percent }: { p: Property; active: boolean; onClick: () => void; issues: string[]; percent: number }) {
   return (
     <button
       data-active={active}
@@ -29,15 +30,16 @@ function Row({ p, active, onClick, issues }: { p: Property; active: boolean; onC
         </span>
         <StatusPill status={p.status} />
       </div>
-      <div className="mt-0.5 tnum text-[11px] text-dm-dim">
-        {p.address.city}, {p.address.state} · {p.address.county.replace(' County', '')}
+      <div className="mt-0.5 flex items-center justify-between gap-2 tnum text-[11px] text-dm-dim">
+        <span>{p.address.city || 'No city'}{p.address.state ? `, ${p.address.state}` : ''}</span>
+        <span className={percent >= 80 ? 'text-dm-green' : percent >= 40 ? 'text-dm-amber' : 'text-dm-red'}>{percent}%</span>
       </div>
     </button>
   );
 }
 
 export function Sidebar() {
-  const { properties, deeds, selectedPropertyId, select, addProperty } = useDentimap();
+  const { properties, deeds, entities, selectedPropertyId, select, addProperty } = useDentimap();
   const [sort, setSort] = useState<Sort>('default');
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
@@ -172,7 +174,7 @@ export function Sidebar() {
             <h3 className="label mb-1.5 px-3">{g.title}</h3>
             <div className="space-y-0.5">
               {g.items.map((p) => (
-                <Row key={p.id} p={p} issues={attentionFor(p, deeds).issues} active={p.id === selectedPropertyId} onClick={() => select(p.id)} />
+                <Row key={p.id} p={p} percent={completionFor(p, deeds, entities).percent} issues={attentionFor(p, deeds).issues} active={p.id === selectedPropertyId} onClick={() => select(p.id)} />
               ))}
             </div>
           </div>

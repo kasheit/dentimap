@@ -1,9 +1,16 @@
 import { AlertTriangle } from 'lucide-react';
+import { levelFor } from '@/lib/completion';
 import { entityTypeLabel, fmtDate } from '@/lib/format';
 import { sortedDeeds, useDentimap } from '@/lib/store';
-import type { DeedRecord, LegalEntity } from '@/lib/types';
+import type { DeedRecord, FieldMeta, LegalEntity, Property } from '@/lib/types';
+import { LevelLabel } from './Chips';
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const detail = (meta?: FieldMeta) => {
+  const parts = [meta?.source, meta?.asOf ? `as of ${fmtDate(meta.asOf)}` : undefined].filter(Boolean);
+  return parts.length ? parts.join(' · ') : undefined;
+};
 
 function Step({ role, last, children }: { role: string; last?: boolean; children: React.ReactNode }) {
   return (
@@ -18,34 +25,54 @@ function Step({ role, last, children }: { role: string; last?: boolean; children
   );
 }
 
-function EntityLine({ entity }: { entity?: LegalEntity }) {
+function Named({ label, value, meta }: { label: string; value?: string; meta?: FieldMeta }) {
+  return (
+    <div className="first:mt-0 mt-3">
+      <div className="text-[13px] text-dm-dim">{label}</div>
+      <div className="text-[15px] font-medium">{value || <span className="font-normal text-dm-dim">—</span>}</div>
+      <div className="mt-0.5">
+        <LevelLabel level={levelFor(!!value, meta)} detail={value ? detail(meta) : undefined} />
+      </div>
+    </div>
+  );
+}
+
+function EntityLine({ entity, meta }: { entity?: LegalEntity; meta?: FieldMeta }) {
   const setTab = useDentimap((s) => s.setTab);
-  if (!entity) return <p className="text-[15px] text-dm-dim">Not identified</p>;
   return (
     <>
-      <button onClick={() => setTab('entities')} className="text-left text-[15px] font-medium transition-colors hover:text-dm-blue">
-        {entity.name}
-      </button>
-      {entity.dbaName && <div className="mt-0.5 text-[13px] text-dm-muted">d/b/a {entity.dbaName}</div>}
-      <div className="mt-0.5 text-[13px] text-dm-dim">
-        {entityTypeLabel[entity.entityType]} · {entity.jurisdiction}
-        {entity.sosId && (
-          <>
-            {' '}· SOS <span className="font-mono text-xs">{entity.sosId}</span>
-          </>
-        )}
+      {entity ? (
+        <>
+          <button onClick={() => setTab('entities')} className="text-left text-[15px] font-medium transition-colors hover:text-dm-blue">
+            {entity.name}
+          </button>
+          {entity.dbaName && <div className="mt-0.5 text-[13px] text-dm-muted">d/b/a {entity.dbaName}</div>}
+          <div className="mt-0.5 text-[13px] text-dm-dim">
+            {entityTypeLabel[entity.entityType]} · {entity.jurisdiction}
+            {entity.sosId && (
+              <>
+                {' '}· SOS <span className="font-mono text-xs">{entity.sosId}</span>
+              </>
+            )}
+          </div>
+        </>
+      ) : (
+        <p className="text-[15px] text-dm-dim">—</p>
+      )}
+      <div className="mt-0.5">
+        <LevelLabel level={levelFor(!!entity, meta)} detail={entity ? detail(meta) : undefined} />
       </div>
     </>
   );
 }
 
 export function OwnershipChain({
+  property,
   deeds,
   landlord,
   operator,
-  business,
 }: {
-  business?: { legalName?: string; dbaName?: string };
+  property: Property;
   deeds: DeedRecord[];
   landlord?: LegalEntity;
   operator?: LegalEntity;
@@ -53,21 +80,14 @@ export function OwnershipChain({
   const conveyances = sortedDeeds(deeds.filter((d) => d.deedType !== 'subdivision_plat'));
   const holder = conveyances[conveyances.length - 1];
   const match = holder && landlord ? norm(holder.grantee) === norm(landlord.name) : undefined;
+  const meta = property.meta ?? {};
 
   return (
     <div>
       <ol>
         <Step role="Business at this location">
-          {business?.legalName || business?.dbaName ? (
-            <>
-              <div className="text-[13px] text-dm-dim">Legal name</div>
-              <div className="text-[15px] font-medium">{business.legalName || <span className="font-normal text-dm-dim">Not set</span>}</div>
-              <div className="mt-2 text-[13px] text-dm-dim">Doing business as</div>
-              <div className="text-[15px] font-medium">{business.dbaName || <span className="font-normal text-dm-dim">Not set</span>}</div>
-            </>
-          ) : (
-            <p className="text-[15px] text-dm-dim">Not set.</p>
-          )}
+          <Named label="Legal name" value={property.legalName} meta={meta.legalName} />
+          <Named label="Doing business as" value={property.dbaName} meta={meta.dbaName} />
         </Step>
         <Step role="Land owner of record">
           {holder ? (
@@ -78,14 +98,17 @@ export function OwnershipChain({
               </div>
             </>
           ) : (
-            <p className="text-[15px] text-dm-dim">No deed on file</p>
+            <p className="text-[15px] text-dm-dim">—</p>
           )}
+          <div className="mt-0.5">
+            <LevelLabel level={holder ? (holder.confidence === 'verified' ? 'confirmed' : 'partial') : 'missing'} detail={holder ? undefined : 'no deed on file'} />
+          </div>
         </Step>
         <Step role="Landlord (legal name)">
-          <EntityLine entity={landlord} />
+          <EntityLine entity={landlord} meta={meta.landlord} />
         </Step>
         <Step role="Operator (legal name)" last>
-          <EntityLine entity={operator} />
+          <EntityLine entity={operator} meta={meta.operator} />
         </Step>
       </ol>
 
