@@ -26,7 +26,8 @@ function EntityLine({ entity }: { entity?: LegalEntity }) {
       <button onClick={() => setTab('entities')} className="text-left text-[15px] font-medium transition-colors hover:text-dm-blue">
         {entity.name}
       </button>
-      <div className="mt-0.5 text-[13px] text-dm-muted">
+      {entity.dbaName && <div className="mt-0.5 text-[13px] text-dm-muted">d/b/a {entity.dbaName}</div>}
+      <div className="mt-0.5 text-[13px] text-dm-dim">
         {entityTypeLabel[entity.entityType]} · {entity.jurisdiction}
         {entity.sosId && (
           <>
@@ -66,10 +67,10 @@ export function OwnershipChain({
             <p className="text-[15px] text-dm-dim">No deed on file</p>
           )}
         </Step>
-        <Step role="Landlord entity">
+        <Step role="Landlord (legal name)">
           <EntityLine entity={landlord} />
         </Step>
-        <Step role="Operating entity" last>
+        <Step role="Operator (legal name)" last>
           <EntityLine entity={operator} />
         </Step>
       </ol>

@@ -24,20 +24,20 @@ export function NotesLog({ property }: { property: Property }) {
 
   const open = log.filter((n) => n.tag !== 'note' && !n.resolved).length;
 
-  const save = (next: NoteEntry[], clearLegacy = false) =>
-    updateProperty(property.id, { noteLog: next, ...(clearLegacy ? { notes: undefined } : {}) });
+  const save = (next: NoteEntry[], logText: string, clearLegacy = false) =>
+    updateProperty(property.id, { noteLog: next, ...(clearLegacy ? { notes: undefined } : {}) }, logText);
 
   const add = () => {
     const t = text.trim();
     if (!t) return;
     const entries = [...(property.noteLog ?? [])];
     entries.push({ id: `note-${Date.now().toString(36)}`, text: t, tag, createdAt: new Date().toISOString() });
-    save(entries);
+    save(entries, `Note added (${tagLabel[tag]})`);
     setText('');
   };
 
-  const editReal = (fn: (n: NoteEntry) => NoteEntry | null) =>
-    save((property.noteLog ?? []).map(fn).filter((n): n is NoteEntry => n !== null));
+  const editReal = (fn: (n: NoteEntry) => NoteEntry | null, logText: string) =>
+    save((property.noteLog ?? []).map(fn).filter((n): n is NoteEntry => n !== null), logText);
 
   return (
     <div>
@@ -80,7 +80,7 @@ export function NotesLog({ property }: { property: Property }) {
                     <input
                       type="checkbox"
                       checked={!!n.resolved}
-                      onChange={() => editReal((x) => (x.id === n.id ? { ...x, resolved: !x.resolved } : x))}
+                      onChange={() => editReal((x) => (x.id === n.id ? { ...x, resolved: !x.resolved } : x), n.resolved ? 'Note reopened' : 'Note resolved')}
                       className="mt-1 h-3.5 w-3.5 accent-[#7eb0ff]"
                       aria-label="Mark resolved"
                     />
@@ -97,7 +97,7 @@ export function NotesLog({ property }: { property: Property }) {
                     <p className={`mt-0.5 whitespace-pre-wrap text-[14px] leading-relaxed ${n.resolved ? 'text-dm-dim line-through' : ''}`}>{n.text}</p>
                   </div>
                   <button
-                    onClick={() => (legacy ? save(property.noteLog ?? [], true) : editReal((x) => (x.id === n.id ? null : x)))}
+                    onClick={() => (legacy ? save(property.noteLog ?? [], 'Note deleted', true) : editReal((x) => (x.id === n.id ? null : x), 'Note deleted'))}
                     className="rounded p-1.5 text-dm-dim transition-colors hover:bg-dm-hover hover:text-dm-red"
                     title="Delete"
                     aria-label="Delete note"

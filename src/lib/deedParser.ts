@@ -112,3 +112,17 @@ export const SAMPLE_PASTE = [
   'CONSIDERATION: $1,250,000.00',
   'EXCISE TAX: $2,500.00',
 ].join('\n');
+
+/** Splits a paste holding several instruments (blank-line separated) into one block per deed. */
+export function splitDeedBlocks(text: string): string[] {
+  const parts = text.split(/\r?\n[ \t]*\r?\n/).map((s) => s.trim()).filter(Boolean);
+  const out: string[] = [];
+  for (const part of parts) {
+    const prev = out[out.length - 1];
+    const startsDeed = /^\s*(SPECIAL\s+)?(WARRANTY|QUIT\s*-?\s*CLAIM|TRUSTEE)/i.test(part);
+    const newDeed = prev !== undefined && /GRANTOR/i.test(prev) && (/GRANTOR/i.test(part) || startsDeed);
+    if (prev === undefined || newDeed) out.push(part);
+    else out[out.length - 1] = `${prev}\n${part}`;
+  }
+  return out.length ? out : [text];
+}

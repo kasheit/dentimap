@@ -1,13 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { seedData } from './seed';
 import { supabase } from './supabase';
-import type { DeedRecord, DentimapData, LegalEntity, Property } from './types';
+import type { ActivityEntry, DeedRecord, DentimapData, LegalEntity, Property } from './types';
 
 export type TabId = 'properties' | 'entities' | 'deeds';
-export type SyncStatus = 'off' | 'connecting' | 'synced' | 'saving' | 'error';
+export type SyncStatus = 'off' | 'connecting' | 'synced' | 'saving' | 'error' | 'conflict';
 
-interface State extends DentimapData {
+interface State {
+  properties: Property[];
+  deeds: DeedRecord[];
+  entities: LegalEntity[];
+  activity: ActivityEntry[];
   selectedPropertyId: string;
   lastDeleted: DeedRecord | null;
   tab: TabId;
@@ -16,16 +19,21 @@ interface State extends DentimapData {
   setTab: (t: TabId) => void;
   select: (id: string) => void;
   openProperty: (id: string) => void;
-  updateProperty: (id: string, patch: Partial<Property>) => void;
+  addProperty: (p: Property) => void;
+  updateProperty: (id: string, patch: Partial<Property>, logText?: string) => void;
+  deleteProperty: (id: string) => void;
   addDeed: (d: DeedRecord) => void;
+  updateDeed: (id: string, d: DeedRecord) => void;
   deleteDeed: (id: string) => void;
   undoDelete: () => void;
   dismissUndo: () => void;
+  addEntity: (e: LegalEntity) => void;
   updateEntity: (id: string, patch: Partial<LegalEntity>) => void;
+  deleteEntity: (id: string) => void;
   linkProperty: (entityId: string, propertyId: string) => void;
   unlinkProperty: (entityId: string, propertyId: string) => void;
-  importData: (d: DentimapData) => void;
-  reset: () => void;
+  importData: (d: DentimapData) => { added: number; updated: number };
+  resolveConflict: (choice: 'remote' | 'mine') => Promise<void>;
 }
 
 export function isValidData(d: unknown): d is DentimapData {
@@ -45,65 +53,146 @@ const pick = (s: State): DentimapData => ({
   properties: s.properties,
   deeds: s.deeds,
   entities: s.entities,
+  activity: s.activity,
 });
+
+const uid = (p: string) => `${p}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+
+const logged = (activity: ActivityEntry[], text: string, propertyId?: string): ActivityEntry[] =>
+  [...activity, { id: uid('act'), at: new Date().toISOString(), text, propertyId }].slice(-300);
+
+const nameOf = (s: State, id: string) => s.properties.find((p) => p.id === id)?.name ?? id;
 
 export const useDentimap = create<State>()(
   persist(
-    (set) => ({
-      ...structuredClone(seedData),
-      selectedPropertyId: seedData.properties[0].id,
+    (set, get) => ({
+      properties: [],
+      deeds: [],
+      entities: [],
+      activity: [],
+      selectedPropertyId: '',
       tab: 'properties',
       lastDeleted: null,
       sync: 'off',
       setTab: (tab) => set({ tab }),
       select: (selectedPropertyId) => set({ selectedPropertyId }),
       openProperty: (selectedPropertyId) => set({ selectedPropertyId, tab: 'properties' }),
-      updateProperty: (id, patch) =>
-        set((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
-      addDeed: (d) => set((s) => ({ deeds: [...s.deeds, d] })),
+
+      addProperty: (p) =>
+        set((s) => ({ properties: [...s.properties, p], selectedPropertyId: p.id, tab: 'properties', activity: logged(s.activity, 'Facility created', p.id) })),
+      updateProperty: (id, patch, logText) =>
+        set((s) => ({
+          properties: s.properties.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+          activity: logText ? logged(s.activity, logText, id) : s.activity,
+        })),
+      deleteProperty: (id) =>
+        set((s) => {
+          const rest = s.properties.filter((p) => p.id !== id);
+          return {
+            properties: rest,
+            deeds: s.deeds.filter((d) => d.propertyId !== id),
+            entities: s.entities.map((e) => ({ ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== id) })),
+            selectedPropertyId: s.selectedPropertyId === id ? (rest[0]?.id ?? '') : s.selectedPropertyId,
+            activity: logged(s.activity, `Facility deleted: ${nameOf(s, id)}`),
+          };
+        }),
+
+      addDeed: (d) =>
+        set((s) => ({ deeds: [...s.deeds, d], activity: logged(s.activity, `Deed added (${d.recordingDate}, ${d.grantor} → ${d.grantee})`, d.propertyId) })),
+      updateDeed: (id, d) =>
+        set((s) => ({ deeds: s.deeds.map((x) => (x.id === id ? d : x)), activity: logged(s.activity, `Deed edited (${d.recordingDate})`, d.propertyId) })),
       deleteDeed: (id) =>
-        set((s) => ({ lastDeleted: s.deeds.find((d) => d.id === id) ?? null, deeds: s.deeds.filter((d) => d.id !== id) })),
-      undoDelete: () => set((s) => (s.lastDeleted ? { deeds: [...s.deeds, s.lastDeleted], lastDeleted: null } : {})),
+        set((s) => {
+          const d = s.deeds.find((x) => x.id === id);
+          return {
+            lastDeleted: d ?? null,
+            deeds: s.deeds.filter((x) => x.id !== id),
+            activity: d ? logged(s.activity, `Deed removed (${d.recordingDate})`, d.propertyId) : s.activity,
+          };
+        }),
+      undoDelete: () =>
+        set((s) =>
+          s.lastDeleted
+            ? { deeds: [...s.deeds, s.lastDeleted], lastDeleted: null, activity: logged(s.activity, `Deed restored (${s.lastDeleted.recordingDate})`, s.lastDeleted.propertyId) }
+            : {},
+        ),
       dismissUndo: () => set({ lastDeleted: null }),
-      updateEntity: (id, patch) =>
-        set((s) => ({ entities: s.entities.map((e) => (e.id === id ? { ...e, ...patch } : e)) })),
+
+      addEntity: (e) => set((s) => ({ entities: [...s.entities, e], activity: logged(s.activity, `Entity created: ${e.name}`) })),
+      updateEntity: (id, patch) => set((s) => ({ entities: s.entities.map((e) => (e.id === id ? { ...e, ...patch } : e)) })),
+      deleteEntity: (id) =>
+        set((s) => ({
+          entities: s.entities.filter((e) => e.id !== id),
+          properties: s.properties.map((p) => ({
+            ...p,
+            landlordEntityId: p.landlordEntityId === id ? undefined : p.landlordEntityId,
+            operatingEntityId: p.operatingEntityId === id ? undefined : p.operatingEntityId,
+          })),
+          activity: logged(s.activity, `Entity deleted: ${s.entities.find((e) => e.id === id)?.name ?? id}`),
+        })),
       linkProperty: (entityId, propertyId) =>
         set((s) => {
           const ent = s.entities.find((e) => e.id === entityId);
           if (!ent) return {};
-          const role =
-            ent.entityType === 'landlord_holding' ? 'landlordEntityId' : ent.entityType === 'clinical_operator' ? 'operatingEntityId' : null;
+          const role = ent.entityType === 'landlord_holding' ? 'landlordEntityId' : ent.entityType === 'clinical_operator' ? 'operatingEntityId' : null;
           const prev = role ? s.properties.find((p) => p.id === propertyId)?.[role] : undefined;
           return {
             entities: s.entities.map((e) => {
-              if (e.id === entityId)
-                return e.associatedPropertyIds.includes(propertyId) ? e : { ...e, associatedPropertyIds: [...e.associatedPropertyIds, propertyId] };
+              if (e.id === entityId) return e.associatedPropertyIds.includes(propertyId) ? e : { ...e, associatedPropertyIds: [...e.associatedPropertyIds, propertyId] };
               // a property has one landlord and one operator, so drop it from the entity it is replacing
               if (prev && e.id === prev) return { ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== propertyId) };
               return e;
             }),
             properties: role ? s.properties.map((p) => (p.id === propertyId ? { ...p, [role]: entityId } : p)) : s.properties,
+            activity: logged(s.activity, `Linked to ${ent.name}`, propertyId),
           };
         }),
       unlinkProperty: (entityId, propertyId) =>
         set((s) => ({
-          entities: s.entities.map((e) =>
-            e.id === entityId ? { ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== propertyId) } : e,
-          ),
+          entities: s.entities.map((e) => (e.id === entityId ? { ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== propertyId) } : e)),
           properties: s.properties.map((p) =>
             p.id === propertyId
               ? { ...p, landlordEntityId: p.landlordEntityId === entityId ? undefined : p.landlordEntityId, operatingEntityId: p.operatingEntityId === entityId ? undefined : p.operatingEntityId }
               : p,
           ),
+          activity: logged(s.activity, `Unlinked from ${s.entities.find((e) => e.id === entityId)?.name ?? entityId}`, propertyId),
         })),
-      importData: (d) =>
-        set({
-          properties: d.properties,
-          deeds: d.deeds,
-          entities: d.entities,
-          selectedPropertyId: d.properties[0]?.id ?? '',
-        }),
-      reset: () => set({ ...structuredClone(seedData), selectedPropertyId: seedData.properties[0].id }),
+
+      // Merge by id: records in the file win over matching records here; nothing else is removed.
+      importData: (d) => {
+        let added = 0;
+        let updated = 0;
+        const merge = <T extends { id: string }>(cur: T[], inc: T[]) => {
+          const map = new Map(cur.map((x) => [x.id, x]));
+          for (const x of inc) {
+            if (map.has(x.id)) updated++;
+            else added++;
+            map.set(x.id, x);
+          }
+          return [...map.values()];
+        };
+        set((s) => {
+          const properties = merge(s.properties, d.properties);
+          return {
+            properties,
+            deeds: merge(s.deeds, d.deeds),
+            entities: merge(s.entities, d.entities),
+            selectedPropertyId: properties.some((p) => p.id === s.selectedPropertyId) ? s.selectedPropertyId : (properties[0]?.id ?? ''),
+            activity: logged(s.activity, `Imported file: ${added} new, ${updated} updated`),
+          };
+        });
+        return { added, updated };
+      },
+
+      resolveConflict: async (choice) => {
+        if (choice === 'remote') {
+          const err = await pull();
+          useDentimap.setState(err ? { sync: 'error', syncMessage: err } : { sync: 'synced', syncMessage: undefined });
+        } else {
+          const res = await pushRemote(pick(get()), true);
+          useDentimap.setState(res === 'ok' ? { sync: 'synced', syncMessage: undefined } : { sync: 'error', syncMessage: res });
+        }
+      },
     }),
     {
       name: 'dentimap-v2',
@@ -115,19 +204,58 @@ export const useDentimap = create<State>()(
 const TABLE = 'dentimap_state';
 const KEY = 'main';
 let started = false;
+let applyingRemote = false;
+// updated_at of the remote row as last seen; null means no row exists yet.
+let remoteVersion: string | null = null;
 
-async function pushRemote(data: DentimapData): Promise<string | null> {
+const friendly = (m: string) =>
+  /relation|does not exist|schema cache/i.test(m) ? 'Table missing — run supabase/dentimap-v2.sql in the Supabase SQL editor.' : m;
+
+async function pushRemote(data: DentimapData, force = false): Promise<'ok' | 'conflict' | string> {
+  if (!supabase) return 'ok';
+  const now = new Date().toISOString();
+  if (remoteVersion === null) {
+    const { data: row, error } = await supabase.from(TABLE).insert({ key: KEY, data, updated_at: now }).select('updated_at').single();
+    if (error) return error.code === '23505' ? 'conflict' : friendly(error.message);
+    remoteVersion = row.updated_at;
+    return 'ok';
+  }
+  let q = supabase.from(TABLE).update({ data, updated_at: now }).eq('key', KEY);
+  if (!force) q = q.eq('updated_at', remoteVersion);
+  const { data: rows, error } = await q.select('updated_at');
+  if (error) return friendly(error.message);
+  if (!rows?.length) return 'conflict';
+  remoteVersion = rows[0].updated_at;
+  return 'ok';
+}
+
+async function pull(): Promise<string | null> {
   if (!supabase) return null;
-  const { error } = await supabase
-    .from(TABLE)
-    .upsert({ key: KEY, data, updated_at: new Date().toISOString() });
-  return error ? error.message : null;
+  const { data, error } = await supabase.from(TABLE).select('data, updated_at').eq('key', KEY).maybeSingle();
+  if (error) return friendly(error.message);
+  if (data && isValidData(data.data)) {
+    const d = data.data;
+    remoteVersion = data.updated_at;
+    const sel = useDentimap.getState().selectedPropertyId;
+    applyingRemote = true;
+    useDentimap.setState({
+      properties: d.properties,
+      deeds: d.deeds,
+      entities: d.entities,
+      activity: d.activity ?? [],
+      selectedPropertyId: d.properties.some((p) => p.id === sel) ? sel : (d.properties[0]?.id ?? ''),
+    });
+    applyingRemote = false;
+  } else {
+    remoteVersion = null;
+  }
+  return null;
 }
 
 /**
- * Supabase is the source of truth once the owner is signed in: pull the stored
- * registry (or seed it from local state on first run), then push every edit,
- * debounced. localStorage stays as the offline cache.
+ * Supabase is the source of truth once the owner is signed in. Edits are pushed
+ * debounced, and only if the remote row is still the version we last saw, so a
+ * change made on another device is never silently overwritten.
  */
 export async function startSync() {
   if (started) return;
@@ -136,27 +264,16 @@ export async function startSync() {
   if (!supabase) return;
 
   set({ sync: 'connecting', syncMessage: undefined });
-  const { data, error } = await supabase.from(TABLE).select('data').eq('key', KEY).maybeSingle();
-  if (error) {
-    set({
-      sync: 'error',
-      syncMessage: /relation|does not exist|schema cache/i.test(error.message)
-        ? 'Table missing — run supabase/dentimap-v2.sql in the Supabase SQL editor.'
-        : error.message,
-    });
+  const err = await pull();
+  if (err) {
+    set({ sync: 'error', syncMessage: err });
     return;
   }
-  if (data && isValidData(data.data)) {
-    const d = data.data;
-    const sel = useDentimap.getState().selectedPropertyId;
-    set({
-      ...d,
-      selectedPropertyId: d.properties.some((p) => p.id === sel) ? sel : (d.properties[0]?.id ?? ''),
-    });
-  } else {
-    const err = await pushRemote(pick(useDentimap.getState()));
-    if (err) {
-      set({ sync: 'error', syncMessage: err });
+  // First run from a browser that already holds data (e.g. a JSON import): create the remote row.
+  if (remoteVersion === null && useDentimap.getState().properties.length > 0) {
+    const res = await pushRemote(pick(useDentimap.getState()));
+    if (res !== 'ok') {
+      set(res === 'conflict' ? { sync: 'conflict', syncMessage: 'The registry changed elsewhere.' } : { sync: 'error', syncMessage: res });
       return;
     }
   }
@@ -164,18 +281,21 @@ export async function startSync() {
 
   let timer: ReturnType<typeof setTimeout> | undefined;
   useDentimap.subscribe((s, prev) => {
-    if (s.properties === prev.properties && s.deeds === prev.deeds && s.entities === prev.entities) return;
+    if (applyingRemote || s.sync === 'conflict') return;
+    if (s.properties === prev.properties && s.deeds === prev.deeds && s.entities === prev.entities && s.activity === prev.activity) return;
     set({ sync: 'saving' });
     clearTimeout(timer);
     timer = setTimeout(async () => {
-      const err = await pushRemote(pick(useDentimap.getState()));
-      set(err ? { sync: 'error', syncMessage: err } : { sync: 'synced', syncMessage: undefined });
+      if (useDentimap.getState().sync === 'conflict') return;
+      const res = await pushRemote(pick(useDentimap.getState()));
+      if (res === 'ok') set({ sync: 'synced', syncMessage: undefined });
+      else if (res === 'conflict') set({ sync: 'conflict', syncMessage: 'This registry was changed somewhere else.' });
+      else set({ sync: 'error', syncMessage: res });
     }, 700);
   });
 }
 
-export const sortedDeeds = (deeds: DeedRecord[]) =>
-  [...deeds].sort((a, b) => a.recordingDate.localeCompare(b.recordingDate));
+export const sortedDeeds = (deeds: DeedRecord[]) => [...deeds].sort((a, b) => a.recordingDate.localeCompare(b.recordingDate));
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
@@ -196,3 +316,5 @@ export function chainBreaks(chain: DeedRecord[]): ChainBreak[] {
   }
   return out;
 }
+
+export const newId = uid;

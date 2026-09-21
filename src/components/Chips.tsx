@@ -91,3 +91,24 @@ export function Empty({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+export function Fact({ label, children, mono, sub }: { label: string; children: ReactNode; mono?: boolean; sub?: ReactNode }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 border-b border-dm-border/70 py-2 last:border-0">
+      <dt className="shrink-0 text-[13px] text-dm-dim">{label}</dt>
+      <dd className="min-w-0 text-right">
+        <div className={`break-words text-[13px] ${mono ? 'font-mono' : 'tnum'}`}>{children}</div>
+        {sub && <div className="mt-0.5 text-[12px] leading-snug">{sub}</div>}
+      </dd>
+    </div>
+  );
+}
+
+export function Group({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div>
+      <h3 className="mb-1 text-[13px] font-semibold">{title}</h3>
+      <dl>{children}</dl>
+    </div>
+  );
+}

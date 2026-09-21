@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkExcise, parseCountyDeedClipboard, SAMPLE_PASTE } from './deedParser';
+import { checkExcise, parseCountyDeedClipboard, SAMPLE_PASTE, splitDeedBlocks } from './deedParser';
 
 describe('parseCountyDeedClipboard', () => {
   it('parses the sample county paste', () => {
@@ -42,5 +42,18 @@ describe('checkExcise', () => {
     expect(checkExcise(1450100, 2901)).toBe(true);
     expect(checkExcise(0, 0)).toBe(true);
     expect(checkExcise(1450000, 2800)).toBe(false);
+  });
+});
+
+describe('splitDeedBlocks', () => {
+  const NL = String.fromCharCode(10);
+  const join = (...lines: string[]) => lines.join(NL);
+  it('keeps a single deed with internal blank lines together', () => {
+    expect(splitDeedBlocks(join('WARRANTY DEED', 'GRANTOR: A', '', 'GRANTEE: B', '', 'CONSIDERATION: $500'))).toHaveLength(1);
+  });
+  it('splits two deeds on blank lines', () => {
+    const blocks = splitDeedBlocks(join('WARRANTY DEED', 'GRANTOR: A', 'GRANTEE: B', '', 'QUITCLAIM DEED', 'GRANTOR: B', 'GRANTEE: C'));
+    expect(blocks).toHaveLength(2);
+    expect(parseCountyDeedClipboard(blocks[1]).deedType).toBe('quitclaim_deed');
   });
 });

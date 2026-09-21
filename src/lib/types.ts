@@ -9,7 +9,6 @@ export type DeedType =
   | 'subdivision_plat'
   | 'other';
 export type EntityType = 'landlord_holding' | 'clinical_operator' | 'mso' | 'land_trust';
-
 export type NoteTag = 'note' | 'question' | 'follow_up';
 
 export interface NoteEntry {
@@ -20,9 +19,22 @@ export interface NoteEntry {
   resolved?: boolean;
 }
 
+/** Provenance for a single value. `unknown` with no source means "unsourced". */
+export interface FieldMeta {
+  state: VerificationState;
+  source?: string;
+  asOf?: string;
+}
+
+export type SourcedField = 'parcelPin' | 'assessedValue' | 'projectInvestment';
+
 export interface Property {
   id: string;
   name: string;
+  /** Name on business documents (the registered entity). */
+  legalName?: string;
+  /** Trade name / doing business as. */
+  dbaName?: string;
   facilityType: FacilityType;
   status: FacilityStatus;
   address: {
@@ -33,12 +45,14 @@ export interface Property {
     county: string;
     parcelPin: string;
   };
+  parcelUrl?: string;
   metrics?: {
     projectInvestment?: number;
     footprintSqFt?: number;
     currentAssessedValue?: number;
     targetOpening?: string;
   };
+  meta?: Partial<Record<SourcedField, FieldMeta>>;
   clinicalSpecs?: {
     operatingRooms?: number;
     pacuBays?: number;
@@ -67,13 +81,17 @@ export interface DeedRecord {
   exciseTaxStamps: number;
   isFormulaVerified: boolean;
   platReference?: string;
+  documentUrl?: string;
   confidence: VerificationState;
   source: string;
 }
 
 export interface LegalEntity {
   id: string;
+  /** Registered legal name. */
   name: string;
+  /** Trade name / doing business as. */
+  dbaName?: string;
   sosId?: string;
   entityType: EntityType;
   jurisdiction: string;
@@ -82,8 +100,16 @@ export interface LegalEntity {
   associatedPropertyIds: string[];
 }
 
+export interface ActivityEntry {
+  id: string;
+  at: string;
+  text: string;
+  propertyId?: string;
+}
+
 export interface DentimapData {
   properties: Property[];
   deeds: DeedRecord[];
   entities: LegalEntity[];
+  activity?: ActivityEntry[];
 }
