@@ -68,3 +68,23 @@ describe('splitDeedBlocks', () => {
     expect(parseCountyDeedClipboard(blocks[1]).deedType).toBe('quitclaim_deed');
   });
 });
+
+describe('assessor values', () => {
+  it('reads land, building and total assessed value', () => {
+    const NL = String.fromCharCode(10);
+    const r = parseCountyDeedClipboard(['PARCEL ID: 0419-72-8812', 'LAND VALUE: $400,000', 'BUILDING VALUE: $1,050,000', 'TOTAL ASSESSED VALUE: $1,450,000'].join(NL));
+    expect(r.landValue).toBe(400000);
+    expect(r.buildingValue).toBe(1050000);
+    expect(r.assessedValue).toBe(1450000);
+  });
+});
+
+describe('assessor sale vs deed date', () => {
+  it('keeps the last sale date separate from the deed date', () => {
+    const NL = String.fromCharCode(10);
+    const r = parseCountyDeedClipboard(['Date Sold 9/29/2000', 'Sale Price $490,000', 'Book 019281', 'Page 01592', 'Deed Date 3/10/2023'].join(NL));
+    expect(r.saleDate).toBe('2000-09-29');
+    expect(r.recordingDate).toBe('2023-03-10');
+    expect(r.consideration).toBe(490000);
+  });
+});

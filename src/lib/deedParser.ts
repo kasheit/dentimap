@@ -11,6 +11,10 @@ export interface ParsedDeedResult {
   exciseTaxStamps?: number;
   deedType: DeedType;
   parcelPin?: string;
+  saleDate?: string;
+  landValue?: number;
+  buildingValue?: number;
+  assessedValue?: number;
   isFormulaVerified: boolean;
   rawText: string;
 }
@@ -95,6 +99,15 @@ export function parseCountyDeedClipboard(rawText: string): ParsedDeedResult {
 
   const pin = text.match(/(?:PARCEL\s*(?:PIN|ID|#|NO\.?)?|PIN\s*#?)\s*[:\s]\s*([0-9][0-9A-Z-]{5,})/i);
   if (pin) result.parcelPin = pin[1].trim();
+
+  // Assessor pages report the last sale separately from the latest recorded deed.
+  const sd = text.match(new RegExp(String.raw`DATE\s*SOLD[:\s]*` + DATE_VALUE, 'i'));
+  if (sd) result.saleDate = normalizeDate(sd[1]);
+
+  // Tax assessor pages list land, building and total assessed value.
+  result.landValue = money(text, 'LAND\\s*(?:VALUE|VAL)');
+  result.buildingValue = money(text, '(?:BUILDING|BLDG)\\s*(?:VALUE|VAL)');
+  result.assessedValue = money(text, '(?:TOTAL|ASSESSED)\\s*(?:ASSESSED\\s*)?(?:VALUE|VAL)');
 
   if (result.consideration !== undefined && result.exciseTaxStamps !== undefined) {
     result.isFormulaVerified = checkExcise(result.consideration, result.exciseTaxStamps);

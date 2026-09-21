@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { parseCountyDeedClipboard, splitDeedBlocks } from '@/lib/deedParser';
 import type { ParsedDeedResult } from '@/lib/deedParser';
-import { deedTypeLabel } from '@/lib/format';
+import { compactUsd, deedTypeLabel, fmtDate } from '@/lib/format';
+import { isImageFile, readImageText } from '@/lib/ocr';
 import { newId, useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
 import { canSaveDraft, DeedForm, draftFromParsed, draftToDeed } from './DeedForm';
@@ -24,6 +25,12 @@ function Token({ label, value }: { label: string; value?: string | number }) {
 
 export function DeedIngestionBuffer({ property }: { property: Property }) {
   const addDeed = useDentimap((s) => s.addDeed);
+  const updateProperty = useDentimap((s) => s.updateProperty);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [reading, setReading] = useState<number | null>(null);
+  const [fromImage, setFromImage] = useState(false);
+  const [ocrError, setOcrError] = useState<string | null>(null);
+  const [applied, setApplied] = useState(false);
   const [raw, setRaw] = useState('');
   const [queue, setQueue] = useState<ParsedDeedResult[]>([]);
   const [total, setTotal] = useState(0);
@@ -44,7 +51,26 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
     load(useful.length ? useful : results.slice(0, 1));
   };
 
+  const readImage = async (file: File) => {
+    setOcrError(null);
+    setReading(0);
+    try {
+      const text = await readImageText(file, setReading);
+      setRaw(text);
+      parse(text);
+      setFromImage(true);
+      setApplied(false);
+    } catch (err) {
+      setOcrError(err instanceof Error ? err.message : 'Could not read that image.');
+    } finally {
+      setReading(null);
+    }
+  };
+
   const clear = () => {
+    setFromImage(false);
+    setApplied(false);
+    setOcrError(null);
     setRaw('');
     setQueue([]);
     setTotal(0);
@@ -76,7 +102,21 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
         <textarea
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            const img = [...e.dataTransfer.files].find(isImageFile);
+            if (img) {
+              e.preventDefault();
+              readImage(img);
+            }
+          }}
           onPaste={(e) => {
+            const img = [...e.clipboardData.files].find(isImageFile);
+            if (img) {
+              e.preventDefault();
+              readImage(img);
+              return;
+            }
             const t = e.clipboardData.getData('text');
             if (t) {
               e.preventDefault();
@@ -86,13 +126,22 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
           }}
           rows={5}
           spellCheck={false}
-          placeholder="Paste a deed record"
+          placeholder="Paste a deed record, or paste or drop a screenshot"
           className="field scroll-thin resize-y font-mono text-[13px] leading-relaxed"
         />
         <div className="flex flex-wrap items-center gap-2">
-          <button className="btn" disabled={!raw.trim()} onClick={() => parse(raw)}>
+          <button className="btn" disabled={!raw.trim() || reading !== null} onClick={() => parse(raw)}>
             Parse
           </button>
+          <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) readImage(f);
+            if (fileRef.current) fileRef.current.value = '';
+          }} />
+          <button className="btn" disabled={reading !== null} onClick={() => fileRef.current?.click()}>
+            Upload screenshot
+          </button>
+          {reading !== null && <span className="text-[13px] text-dm-muted">Reading screenshot… {Math.round(reading * 100)}%</span>}
           {(raw || draft) && (
             <button className="btn" onClick={clear}>
               Clear
@@ -100,8 +149,49 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
           )}
         </div>
 
+        {ocrError && <p className="text-[13px] text-dm-red">{ocrError}</p>}
+
         {parsed && draft && (
           <div className="space-y-4 border-t border-dm-border pt-4">
+            {fromImage && <p className="text-[13px] text-dm-muted">Read from a screenshot. Check every field against the original before adding.</p>}
+            {parsed.saleDate && parsed.recordingDate && parsed.saleDate !== parsed.recordingDate && (
+              <p className="flex items-start gap-2 rounded-md border border-dm-amber/30 bg-dm-amber/10 px-3 py-2 text-[13px] text-dm-amber">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                This page shows a sale on {fmtDate(parsed.saleDate)} and a deed dated {fmtDate(parsed.recordingDate)}. The price may belong to the sale, not that deed. Check it before adding.
+              </p>
+            )}
+            {!applied && (parsed.landValue !== undefined || parsed.buildingValue !== undefined || parsed.assessedValue !== undefined) && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-dm-border px-3 py-2.5 text-[13px]">
+                <span className="text-dm-muted">
+                  Also found:{' '}
+                  {[
+                    parsed.landValue !== undefined && `land ${compactUsd(parsed.landValue)}`,
+                    parsed.buildingValue !== undefined && `building ${compactUsd(parsed.buildingValue)}`,
+                    parsed.assessedValue !== undefined && `assessed ${compactUsd(parsed.assessedValue)}`,
+                  ].filter(Boolean).join(' · ')}
+                </span>
+                <button
+                  className="btn"
+                  onClick={() => {
+                    updateProperty(
+                      property.id,
+                      {
+                        metrics: {
+                          ...property.metrics,
+                          ...(parsed.landValue !== undefined && { landValue: parsed.landValue }),
+                          ...(parsed.buildingValue !== undefined && { buildingValue: parsed.buildingValue }),
+                          ...(parsed.assessedValue !== undefined && { currentAssessedValue: parsed.assessedValue }),
+                        },
+                      },
+                      'Values applied from a record',
+                    );
+                    setApplied(true);
+                  }}
+                >
+                  Apply to this location
+                </button>
+              </div>
+            )}
             {total > 1 && (
               <div className="flex items-center justify-between text-[13px] text-dm-muted">
                 <span>
