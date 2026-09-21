@@ -15,7 +15,12 @@ export function PropertiesView() {
         {selected ? (
           <FacilityDossier property={selected} />
         ) : (
-          <p className="py-24 text-center text-sm text-dm-dim">No facilities in the registry. Import a JSON backup or reset to seed data from the Export menu.</p>
+          <div className="mx-auto max-w-md py-24 text-center">
+            <h1 className="text-lg font-semibold">No facilities yet</h1>
+            <p className="mt-2 text-sm text-dm-muted">
+              Add your first facility with the + button in the sidebar, or import a JSON backup from the header. To load the starting data, run <span className="font-mono text-xs">supabase/dentimap-v2.sql</span> in Supabase and reload.
+            </p>
+          </div>
         )}
       </main>
     </div>

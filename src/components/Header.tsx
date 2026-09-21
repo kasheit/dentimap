@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Building2, Cloud, CloudOff, Download, FileText, Landmark, Loader2, LogOut, MapPin, RotateCcw, Upload } from 'lucide-react';
+import { AlertTriangle, Building2, Cloud, Table2, CloudOff, Download, FileText, Landmark, Loader2, LogOut, MapPin, Upload } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { isValidData, useDentimap } from '@/lib/store';
 import type { TabId } from '@/lib/store';
@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 
 const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
   { id: 'properties', label: 'Properties & Facilities', icon: Building2 },
+  { id: 'matrix', label: 'Real Estate Matrix', icon: Table2 },
   { id: 'entities', label: 'Ownership Entities', icon: Landmark },
   { id: 'deeds', label: 'Deeds & Title Registry', icon: FileText },
 ];
@@ -18,6 +19,13 @@ function SyncBadge() {
     return (
       <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-dim md:flex" title="Saved in this browser only">
         <CloudOff className="h-3.5 w-3.5" /> Local
+      </span>
+    );
+  }
+  if (sync === 'conflict') {
+    return (
+      <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-red md:flex" title={message}>
+        <AlertTriangle className="h-3.5 w-3.5" /> Conflict
       </span>
     );
   }
@@ -38,7 +46,7 @@ function SyncBadge() {
 }
 
 export function Header() {
-  const { tab, setTab, properties, importData, reset } = useDentimap();
+  const { tab, setTab, importData } = useDentimap();
   const [menu, setMenu] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -68,9 +76,9 @@ export function Header() {
     try {
       const parsed = JSON.parse(await file.text());
       if (!isValidData(parsed)) throw new Error('shape');
-      if (!confirm(`Replace the current registry with ${parsed.properties.length} properties, ${parsed.deeds.length} deeds and ${parsed.entities.length} entities from "${file.name}"?`)) return;
-      importData(parsed);
-      setNotice('Import complete.');
+      if (!confirm(`Merge ${parsed.properties.length} properties, ${parsed.deeds.length} deeds and ${parsed.entities.length} entities from "${file.name}"? Records with a matching ID are overwritten by the file; nothing else is removed.`)) return;
+      const { added, updated } = importData(parsed);
+      setNotice(`Imported: ${added} new, ${updated} updated.`);
     } catch {
       setNotice('Import failed — not a valid Dentimap JSON export.');
     }
@@ -82,15 +90,10 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-dm-blue/30 bg-dm-blue/10 text-dm-blue">
-            <MapPin className="h-4 w-4" />
-          </div>
-          <span className="text-[15px] font-semibold tracking-[0.12em]">DENTIMAP</span>
-          <span className="hidden rounded-full border border-dm-border bg-dm-surface px-2.5 py-0.5 tnum text-[11px] text-dm-muted sm:inline">
-            {properties.length} Facilities
-          </span>
-        </div>
+        <span className="flex items-center gap-2 text-[15px] font-semibold tracking-tight">
+          <MapPin className="h-4 w-4 text-dm-blue" />
+          Dentimap
+        </span>
 
         <nav className="order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto">
           {tabs.map(({ id, label, icon: Icon }) => (
@@ -110,7 +113,6 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-3">
           <SyncBadge />
-          <kbd className="hidden rounded border border-dm-border px-1.5 py-0.5 tnum text-[11px] text-dm-dim xl:inline">Ctrl K</kbd>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
           <button className="btn" onClick={() => fileRef.current?.click()} title="Import a Dentimap JSON export">
             <Upload className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Import</span>
@@ -130,15 +132,6 @@ export function Header() {
                   </button>
                 ))}
                 <div className="border-t border-dm-border" />
-                <button
-                  className={menuItem}
-                  onClick={() => {
-                    setMenu(false);
-                    if (confirm('Reset the registry to the original seed data? Your edits and pasted deeds will be lost.')) reset();
-                  }}
-                >
-                  <RotateCcw className="h-3.5 w-3.5" /> Reset to seed data
-                </button>
                 {supabase && (
                   <button className={menuItem} onClick={() => supabase?.auth.signOut()}>
                     <LogOut className="h-3.5 w-3.5" /> Sign out

@@ -36,12 +36,10 @@ export function DeedsView() {
     <main className="mx-auto max-w-[1680px] space-y-6 p-4 sm:p-6 lg:p-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Deeds &amp; title registry</h1>
-        <p className="mt-1 text-sm text-dm-muted">Every recorded instrument across the network. Open a facility to paste and add new records.</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-dm-border bg-dm-border lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-dm-border bg-dm-border lg:grid-cols-3">
         {stat('Instruments', String(deeds.length))}
-        {stat('Facilities with deeds', String(new Set(deeds.map((d) => d.propertyId)).size))}
         {stat('Total consideration', usd(total))}
         {stat('Excise mismatches', String(flagged), flagged ? 'text-dm-red' : 'text-dm-green')}
       </div>
@@ -51,7 +49,7 @@ export function DeedsView() {
           <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dm-dim" />
           <input className="field pl-9" placeholder="Filter by party, instrument, facility…" value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
-        <button className={`btn ${onlyFlagged ? 'btn-primary' : ''}`} onClick={() => setOnlyFlagged((f) => !f)}>
+        <button className={`btn ${onlyFlagged ? 'text-dm-text' : ''}`} onClick={() => setOnlyFlagged((f) => !f)}>
           <AlertTriangle className="h-3.5 w-3.5" /> Mismatches only
         </button>
         <span className="ml-auto tnum text-[11px] text-dm-dim">{rows.length} shown</span>
@@ -83,7 +81,7 @@ export function DeedsView() {
                   )}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="text-xs">{deedTypeLabel[d.deedType]}</div>
+                  <div className="text-xs">{deedTypeLabel[d.deedType]}{d.documentUrl && <> · <a href={d.documentUrl} target="_blank" rel="noreferrer" className="text-dm-blue hover:underline">Document</a></>}</div>
                   <div className="mt-0.5 font-mono text-[11px] text-dm-dim">
                     {[d.instrumentNumber, d.book && d.page ? `Bk ${d.book}/Pg ${d.page}` : undefined].filter(Boolean).join(' · ') || '—'}
                   </div>

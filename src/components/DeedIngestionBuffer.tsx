@@ -101,7 +101,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
           className="field scroll-thin resize-y font-mono text-xs leading-relaxed"
         />
         <div className="flex flex-wrap items-center gap-2">
-          <button className="btn btn-primary" disabled={!raw.trim()} onClick={() => parse(raw)}>
+          <button className="btn" disabled={!raw.trim()} onClick={() => parse(raw)}>
             <Sparkles className="h-3.5 w-3.5" /> Parse
           </button>
           {(raw || draft) && (
