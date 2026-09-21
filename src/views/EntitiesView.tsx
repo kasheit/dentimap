@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Pencil, X } from 'lucide-react';
+import { ChevronDown, Pencil, UserCheck, X } from 'lucide-react';
 import { agentKey, buildAgentDirectory } from '@/lib/agents';
 import { entityTypeLabel, fmtDate } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
@@ -59,7 +59,8 @@ function EntityCard({ e }: { e: LegalEntity }) {
 
       <details className="group/agents border-b border-dm-border">
         <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 transition-colors hover:bg-dm-hover [&::-webkit-details-marker]:hidden">
-          <span className="min-w-0 flex-1 text-sm font-semibold text-dm-text">
+          <span className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold text-dm-text">
+            <UserCheck className="h-4 w-4 text-dm-dim" />
             Registered Agents <span className="ml-1 font-normal text-dm-dim">{agents.length || 'None'}</span>
           </span>
           <ChevronDown className="h-4 w-4 text-dm-dim transition-transform group-[[open]]/agents:rotate-180" />
@@ -164,7 +165,7 @@ function AgentDirectory() {
   return (
     <details className="mb-6 rounded-xl border border-dm-border bg-dm-surface">
       <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 [&::-webkit-details-marker]:hidden">
-        <span className="flex-1 text-sm font-semibold">Registered Agents <span className="ml-1 font-normal text-dm-muted">· {directory.length} across {entities.length} entities</span></span>
+        <span className="flex flex-1 items-center gap-2 text-sm font-semibold"><UserCheck className="h-4 w-4 text-dm-dim" />Registered Agents <span className="ml-1 font-normal text-dm-muted">· {directory.length} across {entities.length} entities</span></span>
         <ChevronDown className="h-4 w-4 text-dm-dim" />
       </summary>
       <ul className="grid gap-x-6 gap-y-2 border-t border-dm-border px-5 py-4 text-sm sm:grid-cols-2">
