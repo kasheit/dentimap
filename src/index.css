@@ -60,9 +60,6 @@
   .tab-chip[aria-pressed='true'] {
     @apply text-dm-text underline decoration-dm-text decoration-2 underline-offset-[6px];
   }
-  .kbd {
-    @apply rounded border border-dm-border bg-dm-bg px-1 font-mono text-[11px] leading-4 text-dm-dim;
-  }
 }
 
 @layer utilities {
