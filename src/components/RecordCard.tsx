@@ -1,17 +1,20 @@
 import { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
-import { addressLine, compactUsd } from '@/lib/format';
-import { useDentimap } from '@/lib/store';
+import { addressLine, compactUsd, fmtMonth } from '@/lib/format';
+import { sortedDeeds, useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
 import { Card, DetailRow } from './Chips';
 import { ConfirmLabel, EDIT_RECORD_EVENT } from './ConfirmLabel';
 import { PropertyEditForm } from './PropertyEditForm';
 
 export function RecordCard({ p }: { p: Property }) {
-  const { updateProperty, deleteProperty } = useDentimap();
+  const { updateProperty, deleteProperty, deeds } = useDentimap();
   // a location created with no address yet opens straight into the editor
   const [editing, setEditing] = useState(!p.address.street && !p.address.city);
   const m = p.metrics;
+  const conveyances = sortedDeeds(deeds.filter((d) => d.propertyId === p.id && d.deedType !== 'subdivision_plat'));
+  const lastDeed = conveyances[conveyances.length - 1];
+  const total = m?.landValue !== undefined && m?.buildingValue !== undefined ? m.landValue + m.buildingValue : undefined;
 
   // "Missing" labels elsewhere on the page open this editor.
   useEffect(() => {
@@ -70,6 +73,22 @@ export function RecordCard({ p }: { p: Property }) {
           label="Assessed value"
           value={m?.currentAssessedValue !== undefined ? compactUsd(m.currentAssessedValue) : undefined}
           status={status('assessedValue', 'Assessed value', m?.currentAssessedValue !== undefined)}
+        />
+        <DetailRow label="Land value" value={m?.landValue !== undefined ? compactUsd(m.landValue) : undefined} />
+        <DetailRow label="Building value" value={m?.buildingValue !== undefined ? compactUsd(m.buildingValue) : undefined} />
+        <DetailRow label="Total value" value={total !== undefined ? compactUsd(total) : undefined} />
+        <DetailRow
+          label="Purchase price"
+          value={
+            lastDeed && lastDeed.consideration > 0 ? (
+              <>
+                {compactUsd(lastDeed.consideration)}
+                <span className="ml-2 text-[13px] font-normal text-dm-dim">
+                  {lastDeed.grantee} · {fmtMonth(lastDeed.recordingDate)}
+                </span>
+              </>
+            ) : undefined
+          }
         />
         <DetailRow label="Project investment" value={m?.projectInvestment !== undefined ? compactUsd(m.projectInvestment) : undefined} />
         <DetailRow label="Footprint" value={m?.footprintSqFt ? `${m.footprintSqFt.toLocaleString()} sq ft` : undefined} />

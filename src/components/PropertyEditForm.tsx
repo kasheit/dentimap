@@ -20,6 +20,8 @@ type Draft = {
   parcelUrl: string;
   currentAssessedValue: string;
   projectInvestment: string;
+  landValue: string;
+  buildingValue: string;
   footprintSqFt: string;
   targetOpening: string;
   operatingRooms: string;
@@ -59,6 +61,8 @@ function toDraft(p: Property): Draft {
     parcelUrl: p.parcelUrl ?? '',
     currentAssessedValue: str(p.metrics?.currentAssessedValue),
     projectInvestment: str(p.metrics?.projectInvestment),
+    landValue: str(p.metrics?.landValue),
+    buildingValue: str(p.metrics?.buildingValue),
     footprintSqFt: str(p.metrics?.footprintSqFt),
     targetOpening: p.metrics?.targetOpening ?? '',
     operatingRooms: str(p.clinicalSpecs?.operatingRooms),
@@ -87,6 +91,8 @@ function toPatch(d: Draft, meta: MetaDraft, p: Property): Partial<Property> {
     ...p.metrics,
     currentAssessedValue: num(d.currentAssessedValue),
     projectInvestment: num(d.projectInvestment),
+    landValue: num(d.landValue),
+    buildingValue: num(d.buildingValue),
     footprintSqFt: num(d.footprintSqFt),
     targetOpening: text(d.targetOpening),
   };
@@ -229,6 +235,15 @@ export function PropertyEditForm({
             <div className="space-y-2">
               <Field label="Project investment">{input('projectInvestment', 'tnum')}</Field>
               <SourceRow label="Project investment" meta={meta.projectInvestment} onMeta={setM('projectInvestment')} />
+            </div>
+            <Field label="Land value">{input('landValue', 'tnum')}</Field>
+            <Field label="Building value">{input('buildingValue', 'tnum')}</Field>
+            <div className="text-[13px] text-dm-dim sm:col-span-2">
+              Total value{' '}
+              <span className="tnum font-medium text-dm-text">
+                {num(d.landValue) !== undefined && num(d.buildingValue) !== undefined ? `$${((num(d.landValue) ?? 0) + (num(d.buildingValue) ?? 0)).toLocaleString('en-US')}` : '—'}
+              </span>{' '}
+              (land + building)
             </div>
             <Field label="Footprint, sq ft">{input('footprintSqFt', 'tnum')}</Field>
             <Field label="Target opening">{input('targetOpening')}</Field>

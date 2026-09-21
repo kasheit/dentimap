@@ -90,6 +90,8 @@ export interface Property {
     projectInvestment?: number;
     footprintSqFt?: number;
     currentAssessedValue?: number;
+    landValue?: number;
+    buildingValue?: number;
     targetOpening?: string;
   };
   meta?: Partial<Record<SourcedField, FieldMeta>>;

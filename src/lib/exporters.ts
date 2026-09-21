@@ -63,6 +63,8 @@ export function exportCsv(d: DentimapData, which: 'properties' | 'deeds' | 'enti
       parcelPin: p.address.parcelPin,
       projectInvestment: p.metrics?.projectInvestment,
       assessedValue: p.metrics?.currentAssessedValue,
+      landValue: p.metrics?.landValue,
+      buildingValue: p.metrics?.buildingValue,
       footprintSqFt: p.metrics?.footprintSqFt,
       targetOpening: p.metrics?.targetOpening,
       operatingRooms: p.clinicalSpecs?.operatingRooms,
