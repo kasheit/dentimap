@@ -83,25 +83,24 @@ export function MatrixView() {
   const onSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: 1 }));
 
   const chip = (active: boolean) =>
-    `rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-      active ? 'border-dm-blue/40 bg-dm-blue/10 text-dm-blue' : 'border-dm-border text-dm-muted hover:border-dm-dim hover:text-dm-text'
+    `text-xs transition-colors ${
+      active ? 'text-dm-text underline decoration-dm-blue decoration-2 underline-offset-[6px]' : 'text-dm-dim hover:text-dm-muted'
     }`;
 
   return (
     <main className="mx-auto max-w-[1680px] p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight">Real estate matrix</h1>
-        <p className="mt-1 text-sm text-dm-muted">Every facility side by side: parcel, values, who holds the land and who operates on it, and whether the last recorded deed agrees.</p>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by county">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5" role="group" aria-label="Filter by county">
           <span className="label">County</span>
           {counties.map((c) => (
             <button key={c} className={chip(county === c)} onClick={() => setCounty(c)}>{c.replace(/ County$/, '')}</button>
           ))}
         </div>
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by facility type">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5" role="group" aria-label="Filter by facility type">
           <span className="label">Type</span>
           {types.map((t) => (
             <button key={t} className={chip(type === t)} onClick={() => setType(t)}>
@@ -150,7 +149,6 @@ export function MatrixView() {
                       <Icon className="h-3.5 w-3.5 shrink-0" />
                       <span className="tnum text-xs">{deed ? fmtDate(deed.recordingDate) : 'None'}</span>
                     </span>
-                    <div className="mt-0.5 text-[11px] text-dm-dim">{label}</div>
                   </td>
                 </tr>
               );

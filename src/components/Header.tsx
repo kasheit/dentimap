@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Building2, Cloud, Table2, CloudOff, Download, FileText, Landmark, Loader2, LogOut, MapPin, RotateCcw, Upload } from 'lucide-react';
+import { Building2, Cloud, Table2, CloudOff, Download, FileText, Landmark, Loader2, LogOut, RotateCcw, Upload } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { isValidData, useDentimap } from '@/lib/store';
 import type { TabId } from '@/lib/store';
@@ -39,7 +39,7 @@ function SyncBadge() {
 }
 
 export function Header() {
-  const { tab, setTab, properties, importData, reset } = useDentimap();
+  const { tab, setTab, importData, reset } = useDentimap();
   const [menu, setMenu] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -83,15 +83,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-dm-blue/30 bg-dm-blue/10 text-dm-blue">
-            <MapPin className="h-4 w-4" />
-          </div>
-          <span className="text-[15px] font-semibold tracking-[0.12em]">DENTIMAP</span>
-          <span className="hidden rounded-full border border-dm-border bg-dm-surface px-2.5 py-0.5 tnum text-[11px] text-dm-muted sm:inline">
-            {properties.length} Facilities
-          </span>
-        </div>
+        <span className="text-[15px] font-semibold tracking-tight">Dentimap</span>
 
         <nav className="order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto">
           {tabs.map(({ id, label, icon: Icon }) => (
@@ -111,7 +103,6 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-3">
           <SyncBadge />
-          <kbd className="hidden rounded border border-dm-border px-1.5 py-0.5 tnum text-[11px] text-dm-dim xl:inline">Ctrl K</kbd>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
           <button className="btn" onClick={() => fileRef.current?.click()} title="Import a Dentimap JSON export">
             <Upload className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Import</span>

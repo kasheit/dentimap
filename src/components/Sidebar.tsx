@@ -74,8 +74,8 @@ export function Sidebar() {
     <button
       key={id}
       onClick={() => setFilter(id)}
-      className={`whitespace-nowrap rounded-full border px-2.5 py-1 tnum text-[11px] transition-colors ${
-        filter === id ? 'border-dm-blue/40 bg-dm-blue/10 text-dm-blue' : 'border-dm-border text-dm-dim hover:text-dm-muted'
+      className={`whitespace-nowrap tnum text-[12px] transition-colors ${
+        filter === id ? 'text-dm-text underline decoration-dm-blue decoration-2 underline-offset-[6px]' : 'text-dm-dim hover:text-dm-muted'
       }`}
     >
       {label} ({counts[id]})
@@ -95,7 +95,7 @@ export function Sidebar() {
             className="field pl-9"
           />
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
           {chip('all', 'All')}
           {chip('valleygate_asc', 'Valleygate ASC')}
           {chip('vfd_practice', 'VFD')}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Pencil, UserCheck, X } from 'lucide-react';
+import { ChevronDown, Pencil, X } from 'lucide-react';
 import { agentKey, buildAgentDirectory } from '@/lib/agents';
 import { entityTypeLabel, fmtDate } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
@@ -57,16 +57,10 @@ function EntityCard({ e }: { e: LegalEntity }) {
         </div>
       </dl>
 
-      <details className="group/agents border-b border-dm-border bg-dm-blue/[0.06] open:pb-1">
-        <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 transition-colors hover:bg-dm-blue/10 [&::-webkit-details-marker]:hidden">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dm-blue/15 text-dm-blue">
-            <UserCheck className="h-4 w-4" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold text-dm-text">Registered Agents</span>
-            <span className="block text-xs text-dm-muted">
-              {agents.length ? `${agents.length} on record` : 'None recorded'}
-            </span>
+      <details className="group/agents border-b border-dm-border">
+        <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 transition-colors hover:bg-dm-hover [&::-webkit-details-marker]:hidden">
+          <span className="min-w-0 flex-1 text-sm font-semibold text-dm-text">
+            Registered Agents <span className="ml-1 font-normal text-dm-dim">{agents.length || 'None'}</span>
           </span>
           <ChevronDown className="h-4 w-4 text-dm-dim transition-transform group-[[open]]/agents:rotate-180" />
         </summary>
@@ -75,7 +69,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
             {agents.length ? (
               <ul className="flex flex-wrap gap-1.5">
                 {agents.map((m) => (
-                  <li key={m} className="inline-flex items-center gap-1.5 rounded-full border border-dm-blue/30 bg-dm-bg py-1 pl-2.5 pr-2 text-xs text-dm-text">
+                  <li key={m} className="inline-flex items-center gap-1.5 rounded-full border border-dm-border bg-dm-bg py-1 pl-2.5 pr-2 text-xs text-dm-text">
                     {m}
                     {sharedCount(m) > 1 && (
                       <span className="tnum text-[11px] text-dm-dim" title={`Also registered on ${sharedCount(m) - 1} other ${sharedCount(m) === 2 ? 'entity' : 'entities'}`}>
@@ -113,7 +107,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
               )}
               <div className="flex gap-2">
                 <input className="field" value={newAgent} onChange={(ev) => setNewAgent(ev.target.value)} placeholder="New agent name" onKeyDown={(ev) => ev.key === 'Enter' && addAgent(newAgent)} />
-                <button className="btn btn-primary" onClick={() => addAgent(newAgent)} disabled={!newAgent.trim()}>Add</button>
+                <button className="btn" onClick={() => addAgent(newAgent)} disabled={!newAgent.trim()}>Add</button>
               </div>
             </div>
           )}
@@ -168,13 +162,12 @@ function AgentDirectory() {
   const entities = useDentimap((s) => s.entities);
   const directory = buildAgentDirectory(entities);
   return (
-    <details className="mb-6 rounded-xl border border-dm-blue/20 bg-dm-blue/[0.06]">
+    <details className="mb-6 rounded-xl border border-dm-border bg-dm-surface">
       <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 [&::-webkit-details-marker]:hidden">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dm-blue/15 text-dm-blue"><UserCheck className="h-4 w-4" /></span>
         <span className="flex-1 text-sm font-semibold">Registered Agents <span className="ml-1 font-normal text-dm-muted">· {directory.length} across {entities.length} entities</span></span>
         <ChevronDown className="h-4 w-4 text-dm-dim" />
       </summary>
-      <ul className="grid gap-x-6 gap-y-2 border-t border-dm-blue/15 px-5 py-4 text-sm sm:grid-cols-2">
+      <ul className="grid gap-x-6 gap-y-2 border-t border-dm-border px-5 py-4 text-sm sm:grid-cols-2">
         {directory.length === 0 && <li className="text-dm-dim">No registered agents recorded yet.</li>}
         {directory.map((d) => (
           <li key={d.name} className="flex items-baseline justify-between gap-3">
@@ -193,7 +186,6 @@ export function EntitiesView() {
     <main className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight">Ownership entities</h1>
-        <p className="mt-1 text-sm text-dm-muted">Landlord holding companies and clinical operators behind the facility network.</p>
       </div>
       <AgentDirectory />
       <div className="grid gap-6 md:grid-cols-2">

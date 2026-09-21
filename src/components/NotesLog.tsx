@@ -56,7 +56,7 @@ export function NotesLog({ property }: { property: Property }) {
               <option key={t} value={t}>{tagLabel[t]}</option>
             ))}
           </select>
-          <button className="btn btn-primary justify-center" disabled={!text.trim()} onClick={add}>
+          <button className="btn justify-center" disabled={!text.trim()} onClick={add}>
             Add
           </button>
         </div>
