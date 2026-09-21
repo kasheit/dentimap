@@ -7,11 +7,11 @@ import type { TabId } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
 
 const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
-  { id: 'properties', label: 'Properties & Facilities', icon: Building2 },
-  { id: 'matrix', label: 'Real Estate Matrix', icon: Table2 },
-  { id: 'entities', label: 'Ownership Entities', icon: Landmark },
+  { id: 'properties', label: 'Locations', icon: Building2 },
+  { id: 'matrix', label: 'Matrix', icon: Table2 },
+  { id: 'entities', label: 'Entities', icon: Landmark },
   { id: 'people', label: 'People', icon: Users },
-  { id: 'deeds', label: 'Deeds & Title Registry', icon: FileText },
+  { id: 'deeds', label: 'Deeds', icon: FileText },
 ];
 
 function SyncBadge() {
@@ -20,14 +20,14 @@ function SyncBadge() {
   if (sync === 'off' || sync === 'synced' || sync === 'connecting' || sync === 'saving') return null;
   if (sync === 'conflict') {
     return (
-      <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-red md:flex" title={message}>
+      <span className="hidden items-center gap-1.5 tnum text-[13px] text-dm-red md:flex" title={message}>
         <AlertTriangle className="h-3.5 w-3.5" /> Conflict
       </span>
     );
   }
   if (sync === 'error') {
     return (
-      <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-amber md:flex" title={message}>
+      <span className="hidden items-center gap-1.5 tnum text-[13px] text-dm-amber md:flex" title={message}>
         <CloudOff className="h-3.5 w-3.5" /> Not syncing
       </span>
     );
@@ -67,7 +67,7 @@ export function Header() {
     try {
       const parsed = JSON.parse(await file.text());
       if (!isValidData(parsed)) throw new Error('shape');
-      if (!confirm(`Merge ${parsed.properties.length} properties, ${parsed.deeds.length} deeds and ${parsed.entities.length} entities from "${file.name}"? Records with a matching ID are overwritten by the file; nothing else is removed.`)) return;
+      if (!confirm(`Merge ${parsed.properties.length} locations, ${parsed.deeds.length} deeds and ${parsed.entities.length} entities from "${file.name}"? Records with a matching ID are overwritten by the file; nothing else is removed.`)) return;
       const { added, updated } = importData(parsed);
       setNotice(`Imported: ${added} new, ${updated} updated.`);
     } catch {
@@ -76,12 +76,12 @@ export function Header() {
     if (fileRef.current) fileRef.current.value = '';
   };
 
-  const menuItem = 'flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text';
+  const menuItem = 'flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text';
 
   return (
     <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none" draggable={false} />
+        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-150" draggable={false} />
 
         <nav className="order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto">
           {tabs.map(({ id, label, icon: Icon }) => (
@@ -122,7 +122,7 @@ export function Header() {
             Import
           </button>
           <div className="relative" ref={menuRef}>
-            <button className="btn btn-primary" onClick={() => setMenu((m) => !m)}>
+            <button className="btn" onClick={() => setMenu((m) => !m)}>
               Export
             </button>
             {menu && (
@@ -132,7 +132,7 @@ export function Header() {
                 </button>
                 {(['properties', 'deeds', 'entities'] as const).map((w) => (
                   <button key={w} className={menuItem} onClick={() => { exportCsv(snapshot(), w); setMenu(false); }}>
-                    {w[0].toUpperCase() + w.slice(1)} (CSV)
+                    {(w === 'properties' ? 'Locations' : w[0].toUpperCase() + w.slice(1))} (CSV)
                   </button>
                 ))}
                 <div className="border-t border-dm-border" />
@@ -147,7 +147,7 @@ export function Header() {
         </div>
       </div>
       {notice && (
-        <div className="border-t border-dm-border bg-dm-surface px-6 py-1.5 text-center tnum text-[11px] text-dm-muted">{notice}</div>
+        <div className="border-t border-dm-border bg-dm-surface px-6 py-1.5 text-center tnum text-[13px] text-dm-muted">{notice}</div>
       )}
     </header>
   );

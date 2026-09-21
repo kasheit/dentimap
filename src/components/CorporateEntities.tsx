@@ -6,7 +6,7 @@ import { LevelLabel } from './Chips';
 
 function SubHeading({ children, first }: { children: React.ReactNode; first?: boolean }) {
   return (
-    <div className={`text-[11px] font-semibold uppercase tracking-[0.08em] text-dm-blue/80 ${first ? '' : 'mt-6'} mb-1 border-b border-dm-border/70 pb-1.5`}>
+    <div className={`text-[12px] font-semibold uppercase tracking-[0.08em] text-dm-blue/80 ${first ? '' : 'mt-6'} mb-1 border-b border-dm-border/70 pb-1.5`}>
       {children}
     </div>
   );
@@ -53,7 +53,7 @@ export function OwnershipChain({ property, deeds }: { property: Property; deeds:
             </>
           )
         }
-        status={<LevelLabel level={holder ? (holder.confidence === 'verified' ? 'confirmed' : 'partial') : 'missing'} detail={holder ? holder.source : 'no deed on file'} />}
+        status={<LevelLabel level={holder ? (holder.confidence === 'verified' ? 'confirmed' : 'partial') : 'missing'} detail={holder ? holder.source || undefined : 'no deed on file'} />}
       />
     </div>
   );

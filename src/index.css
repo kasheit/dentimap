@@ -32,7 +32,7 @@
     @apply border-dm-blue/40 bg-dm-blue/10 text-dm-blue hover:bg-dm-blue/20 hover:text-dm-blue;
   }
   .label {
-    @apply text-xs font-medium text-dm-dim;
+    @apply text-[13px] font-medium text-dm-dim;
   }
 }
 

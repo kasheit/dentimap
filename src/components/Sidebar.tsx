@@ -30,7 +30,7 @@ function Row({ p, active, onClick, issues, percent }: { p: Property; active: boo
         </span>
         <StatusPill status={p.status} />
       </div>
-      <div className="mt-0.5 flex items-center justify-between gap-2 tnum text-[11px] text-dm-dim">
+      <div className="mt-0.5 flex items-center justify-between gap-2 tnum text-[13px] text-dm-dim">
         <span>{p.address.city || 'No city'}{p.address.state ? `, ${p.address.state}` : ''}</span>
         <span className={percent >= 80 ? 'text-dm-green' : percent >= 40 ? 'text-dm-amber' : 'text-dm-red'}>{percent}%</span>
       </div>
@@ -116,7 +116,7 @@ export function Sidebar() {
   const create = () =>
     addProperty({
       id: newId('prop'),
-      name: 'New facility',
+      name: 'New location',
       facilityType: 'vfd_practice',
       status: 'active',
       address: { street: '', city: '', state: 'NC', zip: '', county: '', parcelPin: '' },
@@ -126,7 +126,7 @@ export function Sidebar() {
     <button
       key={id}
       onClick={() => setFilter(id)}
-      className={`whitespace-nowrap tnum text-[12px] transition-colors ${
+      className={`whitespace-nowrap tnum text-[13px] transition-colors ${
         filter === id ? 'text-dm-text underline decoration-dm-blue decoration-2 underline-offset-[6px]' : 'text-dm-dim hover:text-dm-muted'
       }`}
     >
@@ -144,11 +144,11 @@ export function Sidebar() {
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search facilities, PINs…  ( / )"
+            placeholder="Search locations, PINs"
             className="field pl-9"
           />
         </div>
-          <button className="btn shrink-0 px-2.5" onClick={create} title="Add a facility" aria-label="Add a facility">
+          <button className="btn shrink-0 px-2.5" onClick={create} title="Add a location" aria-label="Add a location">
             <Plus className="h-4 w-4" />
           </button>
         </div>
@@ -158,7 +158,7 @@ export function Sidebar() {
           {chip('vfd_practice', 'VFD')}
           {chip('attention', 'Needs attention')}
         </div>
-        <label className="flex items-center gap-2 text-[12px] text-dm-dim">
+        <label className="flex items-center gap-2 text-[13px] text-dm-dim">
           Sort
           <select className="bg-transparent text-dm-muted outline-none" value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
             <option value="default">Original order</option>
@@ -179,7 +179,7 @@ export function Sidebar() {
             </div>
           </div>
         ))}
-        {!groups.length && <p className="px-3 py-6 text-center text-sm text-dm-dim">No facilities match “{q}”.</p>}
+        {!groups.length && <p className="px-3 py-6 text-center text-sm text-dm-dim">No locations match “{q}”.</p>}
       </div>
     </aside>
   );

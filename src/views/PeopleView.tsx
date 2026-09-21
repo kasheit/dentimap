@@ -112,7 +112,7 @@ function LinkList({
               </button>
               <button
                 onClick={() => onRemove(i.id)}
-                className="rounded p-1.5 text-dm-dim opacity-60 transition hover:text-dm-red group-hover:opacity-100"
+                className="rounded p-1.5 text-dm-muted transition hover:text-dm-red group-hover:opacity-100"
                 aria-label={`Remove ${i.label}`}
               >
                 <X className="h-3.5 w-3.5" />
@@ -223,7 +223,7 @@ function Profile({ person }: { person: Person }) {
 
       <section className="border-t border-dm-border pt-5">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-[15px] font-semibold">What they did</h2>
+          <h2 className="text-[18px] font-semibold">What they did</h2>
           <span className="text-[13px] text-dm-dim">{actions.length}</span>
         </div>
         {actions.length === 0 ? (
@@ -235,7 +235,7 @@ function Profile({ person }: { person: Person }) {
                 <span className="tnum text-[13px] text-dm-dim">{fmtDate(a.date)}</span>
                 <div className="min-w-0">
                   <p className="text-[14px] leading-relaxed">{a.text}</p>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 text-[12px] text-dm-dim">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 text-[13px] text-dm-dim">
                     {propName(a.propertyId) && (
                       <button className="hover:text-dm-blue hover:underline" onClick={() => a.propertyId && openProperty(a.propertyId)}>
                         {propName(a.propertyId)}
@@ -245,7 +245,7 @@ function Profile({ person }: { person: Person }) {
                   </div>
                 </div>
                 <button
-                  className="self-start rounded p-1.5 text-dm-dim transition-colors hover:text-dm-red"
+                  className="self-start rounded p-1.5 text-dm-muted transition-colors hover:text-dm-red"
                   aria-label="Delete entry"
                   onClick={() => updatePerson(person.id, { actions: person.actions.filter((x) => x.id !== a.id) })}
                 >
@@ -278,7 +278,7 @@ function Profile({ person }: { person: Person }) {
       </section>
 
       <section className="border-t border-dm-border pt-5">
-        <h2 className="mb-3 text-[15px] font-semibold">Notes</h2>
+        <h2 className="mb-3 text-[18px] font-semibold">Notes</h2>
         <textarea
           className="field scroll-thin resize-y leading-relaxed"
           rows={4}
@@ -357,7 +357,7 @@ export function PeopleView() {
                 }`}
               >
                 <div className="text-[13px] font-medium">{p.name}</div>
-                <div className="mt-0.5 text-[12px] text-dm-dim">
+                <div className="mt-0.5 text-[13px] text-dm-dim">
                   {roleText(p)}
                   {p.status === 'former' && ' · Former'}
                 </div>

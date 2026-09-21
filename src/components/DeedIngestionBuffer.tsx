@@ -12,7 +12,7 @@ function Token({ label, value }: { label: string; value?: string | number }) {
   const found = value !== undefined && value !== '';
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[12px] ${
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[13px] ${
         found ? 'border-dm-border bg-dm-surface text-dm-text' : 'border-dm-border/60 text-dm-dim'
       }`}
     >
@@ -87,7 +87,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
           rows={5}
           spellCheck={false}
           placeholder="Paste a deed record"
-          className="field scroll-thin resize-y font-mono text-xs leading-relaxed"
+          className="field scroll-thin resize-y font-mono text-[13px] leading-relaxed"
         />
         <div className="flex flex-wrap items-center gap-2">
           <button className="btn" disabled={!raw.trim()} onClick={() => parse(raw)}>
@@ -127,7 +127,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
             {pinMismatch && (
               <p className="flex items-start gap-2 rounded-md border border-dm-amber/30 bg-dm-amber/10 px-3 py-2 text-[13px] text-dm-amber">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                Parsed parcel PIN {parsed.parcelPin} does not match this facility’s PIN ({property.address.parcelPin}). Check that you’re adding this to the right property.
+                Parsed parcel PIN {parsed.parcelPin} does not match this location’s PIN ({property.address.parcelPin}). Check that you’re adding this to the right property.
               </p>
             )}
 

@@ -16,8 +16,8 @@ export function PropertiesView() {
           <FacilityDossier property={selected} />
         ) : (
           <div className="mx-auto max-w-md py-24 text-center">
-            <h1 className="text-lg font-semibold">No facilities yet</h1>
-            <p className="mt-2 text-sm text-dm-muted">Add a facility with the + button, or import a backup.</p>
+            <h1 className="text-lg font-semibold">No locations yet</h1>
+            <p className="mt-2 text-sm text-dm-muted">Add a location with the + button, or import a backup.</p>
           </div>
         )}
       </main>

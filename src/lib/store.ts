@@ -110,7 +110,7 @@ export const useDentimap = create<State>()(
       openProperty: (selectedPropertyId) => set({ selectedPropertyId, tab: 'properties' }),
 
       addProperty: (p) =>
-        set((s) => ({ properties: [...s.properties, p], selectedPropertyId: p.id, tab: 'properties', activity: logged(s.activity, 'Facility created', p.id) })),
+        set((s) => ({ properties: [...s.properties, p], selectedPropertyId: p.id, tab: 'properties', activity: logged(s.activity, 'Location created', p.id) })),
       updateProperty: (id, patch, logText) =>
         set((s) => ({
           properties: s.properties.map((p) => (p.id === id ? { ...p, ...patch } : p)),
@@ -125,7 +125,7 @@ export const useDentimap = create<State>()(
             entities: s.entities.map((e) => ({ ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== id) })),
             people: s.people.map((x) => ({ ...x, propertyIds: x.propertyIds.filter((y) => y !== id), actions: x.actions.map((a) => (a.propertyId === id ? { ...a, propertyId: undefined } : a)) })),
             selectedPropertyId: s.selectedPropertyId === id ? (rest[0]?.id ?? '') : s.selectedPropertyId,
-            activity: logged(s.activity, `Facility deleted: ${nameOf(s, id)}`),
+            activity: logged(s.activity, `Location deleted: ${nameOf(s, id)}`),
           };
         }),
 

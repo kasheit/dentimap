@@ -88,7 +88,7 @@ export function NotesLog({ property }: { property: Property }) {
                     <span className="w-3.5" />
                   )}
                   <div className="min-w-0 flex-1">
-                    <div className="text-[12px] text-dm-dim">
+                    <div className="text-[13px] text-dm-dim">
                       <span className={tagColor[n.tag]}>{tagLabel[n.tag]}</span>
                       {!legacy && <> · {stamp(n.createdAt)}</>}
                       {legacy && <> · earlier note</>}

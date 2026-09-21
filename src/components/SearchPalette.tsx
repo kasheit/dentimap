@@ -5,7 +5,7 @@ import { useDentimap } from '@/lib/store';
 
 interface Result {
   key: string;
-  kind: 'Facility' | 'Person' | 'Entity' | 'Deed';
+  kind: 'Location' | 'Person' | 'Entity' | 'Deed';
   title: string;
   sub: string;
   go: () => void;
@@ -36,7 +36,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
     const out: Result[] = [];
     for (const p of properties) {
       if (hit([p.name, p.legalName, p.dbaName, p.sosId, p.address.street, p.address.city, p.address.zip, p.address.county, p.address.parcelPin].filter(Boolean).join(' '))) {
-        out.push({ key: p.id, kind: 'Facility', title: p.name, sub: [p.address.city, p.address.state, p.address.parcelPin].filter(Boolean).join(' · '), go: () => openProperty(p.id) });
+        out.push({ key: p.id, kind: 'Location', title: p.name, sub: [p.address.city, p.address.state, p.address.parcelPin].filter(Boolean).join(' · '), go: () => openProperty(p.id) });
       }
     }
     for (const p of people) {
@@ -87,7 +87,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search facilities, people, entities, deeds"
+            placeholder="Search locations, people, entities, deeds"
             className="w-full bg-transparent py-3.5 pl-11 pr-4 text-[15px] outline-none placeholder:text-dm-dim"
           />
         </div>
@@ -99,10 +99,10 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
                 onClick={() => choose(r)}
                 className={`flex w-full items-baseline gap-3 rounded-md px-3 py-2 text-left ${i === idx ? 'bg-dm-hover' : ''}`}
               >
-                <span className="w-16 shrink-0 text-[12px] text-dm-dim">{r.kind}</span>
+                <span className="w-16 shrink-0 text-[13px] text-dm-dim">{r.kind}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14px]">{r.title}</span>
-                  {r.sub && <span className="block truncate text-[12px] text-dm-dim">{r.sub}</span>}
+                  {r.sub && <span className="block truncate text-[13px] text-dm-dim">{r.sub}</span>}
                 </span>
               </button>
             </li>

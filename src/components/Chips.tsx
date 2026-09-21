@@ -20,7 +20,7 @@ export function Card({
   return (
     <section id={id} className={`scroll-mt-20 border-t border-dm-border pt-5 ${className}`}>
       <header className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-[15px] font-semibold text-dm-text">{title}</h2>
+        <h2 className="text-[18px] font-semibold text-dm-text">{title}</h2>
         {action}
       </header>
       <div>{children}</div>
@@ -37,7 +37,7 @@ const statusDot: Record<FacilityStatus, string> = {
 
 export function StatusPill({ status }: { status: FacilityStatus }) {
   return (
-    <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] text-dm-muted">
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[13px] text-dm-muted">
       <i className={`h-1.5 w-1.5 rounded-full ${statusDot[status]}`} />
       {statusLabel[status]}
     </span>
@@ -55,7 +55,7 @@ export function VerifyChip({ state }: { state: VerificationState }) {
   const { label, cls, Icon } = verifyMeta[state];
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] ${cls}`}
+      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[13px] ${cls}`}
     >
       <Icon className="h-3 w-3" />
       {label}
@@ -66,13 +66,13 @@ export function VerifyChip({ state }: { state: VerificationState }) {
 export function FormulaChip({ consideration, stamps, ok, expected }: { consideration: number; stamps: number; ok: boolean; expected: number }) {
   const fmt = (n: number, d = 0) => `$${n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })}`;
   return ok ? (
-    <span className="inline-flex items-center gap-1.5 rounded-md border border-dm-green/30 bg-dm-green/10 px-2 py-1 tnum text-[11px] text-dm-green">
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-dm-green/30 bg-dm-green/10 px-2 py-1 tnum text-[13px] text-dm-green">
       <CheckCircle2 className="h-3 w-3" />
       {fmt(consideration)} / $500 = {fmt(stamps, 2)}
     </span>
   ) : (
     <span
-      className="inline-flex items-center gap-1.5 rounded-md border border-dm-red/30 bg-dm-red/10 px-2 py-1 tnum text-[11px] text-dm-red"
+      className="inline-flex items-center gap-1.5 rounded-md border border-dm-red/30 bg-dm-red/10 px-2 py-1 tnum text-[13px] text-dm-red"
       title="North Carolina excise tax is $1 per $500 of consideration (G.S. 105-228.30)"
     >
       <AlertTriangle className="h-3 w-3" />
@@ -95,7 +95,7 @@ export function Fact({ label, children, mono, sub }: { label: string; children: 
       <dt className="shrink-0 text-[13px] text-dm-dim">{label}</dt>
       <dd className="min-w-0 text-right">
         <div className={`break-words text-[13px] ${mono ? 'font-mono' : 'tnum'}`}>{children}</div>
-        {sub && <div className="mt-0.5 text-[12px] leading-snug">{sub}</div>}
+        {sub && <div className="mt-0.5 text-[13px] leading-snug">{sub}</div>}
       </dd>
     </div>
   );
@@ -137,12 +137,25 @@ export function LevelLabel({
       {detail && <span className="text-dm-dim">· {detail}</span>}
     </>
   );
-  const cls = 'inline-flex flex-wrap items-center justify-end gap-x-1.5 text-[12px]';
+  const cls = 'inline-flex flex-wrap items-center justify-end gap-x-1.5 text-[13px]';
   return onClick ? (
     <button type="button" onClick={onClick} className={`${cls} rounded px-1 py-0.5 text-left transition-colors hover:bg-dm-hover`} title={level === 'missing' ? 'Fill this in' : 'Click to confirm'}>
       {body}
     </button>
   ) : (
     <span className={cls}>{body}</span>
+  );
+}
+
+/** One detail as a single line: label, value, and a status in a fixed right-hand column. */
+export function DetailRow({ label, value, mono, status }: { label: string; value?: ReactNode; mono?: boolean; status?: ReactNode }) {
+  return (
+    <div className="grid gap-x-4 gap-y-1 border-b border-dm-border/50 py-2.5 last:border-0 sm:grid-cols-[10rem_1fr_7.5rem] sm:items-baseline">
+      <div className="text-[13px] text-dm-dim">{label}</div>
+      <div className={`min-w-0 break-words font-medium ${mono ? 'font-mono text-[14px]' : 'text-[15px]'}`}>
+        {value || <span className="font-normal text-dm-dim">—</span>}
+      </div>
+      <div className="sm:text-right">{status}</div>
+    </div>
   );
 }

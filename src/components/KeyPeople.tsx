@@ -32,7 +32,7 @@ export function KeyPeople({ property }: { property: Property }) {
                   <ul className="mt-2 space-y-1.5">
                     {acts.map((a) => (
                       <li key={a.id} className="grid gap-x-3 sm:grid-cols-[6.5rem_1fr]">
-                        <span className="tnum text-[12px] text-dm-dim">{fmtDate(a.date)}</span>
+                        <span className="tnum text-[13px] text-dm-dim">{fmtDate(a.date)}</span>
                         <div className="text-[13px]">
                           {a.text}
                           <div className="mt-0.5">

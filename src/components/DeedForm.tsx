@@ -30,7 +30,7 @@ export const draftFromParsed = (r: ParsedDeedResult): Draft => ({
   book: r.book ?? '',
   page: r.page ?? '',
   confidence: 'unverified',
-  source: 'Pasted from county record',
+  source: '',
   documentUrl: '',
 });
 
@@ -70,7 +70,7 @@ export function draftToDeed(d: Draft, base: Pick<DeedRecord, 'id' | 'propertyId'
     exciseTaxStamps: s,
     isFormulaVerified: checkExcise(c, s),
     confidence: d.confidence,
-    source: d.source.trim() || 'Pasted from county record',
+    source: d.source.trim(),
     documentUrl: d.documentUrl.trim() || undefined,
   };
 }
@@ -109,19 +109,19 @@ export function DeedForm({ draft, onChange, withConfidence }: { draft: Draft; on
           <span />
         )}
         <label className="space-y-1">
-          <span className="label">Grantor (seller)</span>
+          <span className="label">Grantor</span>
           <input className="field" value={draft.grantor} onChange={(e) => set('grantor', e.target.value)} />
         </label>
         <label className="space-y-1 lg:col-span-2">
-          <span className="label">Grantee (buyer)</span>
+          <span className="label">Grantee</span>
           <input className="field" value={draft.grantee} onChange={(e) => set('grantee', e.target.value)} />
         </label>
         <label className="space-y-1">
-          <span className="label">Consideration (USD)</span>
+          <span className="label">Consideration</span>
           <input inputMode="decimal" className="field tnum" value={draft.consideration} onChange={(e) => set('consideration', e.target.value)} />
         </label>
         <label className="space-y-1">
-          <span className="label">Excise stamps (USD)</span>
+          <span className="label">Excise stamps</span>
           <input inputMode="decimal" className="field tnum" value={draft.exciseTaxStamps} onChange={(e) => set('exciseTaxStamps', e.target.value)} />
         </label>
         <label className="space-y-1">
@@ -137,11 +137,11 @@ export function DeedForm({ draft, onChange, withConfidence }: { draft: Draft; on
           <input className="field font-mono text-[13px]" value={draft.page} onChange={(e) => set('page', e.target.value)} />
         </label>
         <label className="space-y-1 sm:col-span-2">
-          <span className="label">Source</span>
+          <span className="label">Source (optional)</span>
           <input className="field" value={draft.source} onChange={(e) => set('source', e.target.value)} />
         </label>
         <label className="space-y-1 sm:col-span-2 lg:col-span-3">
-          <span className="label">Document link (optional)</span>
+          <span className="label">Document link</span>
           <input className="field text-[13px]" placeholder="https://… link to the recorded instrument" value={draft.documentUrl} onChange={(e) => set('documentUrl', e.target.value)} />
         </label>
       </div>

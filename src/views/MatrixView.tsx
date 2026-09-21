@@ -64,14 +64,14 @@ export function MatrixView() {
   const onSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: 1 }));
 
   const chip = (active: boolean) =>
-    `text-xs transition-colors ${
+    `text-[13px] transition-colors ${
       active ? 'text-dm-text underline decoration-dm-blue decoration-2 underline-offset-[6px]' : 'text-dm-dim hover:text-dm-muted'
     }`;
 
   return (
     <main className="mx-auto max-w-[1680px] p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Real estate matrix</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Matrix</h1>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -81,7 +81,7 @@ export function MatrixView() {
             <button key={c} className={chip(county === c)} onClick={() => setCounty(c)}>{c.replace(/ County$/, '')}</button>
           ))}
         </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5" role="group" aria-label="Filter by facility type">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5" role="group" aria-label="Filter by type">
           <span className="label">Type</span>
           {types.map((t) => (
             <button key={t} className={chip(type === t)} onClick={() => setType(t)}>
@@ -94,8 +94,8 @@ export function MatrixView() {
       <div className="overflow-x-auto rounded-xl border border-dm-border bg-dm-surface scroll-thin">
         <table className="w-full min-w-[820px] border-collapse text-[13px]">
           <thead>
-            <tr className="border-b border-dm-border text-xs text-dm-dim">
-              <SortHead label="Facility" k="name" sort={sort} onSort={onSort} />
+            <tr className="border-b border-dm-border text-[13px] text-dm-dim">
+              <SortHead label="Location" k="name" sort={sort} onSort={onSort} />
               <SortHead label="County" k="county" sort={sort} onSort={onSort} />
               <th className="px-4 py-3 text-left font-medium">Parcel PIN</th>
               <SortHead label="Assessed" k="assessed" sort={sort} onSort={onSort} right />
@@ -110,21 +110,21 @@ export function MatrixView() {
                 <tr key={p.id} className="border-b border-dm-border/60 transition-colors last:border-0 hover:bg-dm-hover">
                   <td className="px-4 py-3">
                     <button onClick={() => openProperty(p.id)} className="text-left font-medium text-dm-text hover:text-dm-blue hover:underline">{p.name}</button>
-                    {p.dbaName && <div className="mt-0.5 text-xs text-dm-muted">d/b/a {p.dbaName}</div>}
-                    <div className="mt-0.5 text-xs text-dm-dim">
+                    {p.dbaName && <div className="mt-0.5 text-[13px] text-dm-muted">d/b/a {p.dbaName}</div>}
+                    <div className="mt-0.5 text-[13px] text-dm-dim">
                       {facilityTypeLabel[p.facilityType]} · <span className={statusTone[p.status]}>{statusLabel[p.status]}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-dm-muted">{p.address.county.replace(/ County$/, '')}<div className="text-xs text-dm-dim">{p.address.city}, {p.address.state}</div></td>
-                  <td className="px-4 py-3 font-mono text-xs text-dm-muted">{p.address.parcelPin || '—'}</td>
+                  <td className="px-4 py-3 text-dm-muted">{p.address.county.replace(/ County$/, '')}<div className="text-[13px] text-dm-dim">{p.address.city}, {p.address.state}</div></td>
+                  <td className="px-4 py-3 font-mono text-[13px] text-dm-muted">{p.address.parcelPin || '—'}</td>
                   <td className="px-4 py-3 text-right tnum">{compactUsd(p.metrics?.currentAssessedValue)}</td>
                   <td className="px-4 py-3 text-right tnum">{compactUsd(p.metrics?.projectInvestment)}</td>
-                  <td className="px-4 py-3 tnum text-xs text-dm-muted">{deed ? fmtDate(deed.recordingDate) : '—'}</td>
+                  <td className="px-4 py-3 tnum text-[13px] text-dm-muted">{deed ? fmtDate(deed.recordingDate) : '—'}</td>
                 </tr>
               );
             })}
             {rows.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-sm text-dm-dim">No facilities match these filters.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-12 text-center text-sm text-dm-dim">No locations match these filters.</td></tr>
             )}
           </tbody>
         </table>

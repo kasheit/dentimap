@@ -30,7 +30,7 @@ function AuthShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen items-center justify-center bg-dm-bg px-4">
       <div className="w-full max-w-sm rounded-xl border border-dm-border bg-dm-surface p-8">
         <h1>
-          <img src="/dentimap-logo.png" alt="Dentimap" className="h-10 w-auto" />
+          <img src="/dentimap-logo.png" alt="Dentimap" className="h-10 w-auto brightness-150" />
         </h1>
         <p className="mt-3 text-sm text-dm-muted">Owner access only.</p>
         {children}

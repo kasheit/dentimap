@@ -28,7 +28,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
       <header className="min-w-0">
         <div className="flex items-center gap-3 text-[13px] text-dm-muted">
           <span>{facilityTypeLabel[p.facilityType]}</span>
-          <span className="text-dm-border">|</span>
+          <span className="text-dm-dim">·</span>
           <StatusPill status={p.status} />
         </div>
         <h1 className="mt-1.5 text-[28px] font-semibold leading-tight">{p.name}</h1>
@@ -69,7 +69,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
 
       {hasSpecs && cs && (
         <details id="specs" className="border-t border-dm-border pt-5">
-          <summary className="cursor-pointer list-none text-[15px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">Specifications</summary>
+          <summary className="cursor-pointer list-none text-[18px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">Specifications</summary>
           <div className="mt-4">
           <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
             {(cs.operatingRooms !== undefined || cs.pacuBays !== undefined || cs.outpatientSharePercent !== undefined) && (
@@ -100,7 +100,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
       </Card>
 
       <details id="history" className="border-t border-dm-border pt-5">
-        <summary className="cursor-pointer list-none text-[15px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">
+        <summary className="cursor-pointer list-none text-[18px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">
           Activity <span className="ml-1 text-[13px] font-normal text-dm-dim">{activityCount}</span>
         </summary>
         <div className="mt-4">

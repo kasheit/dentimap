@@ -16,7 +16,7 @@ export function HistoryLog({ propertyId }: { propertyId: string }) {
         {shown.map((a) => (
           <li key={a.id} className="flex items-baseline justify-between gap-4 py-2 text-[13px]">
             <span className="min-w-0 break-words">{a.text}</span>
-            <span className="shrink-0 text-[12px] text-dm-dim">{stamp(a.at)}</span>
+            <span className="shrink-0 text-[13px] text-dm-dim">{stamp(a.at)}</span>
           </li>
         ))}
       </ul>

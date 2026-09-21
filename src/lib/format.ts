@@ -62,3 +62,9 @@ export const personRoleLabel: Record<PersonRole, string> = {
   attorney: 'Attorney',
   registered_agent: 'Registered agent',
 };
+
+export const fmtMonth = (iso: string) => {
+  const [y, m] = iso.split('-').map(Number);
+  if (!y || !m) return iso;
+  return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+};

@@ -12,7 +12,7 @@ export default {
           hover: '#1b1f25',
           text: '#e7e9ec',
           muted: '#9ba3ad',
-          dim: '#6c7580',
+          dim: '#838d99',
           blue: '#7eb0ff',
           green: '#63c99b',
           amber: '#dcae56',

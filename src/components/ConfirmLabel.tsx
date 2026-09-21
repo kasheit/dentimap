@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { isStale, levelFor } from '@/lib/completion';
-import { fmtDate } from '@/lib/format';
+import { fmtDate, fmtMonth } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { Property, SourcedField } from '@/lib/types';
 import { LevelLabel } from './Chips';
@@ -13,7 +13,7 @@ const today = () => new Date().toISOString().slice(0, 10);
  * Confirmation status for one detail. Green is confirmed from records; yellow (or a verified
  * date older than a year) is click-to-confirm; red means nothing is there yet and opens the editor.
  */
-export function ConfirmLabel({ property, field, label, has, extra }: { property: Property; field: SourcedField; label: string; has: boolean; extra?: React.ReactNode }) {
+export function ConfirmLabel({ property, field, label, has, extra, showDetail = true }: { property: Property; field: SourcedField; label: string; has: boolean; extra?: React.ReactNode; showDetail?: boolean }) {
   const updateProperty = useDentimap((s) => s.updateProperty);
   const meta = property.meta?.[field];
   const level = levelFor(has, meta);
@@ -22,7 +22,8 @@ export function ConfirmLabel({ property, field, label, has, extra }: { property:
   const [source, setSource] = useState(meta?.source ?? '');
   const [asOf, setAsOf] = useState(today());
 
-  const detail = [meta?.source, meta?.asOf ? `as of ${fmtDate(meta.asOf)}` : undefined].filter(Boolean).join(' · ') || undefined;
+  const full = [meta?.source, meta?.asOf ? `as of ${fmtDate(meta.asOf)}` : undefined].filter(Boolean).join(' · ') || undefined;
+  const detail = [meta?.source, meta?.asOf ? fmtMonth(meta.asOf) : undefined].filter(Boolean).join(' · ') || undefined;
 
   const onClick = () => {
     if (level === 'confirmed') return;
@@ -46,8 +47,8 @@ export function ConfirmLabel({ property, field, label, has, extra }: { property:
 
   return (
     <span className="relative inline-block">
-      <span className="inline-flex items-center gap-3">
-        <LevelLabel level={level} stale={stale} detail={has ? detail : undefined} onClick={level === 'confirmed' ? undefined : onClick} />
+      <span className="inline-flex items-center gap-3" title={has ? full : undefined}>
+        <LevelLabel level={level} stale={stale} detail={has && showDetail ? detail : undefined} onClick={level === 'confirmed' ? undefined : onClick} />
         {extra}
       </span>
       {open && (

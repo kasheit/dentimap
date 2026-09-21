@@ -158,31 +158,33 @@ export function PropertyEditForm({
   return (
     <Card
       id="record"
-      title="Edit facility"
+      title="Edit location"
       action={
         <div className="flex gap-2">
           <button className="btn" onClick={onCancel}>Cancel</button>
-          <button className="btn" disabled={!canSave} onClick={() => onSave(toPatch(d, meta, p))}>Save changes</button>
+          <button className="btn btn-primary" disabled={!canSave} onClick={() => onSave(toPatch(d, meta, p))}>Save changes</button>
         </div>
       }
     >
-      <div className="space-y-6">
+      <div className="space-y-8">
+        <div className="grid gap-x-12 gap-y-8 lg:grid-cols-2">
+        <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Facility name (how it appears in Dentimap)" span="sm:col-span-2">{input('name')}</Field>
+          <Field label="Name" span="sm:col-span-2">{input('name')}</Field>
           <div className="space-y-2">
-            <Field label="Legal name (on business documents)">{input('legalName')}</Field>
+            <Field label="Legal name">{input('legalName')}</Field>
             <SourceRow label="Legal name" meta={meta.legalName} onMeta={setM('legalName')} />
           </div>
           <div className="space-y-2">
-            <Field label="Doing business as (trade name)">{input('dbaName')}</Field>
+            <Field label="Doing business as">{input('dbaName')}</Field>
             <SourceRow label="Doing business as" meta={meta.dbaName} onMeta={setM('dbaName')} />
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <Field label="Business SOS ID (Secretary of State)">{input('sosId', 'font-mono')}</Field>
+            <Field label="Business SOS ID">{input('sosId', 'font-mono')}</Field>
             <SourceRow label="Business SOS ID" meta={meta.sosId} onMeta={setM('sosId')} />
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <Field label="Date of first filing">
+            <Field label="First filing date">
               <input type="date" className="field" value={d.firstFilingDate} onChange={(e) => set('firstFilingDate', e.target.value)} />
             </Field>
             <SourceRow label="First filing date" meta={meta.firstFilingDate} onMeta={setM('firstFilingDate')} />
@@ -211,22 +213,24 @@ export function PropertyEditForm({
             <div className="sm:col-span-6"><SourceRow label="County" meta={meta.county} onMeta={setM('county')} /></div>
             <Field label="Parcel PIN" span="sm:col-span-3">{input('parcelPin', 'font-mono')}</Field>
             <div className="sm:col-span-6"><SourceRow label="Parcel PIN" meta={meta.parcelPin} onMeta={setM('parcelPin')} /></div>
-            <Field label="County parcel record link (optional)" span="sm:col-span-6">{input('parcelUrl')}</Field>
+            <Field label="County record link" span="sm:col-span-6">{input('parcelUrl')}</Field>
           </div>
         </div>
 
+        </div>
+        <div className="space-y-6">
         <div>
           <h3 className="mb-3 text-[13px] font-semibold">Values</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Field label="Assessed value ($)">{input('currentAssessedValue', 'tnum')}</Field>
+              <Field label="Assessed value">{input('currentAssessedValue', 'tnum')}</Field>
               <SourceRow label="Assessed value" meta={meta.assessedValue} onMeta={setM('assessedValue')} />
             </div>
             <div className="space-y-2">
-              <Field label="Project investment ($)">{input('projectInvestment', 'tnum')}</Field>
+              <Field label="Project investment">{input('projectInvestment', 'tnum')}</Field>
               <SourceRow label="Project investment" meta={meta.projectInvestment} onMeta={setM('projectInvestment')} />
             </div>
-            <Field label="Footprint (sq ft)">{input('footprintSqFt', 'tnum')}</Field>
+            <Field label="Footprint, sq ft">{input('footprintSqFt', 'tnum')}</Field>
             <Field label="Target opening">{input('targetOpening')}</Field>
           </div>
         </div>
@@ -236,17 +240,20 @@ export function PropertyEditForm({
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Operating rooms">{input('operatingRooms', 'tnum')}</Field>
             <Field label="PACU bays">{input('pacuBays', 'tnum')}</Field>
-            <Field label="Outpatient share (%)">{input('outpatientSharePercent', 'tnum')}</Field>
+            <Field label="Outpatient share, %">{input('outpatientSharePercent', 'tnum')}</Field>
             <Field label="Licensure" span="sm:col-span-3">{input('licensure')}</Field>
-            <Field label="Services (comma-separated)" span="sm:col-span-3">{input('specialties')}</Field>
+            <Field label="Services, comma-separated" span="sm:col-span-3">{input('specialties')}</Field>
           </div>
+        </div>
+
+        </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span />
           {onDelete && (
             <button className="btn text-dm-red hover:text-dm-red" onClick={onDelete}>
-              Delete facility
+              Delete location
             </button>
           )}
         </div>

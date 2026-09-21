@@ -25,7 +25,7 @@ function EntityHeader({ e }: { e: LegalEntity }) {
           {e.dbaName && <div className="mt-0.5 text-[13px] text-dm-muted">d/b/a {e.dbaName}</div>}
           <div className="mt-1 text-[13px] text-dm-dim">{entityTypeLabel[e.entityType]} · {e.jurisdiction || 'Jurisdiction not set'}</div>
         </div>
-        <button className="rounded p-1.5 text-dm-dim transition-colors hover:bg-dm-hover hover:text-dm-blue" onClick={() => setEditing(true)} aria-label={`Edit ${e.name}`} title="Edit entity">
+        <button className="rounded p-1.5 text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-blue" onClick={() => setEditing(true)} aria-label={`Edit ${e.name}`} title="Edit entity">
           <Pencil className="h-3.5 w-3.5" />
         </button>
       </header>
@@ -35,11 +35,11 @@ function EntityHeader({ e }: { e: LegalEntity }) {
   return (
     <header className="space-y-3 border-b border-dm-border p-5">
       <label className="block space-y-1">
-        <span className="label">Legal name (as registered)</span>
+        <span className="label">Legal name</span>
         <input className="field" value={d.name} onChange={(ev) => set('name', ev.target.value)} autoFocus />
       </label>
       <label className="block space-y-1">
-        <span className="label">Doing business as (trade name)</span>
+        <span className="label">Doing business as</span>
         <input className="field" value={d.dbaName} onChange={(ev) => set('dbaName', ev.target.value)} />
       </label>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -66,7 +66,7 @@ function EntityHeader({ e }: { e: LegalEntity }) {
         <button
           className="btn text-dm-red hover:text-dm-red"
           onClick={() => {
-            if (confirm(`Delete "${e.name}"? Facilities and people linked to it are kept.`)) deleteEntity(e.id);
+            if (confirm(`Delete "${e.name}"? Locations and people linked to it are kept.`)) deleteEntity(e.id);
           }}
         >
           Delete entity
@@ -139,7 +139,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
                 </button>
                 <button
                   onClick={() => updatePerson(p.id, { entityIds: p.entityIds.filter((x) => x !== e.id) })}
-                  className="rounded p-1.5 text-dm-dim opacity-60 transition hover:bg-dm-raised hover:text-dm-red group-hover:opacity-100"
+                  className="rounded p-1.5 text-dm-muted transition hover:bg-dm-raised hover:text-dm-red group-hover:opacity-100"
                   aria-label={`Unlink ${p.name} from ${e.name}`}
                 >
                   <X className="h-3.5 w-3.5" />
@@ -169,7 +169,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
       </div>
 
       <div className="p-5">
-        <div className="label mb-2">Associated properties ({linked.length})</div>
+        <div className="label mb-2">Associated locations ({linked.length})</div>
         {linked.length ? (
           <ul className="space-y-0.5">
             {linked.map((p) => (
@@ -180,8 +180,8 @@ function EntityCard({ e }: { e: LegalEntity }) {
                 </button>
                 <button
                   onClick={() => unlinkProperty(e.id, p.id)}
-                  className="rounded p-1.5 text-dm-dim opacity-60 transition hover:bg-dm-raised hover:text-dm-red group-hover:opacity-100"
-                  title="Remove from this entity (the property itself is kept)"
+                  className="rounded p-1.5 text-dm-muted transition hover:bg-dm-raised hover:text-dm-red group-hover:opacity-100"
+                  title="Remove from this entity (the location itself is kept)"
                   aria-label={`Remove ${p.name} from ${e.name}`}
                 >
                   <X className="h-3.5 w-3.5" />
@@ -190,16 +190,16 @@ function EntityCard({ e }: { e: LegalEntity }) {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-dm-dim">No linked properties</p>
+          <p className="text-sm text-dm-dim">No linked locations</p>
         )}
         {available.length > 0 && (
           <select
             className="field mt-3"
             value=""
             onChange={(ev) => ev.target.value && linkProperty(e.id, ev.target.value)}
-            aria-label="Add a property"
+            aria-label="Add a location"
           >
-            <option value="">+ Add a property…</option>
+            <option value="">+ Add a location…</option>
             {available.map((p) => (
               <option key={p.id} value={p.id}>{p.name} — {p.address.city}, {p.address.state}</option>
             ))}
@@ -216,7 +216,7 @@ export function EntitiesView() {
   return (
     <main className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
       <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Ownership entities</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Entities</h1>
         <button
           className="btn"
           onClick={() => addEntity({ id: newId('entity'), name: 'New entity', entityType: 'landlord_holding', jurisdiction: 'North Carolina', associatedPropertyIds: [] })}
