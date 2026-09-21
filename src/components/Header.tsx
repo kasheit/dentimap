@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Building2, Cloud, Table2, CloudOff, Download, FileText, Landmark, Loader2, LogOut, Upload } from 'lucide-react';
+import { AlertTriangle, Building2, Table2, CloudOff, FileText, Landmark } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { isValidData, useDentimap } from '@/lib/store';
 import type { TabId } from '@/lib/store';
@@ -15,13 +15,7 @@ const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
 function SyncBadge() {
   const sync = useDentimap((s) => s.sync);
   const message = useDentimap((s) => s.syncMessage);
-  if (sync === 'off') {
-    return (
-      <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-dim md:flex" title="Saved in this browser only">
-        <CloudOff className="h-3.5 w-3.5" /> Local
-      </span>
-    );
-  }
+  if (sync === 'off' || sync === 'synced' || sync === 'connecting' || sync === 'saving') return null;
   if (sync === 'conflict') {
     return (
       <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-red md:flex" title={message}>
@@ -32,17 +26,11 @@ function SyncBadge() {
   if (sync === 'error') {
     return (
       <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-amber md:flex" title={message}>
-        <CloudOff className="h-3.5 w-3.5" /> Local · sync off
+        <CloudOff className="h-3.5 w-3.5" /> Not syncing
       </span>
     );
   }
-  const busy = sync === 'connecting' || sync === 'saving';
-  return (
-    <span className="hidden items-center gap-1.5 tnum text-[11px] text-dm-green md:flex">
-      {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Cloud className="h-3.5 w-3.5" />}
-      {busy ? 'Syncing' : 'Synced'}
-    </span>
-  );
+  return null;
 }
 
 export function Header() {
@@ -112,26 +100,26 @@ export function Header() {
           <SyncBadge />
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
           <button className="btn" onClick={() => fileRef.current?.click()} title="Import a Dentimap JSON export">
-            <Upload className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Import</span>
+            Import
           </button>
           <div className="relative" ref={menuRef}>
             <button className="btn btn-primary" onClick={() => setMenu((m) => !m)}>
-              <Download className="h-3.5 w-3.5" /> Export
+              Export
             </button>
             {menu && (
               <div className="absolute right-0 mt-1.5 w-52 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-2xl shadow-black/50">
                 <button className={menuItem} onClick={() => { exportJson(snapshot()); setMenu(false); }}>
-                  <Download className="h-3.5 w-3.5" /> Full backup (JSON)
+                  Full backup (JSON)
                 </button>
                 {(['properties', 'deeds', 'entities'] as const).map((w) => (
                   <button key={w} className={menuItem} onClick={() => { exportCsv(snapshot(), w); setMenu(false); }}>
-                    <Download className="h-3.5 w-3.5" /> {w[0].toUpperCase() + w.slice(1)} (CSV)
+                    {w[0].toUpperCase() + w.slice(1)} (CSV)
                   </button>
                 ))}
                 <div className="border-t border-dm-border" />
                 {supabase && (
                   <button className={menuItem} onClick={() => supabase?.auth.signOut()}>
-                    <LogOut className="h-3.5 w-3.5" /> Sign out
+                    Sign out
                   </button>
                 )}
               </div>

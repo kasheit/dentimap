@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, CheckCircle2, Search } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, Search } from 'lucide-react';
 import { VerifyChip } from '@/components/Chips';
 import { expectedExcise } from '@/lib/deedParser';
 import { deedTypeLabel, fmtDate, usd } from '@/lib/format';
@@ -23,14 +23,6 @@ export function DeedsView() {
       .sort((a, b) => (desc ? -1 : 1) * a.d.recordingDate.localeCompare(b.d.recordingDate));
   }, [deeds, properties, q, desc, onlyFlagged]);
 
-  const total = deeds.reduce((s, d) => s + d.consideration, 0);
-  const flagged = deeds.filter((d) => !d.isFormulaVerified).length;
-  const stat = (label: string, value: string, tone = '') => (
-    <div className="bg-dm-surface px-5 py-4">
-      <div className="label">{label}</div>
-      <div className={`mt-1.5 tnum text-xl font-semibold ${tone}`}>{value}</div>
-    </div>
-  );
 
   return (
     <main className="mx-auto max-w-[1680px] space-y-6 p-4 sm:p-6 lg:p-8">
@@ -38,11 +30,6 @@ export function DeedsView() {
         <h1 className="text-2xl font-semibold tracking-tight">Deeds &amp; title registry</h1>
       </div>
 
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-dm-border bg-dm-border lg:grid-cols-3">
-        {stat('Instruments', String(deeds.length))}
-        {stat('Total consideration', usd(total))}
-        {stat('Excise mismatches', String(flagged), flagged ? 'text-dm-red' : 'text-dm-green')}
-      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative w-full sm:w-80">
@@ -96,7 +83,7 @@ export function DeedsView() {
                 <td className="whitespace-nowrap px-4 py-3 tnum text-xs">{usd(d.consideration)}</td>
                 <td className="whitespace-nowrap px-4 py-3 tnum text-xs">
                   {d.isFormulaVerified ? (
-                    <span className="inline-flex items-center gap-1.5 text-dm-green"><CheckCircle2 className="h-3.5 w-3.5" /> {usd(d.exciseTaxStamps, 2)}</span>
+                    <span>{usd(d.exciseTaxStamps, 2)}</span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 text-dm-red" title={`Expected ${usd(expectedExcise(d.consideration), 2)}`}>
                       <AlertTriangle className="h-3.5 w-3.5" /> {usd(d.exciseTaxStamps, 2)} ≠ {usd(expectedExcise(d.consideration), 2)}

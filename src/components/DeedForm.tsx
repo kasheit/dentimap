@@ -146,11 +146,7 @@ export function DeedForm({ draft, onChange, withConfidence }: { draft: Draft; on
         </label>
       </div>
       <div>
-        {canCheck ? (
-          <FormulaChip consideration={c} stamps={s} ok={checkExcise(c, s)} expected={expectedExcise(c)} />
-        ) : (
-          <span className="text-[12px] text-dm-dim">Enter consideration and excise stamps to check the $1 / $500 formula.</span>
-        )}
+        {canCheck && !checkExcise(c, s) && <FormulaChip consideration={c} stamps={s} ok={false} expected={expectedExcise(c)} />}
       </div>
     </div>
   );

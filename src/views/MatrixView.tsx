@@ -71,14 +71,6 @@ export function MatrixView() {
       });
   }, [properties, entities, county, type, sort]);
 
-  const totals = useMemo(
-    () => ({
-      assessed: rows.reduce((n, p) => n + (p.metrics?.currentAssessedValue ?? 0), 0),
-      investment: rows.reduce((n, p) => n + (p.metrics?.projectInvestment ?? 0), 0),
-      assessedCount: rows.filter((p) => p.metrics?.currentAssessedValue !== undefined).length,
-    }),
-    [rows],
-  );
 
   const onSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: 1 }));
 
@@ -158,19 +150,6 @@ export function MatrixView() {
               <tr><td colSpan={8} className="px-4 py-12 text-center text-sm text-dm-dim">No facilities match these filters.</td></tr>
             )}
           </tbody>
-          {rows.length > 0 && (
-            <tfoot>
-              <tr className="border-t border-dm-border bg-dm-bg/40 text-xs text-dm-muted">
-                <td className="px-4 py-3 font-medium" colSpan={3}>{rows.length} {rows.length === 1 ? 'facility' : 'facilities'}</td>
-                <td className="px-4 py-3 text-right tnum" title={`${totals.assessedCount} of ${rows.length} have an assessed value`}>
-                  {compactUsd(totals.assessed)}
-                  <div className="text-[11px] text-dm-dim">{totals.assessedCount} of {rows.length} assessed</div>
-                </td>
-                <td className="px-4 py-3 text-right tnum">{compactUsd(totals.investment)}</td>
-                <td colSpan={3} />
-              </tr>
-            </tfoot>
-          )}
         </table>
       </div>
     </main>

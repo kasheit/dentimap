@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { entityTypeLabel, fmtDate } from '@/lib/format';
 import { sortedDeeds, useDentimap } from '@/lib/store';
 import type { DeedRecord, LegalEntity } from '@/lib/types';
@@ -66,7 +66,7 @@ export function OwnershipChain({
               <div className="text-[15px] font-medium">{business.dbaName || <span className="font-normal text-dm-dim">Not set</span>}</div>
             </>
           ) : (
-            <p className="text-[15px] text-dm-dim">Legal and d/b/a names not set. Add them from Edit in the Record section.</p>
+            <p className="text-[15px] text-dm-dim">Not set.</p>
           )}
         </Step>
         <Step role="Land owner of record">
@@ -89,11 +89,6 @@ export function OwnershipChain({
         </Step>
       </ol>
 
-      {match === true && (
-        <p className="mt-5 flex items-center gap-2 text-[13px] text-dm-green">
-          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> Deed holder matches the landlord entity.
-        </p>
-      )}
       {match === false && holder && landlord && (
         <p className="mt-5 flex items-start gap-2 rounded-md border border-dm-amber/30 bg-dm-amber/10 px-3 py-2 text-[13px] text-dm-amber">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -102,9 +97,6 @@ export function OwnershipChain({
             <b className="font-medium">{landlord.name}</b>. A later transfer may be missing or the landlord link may be wrong.
           </span>
         </p>
-      )}
-      {match === undefined && holder && !landlord && (
-        <p className="mt-5 text-[13px] text-dm-dim">Link a landlord entity from the Ownership Entities tab to cross-check the deed holder.</p>
       )}
     </div>
   );

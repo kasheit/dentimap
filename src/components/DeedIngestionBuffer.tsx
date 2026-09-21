@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { AlertTriangle, ClipboardPaste, Plus, SkipForward, Sparkles, X } from 'lucide-react';
-import { parseCountyDeedClipboard, SAMPLE_PASTE, splitDeedBlocks } from '@/lib/deedParser';
+import { AlertTriangle } from 'lucide-react';
+import { parseCountyDeedClipboard, splitDeedBlocks } from '@/lib/deedParser';
 import type { ParsedDeedResult } from '@/lib/deedParser';
 import { deedTypeLabel } from '@/lib/format';
 import { newId, useDentimap } from '@/lib/store';
@@ -70,18 +70,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
   return (
     <div className="rounded-lg border border-dm-border bg-dm-bg">
       <div className="flex items-center justify-between gap-3 border-b border-dm-border px-4 py-2.5">
-        <span className="flex items-center gap-2 text-[13px] font-medium text-dm-muted">
-          <ClipboardPaste className="h-3.5 w-3.5" /> Paste county record
-        </span>
-        <button
-          className="text-[12px] text-dm-blue transition-colors hover:text-dm-text"
-          onClick={() => {
-            setRaw(SAMPLE_PASTE);
-            parse(SAMPLE_PASTE);
-          }}
-        >
-          Load example
-        </button>
+        <span className="text-[13px] font-medium text-dm-muted">Paste county record</span>
       </div>
       <div className="space-y-3 p-4">
         <textarea
@@ -97,16 +86,16 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
           }}
           rows={5}
           spellCheck={false}
-          placeholder="Paste text copied from a County Register of Deeds or Tax Assessor page. Several deeds separated by a blank line are queued one at a time."
+          placeholder="Paste a deed record"
           className="field scroll-thin resize-y font-mono text-xs leading-relaxed"
         />
         <div className="flex flex-wrap items-center gap-2">
           <button className="btn" disabled={!raw.trim()} onClick={() => parse(raw)}>
-            <Sparkles className="h-3.5 w-3.5" /> Parse
+            Parse
           </button>
           {(raw || draft) && (
             <button className="btn" onClick={clear}>
-              <X className="h-3.5 w-3.5" /> Clear
+              Clear
             </button>
           )}
         </div>
@@ -119,7 +108,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
                   Record {total - queue.length + 1} of {total}
                 </span>
                 <button className="btn" onClick={advance}>
-                  <SkipForward className="h-3.5 w-3.5" /> Skip this one
+                  Skip this one
                 </button>
               </div>
             )}
@@ -146,7 +135,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
 
             <div className="flex justify-end">
               <button className="btn btn-primary" disabled={!canSaveDraft(draft)} onClick={commit} title={canSaveDraft(draft) ? '' : 'Needs a recording date, grantor and grantee'}>
-                <Plus className="h-3.5 w-3.5" /> Add to title chain
+                Add to title chain
               </button>
             </div>
           </div>

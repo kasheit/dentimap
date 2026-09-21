@@ -17,9 +17,7 @@ export function PropertiesView() {
         ) : (
           <div className="mx-auto max-w-md py-24 text-center">
             <h1 className="text-lg font-semibold">No facilities yet</h1>
-            <p className="mt-2 text-sm text-dm-muted">
-              Add your first facility with the + button in the sidebar, or import a JSON backup from the header. To load the starting data, run <span className="font-mono text-xs">supabase/dentimap-v2.sql</span> in Supabase and reload.
-            </p>
+            <p className="mt-2 text-sm text-dm-muted">Add a facility with the + button, or import a backup.</p>
           </div>
         )}
       </main>

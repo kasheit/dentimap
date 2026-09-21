@@ -63,7 +63,7 @@ export function NotesLog({ property }: { property: Property }) {
       </div>
 
       {log.length === 0 ? (
-        <p className="mt-4 text-[13px] text-dm-dim">No notes yet. Log open questions and follow-ups here as you work through the record.</p>
+        <p className="mt-4 text-[13px] text-dm-dim">No notes.</p>
       ) : (
         <>
           <p className="mt-5 text-[13px] text-dm-dim">

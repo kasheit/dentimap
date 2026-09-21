@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Trash2 } from 'lucide-react';
 import { facilityTypeLabel, statusLabel } from '@/lib/format';
 import type { FacilityStatus, FacilityType, FieldMeta, Property, SourcedField, VerificationState } from '@/lib/types';
 import { Card } from './Chips';
@@ -222,10 +221,10 @@ export function PropertyEditForm({
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-dm-dim">Landlord and operator are edited from Ownership Entities. Deeds and notes save as you add them.</p>
+          <span />
           {onDelete && (
             <button className="btn text-dm-red hover:text-dm-red" onClick={onDelete}>
-              <Trash2 className="h-3.5 w-3.5" /> Delete facility
+              Delete facility
             </button>
           )}
         </div>

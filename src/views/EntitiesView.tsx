@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Pencil, Plus, Trash2, UserCheck, X } from 'lucide-react';
+import { Pencil, X } from 'lucide-react';
 import { agentKey, buildAgentDirectory } from '@/lib/agents';
 import { entityTypeLabel, fmtDate } from '@/lib/format';
 import { newId, useDentimap } from '@/lib/store';
@@ -70,7 +70,7 @@ function EntityHeader({ e }: { e: LegalEntity }) {
             if (confirm(`Delete "${e.name}"? Facilities linked to it are kept but lose this landlord/operator link.`)) deleteEntity(e.id);
           }}
         >
-          <Trash2 className="h-3.5 w-3.5" /> Delete entity
+          Delete entity
         </button>
         <div className="flex gap-2">
           <button className="btn" onClick={() => setEditing(false)}>Cancel</button>
@@ -140,15 +140,9 @@ function EntityCard({ e }: { e: LegalEntity }) {
         </div>
       </dl>
 
-      <details className="group/agents border-b border-dm-border">
-        <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 transition-colors hover:bg-dm-hover [&::-webkit-details-marker]:hidden">
-          <span className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold text-dm-text">
-            <UserCheck className="h-4 w-4 text-dm-dim" />
-            Registered Agents <span className="ml-1 font-normal text-dm-dim">{agents.length || 'None'}</span>
-          </span>
-          <ChevronDown className="h-4 w-4 text-dm-dim transition-transform group-[[open]]/agents:rotate-180" />
-        </summary>
-        <div className="space-y-3 px-5 pb-4 pt-1">
+      <div className="border-b border-dm-border px-5 py-4">
+        <div className="mb-2 text-sm font-semibold text-dm-text">Registered agents</div>
+        <div className="space-y-3">
           <div className="flex items-start justify-between gap-3">
             {agents.length ? (
               <ul className="flex flex-wrap gap-1.5">
@@ -196,7 +190,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
             </div>
           )}
         </div>
-      </details>
+      </div>
 
       <div className="space-y-5 p-5">
         <div>
@@ -263,12 +257,9 @@ function AgentDirectory() {
   };
 
   return (
-    <details className="mb-6 rounded-xl border border-dm-border bg-dm-surface">
-      <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 [&::-webkit-details-marker]:hidden">
-        <span className="flex flex-1 items-center gap-2 text-sm font-semibold"><UserCheck className="h-4 w-4 text-dm-dim" />Registered Agents <span className="ml-1 font-normal text-dm-muted">· {directory.length} across {entities.length} entities</span></span>
-        <ChevronDown className="h-4 w-4 text-dm-dim" />
-      </summary>
-      <ul className="grid gap-x-6 gap-y-2 border-t border-dm-border px-5 py-4 text-sm sm:grid-cols-2">
+    <section className="mb-8">
+      <h2 className="mb-1 text-[15px] font-semibold">Agent directory <span className="ml-1 text-[13px] font-normal text-dm-dim">{directory.length}</span></h2>
+      <ul className="grid gap-x-6 gap-y-2 py-3 text-sm sm:grid-cols-2">
         {directory.length === 0 && <li className="text-dm-dim">No registered agents recorded yet.</li>}
         {directory.map((d) => (
           <li key={d.name} className="flex items-baseline justify-between gap-3">
@@ -292,7 +283,7 @@ function AgentDirectory() {
           </li>
         ))}
       </ul>
-    </details>
+    </section>
   );
 }
 
@@ -309,7 +300,7 @@ export function EntitiesView() {
             addEntity({ id: newId('entity'), name: 'New entity', entityType: 'landlord_holding', jurisdiction: 'North Carolina', associatedPropertyIds: [] })
           }
         >
-          <Plus className="h-3.5 w-3.5" /> Add entity
+          Add entity
         </button>
       </div>
       <AgentDirectory />

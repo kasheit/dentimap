@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { checkExcise, parseCountyDeedClipboard, SAMPLE_PASTE, splitDeedBlocks } from './deedParser';
+import { checkExcise, parseCountyDeedClipboard, splitDeedBlocks } from './deedParser';
+
+const SAMPLE_PASTE = [
+  'WARRANTY DEED',
+  'RECORDED: 03/14/2022    INST #: 2022009917',
+  'BOOK 14611 PAGE 208',
+  'GRANTOR: SAMPLE SELLER HOLDINGS LLC',
+  'GRANTEE: SAMPLE BUYER PARTNERS LLC',
+  'PARCEL PIN: 0419-72-8812',
+  'CONSIDERATION: $1,250,000.00',
+  'EXCISE TAX: $2,500.00',
+].join(String.fromCharCode(10));
 
 describe('parseCountyDeedClipboard', () => {
   it('parses the sample county paste', () => {

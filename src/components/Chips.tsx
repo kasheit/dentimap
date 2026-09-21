@@ -6,7 +6,6 @@ import { statusLabel } from '@/lib/format';
 export function Card({
   id,
   title,
-  icon,
   action,
   children,
   className = '',
@@ -19,15 +18,12 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section id={id} className={`scroll-mt-28 rounded-xl border border-dm-border bg-dm-surface ${className}`}>
-      <header className="flex items-center justify-between gap-3 border-b border-dm-border px-5 py-3">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-dm-text">
-          {icon}
-          {title}
-        </h2>
+    <section id={id} className={`scroll-mt-20 border-t border-dm-border pt-5 ${className}`}>
+      <header className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-[15px] font-semibold text-dm-text">{title}</h2>
         {action}
       </header>
-      <div className="p-5">{children}</div>
+      <div>{children}</div>
     </section>
   );
 }
@@ -55,6 +51,7 @@ const verifyMeta: Record<VerificationState, { label: string; cls: string; Icon: 
 };
 
 export function VerifyChip({ state }: { state: VerificationState }) {
+  if (state === 'verified') return null;
   const { label, cls, Icon } = verifyMeta[state];
   return (
     <span

@@ -208,8 +208,10 @@ let applyingRemote = false;
 // updated_at of the remote row as last seen; null means no row exists yet.
 let remoteVersion: string | null = null;
 
-const friendly = (m: string) =>
-  /relation|does not exist|schema cache/i.test(m) ? 'Table missing — run supabase/dentimap-v2.sql in the Supabase SQL editor.' : m;
+const friendly = (m: string) => {
+  console.warn('[dentimap sync]', m);
+  return /relation|does not exist|schema cache/i.test(m) ? 'Cloud sync is not set up. Changes are saved in this browser.' : m;
+};
 
 async function pushRemote(data: DentimapData, force = false): Promise<'ok' | 'conflict' | string> {
   if (!supabase) return 'ok';

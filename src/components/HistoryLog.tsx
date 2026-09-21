@@ -8,7 +8,7 @@ export function HistoryLog({ propertyId }: { propertyId: string }) {
   const activity = useDentimap((s) => s.activity);
   const [all, setAll] = useState(false);
   const mine = activity.filter((a) => a.propertyId === propertyId).reverse();
-  if (!mine.length) return <p className="text-[13px] text-dm-dim">No changes recorded yet. Edits made from now on are logged here.</p>;
+  if (!mine.length) return <p className="text-[13px] text-dm-dim">No changes yet.</p>;
   const shown = all ? mine : mine.slice(0, 10);
   return (
     <div>

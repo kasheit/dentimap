@@ -17,7 +17,7 @@ export function TitleChainTimeline({ deeds }: { deeds: DeedRecord[] }) {
   const chain = useMemo(() => sortedDeeds(deeds), [deeds]);
   const breaks = useMemo(() => new Map(chainBreaks(chain).map((b) => [b.deedId, b])), [chain]);
 
-  if (!chain.length) return <Empty>No recorded instruments yet. Paste a county record above to start the chain of title.</Empty>;
+  if (!chain.length) return <Empty>No instruments recorded.</Empty>;
 
   return (
     <ol className="relative space-y-4 pl-6 before:absolute before:bottom-2 before:left-[7px] before:top-2 before:w-px before:bg-dm-border">
@@ -102,7 +102,7 @@ export function TitleChainTimeline({ deeds }: { deeds: DeedRecord[] }) {
                 {!isPlat || d.consideration > 0 ? (
                   <>
                     <span className="tnum text-base font-semibold text-dm-text">{usd(d.consideration)}</span>
-                    <FormulaChip consideration={d.consideration} stamps={d.exciseTaxStamps} ok={d.isFormulaVerified} expected={expectedExcise(d.consideration)} />
+                    {!d.isFormulaVerified && <FormulaChip consideration={d.consideration} stamps={d.exciseTaxStamps} ok={false} expected={expectedExcise(d.consideration)} />}
                   </>
                 ) : (
                   <span className="tnum text-[11px] text-dm-dim">No consideration — plat / subdivision record</span>

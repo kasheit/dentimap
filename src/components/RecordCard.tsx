@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, Pencil } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { addressLine, compactUsd, fmtDate } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { FieldMeta, Property } from '@/lib/types';
@@ -8,9 +8,7 @@ import { PropertyEditForm } from './PropertyEditForm';
 
 function SourceNote({ meta, hasValue }: { meta?: FieldMeta; hasValue: boolean }) {
   if (!hasValue) return null;
-  if (!meta || (meta.state === 'unknown' && !meta.source && !meta.asOf)) {
-    return <span className="text-dm-amber">Unsourced</span>;
-  }
+  if (!meta || (meta.state === 'unknown' && !meta.source && !meta.asOf)) return null;
   const tone = meta.state === 'verified' ? 'text-dm-green' : meta.state === 'unverified' ? 'text-dm-amber' : 'text-dm-dim';
   const label = meta.state === 'verified' ? 'Verified' : meta.state === 'unverified' ? 'Unverified' : 'Source';
   return (
@@ -29,6 +27,11 @@ export function RecordCard({ p }: { p: Property }) {
   const m = p.metrics;
   const meta = p.meta ?? {};
   const dash = <span className="text-dm-dim">—</span>;
+  const unsourced = [
+    [!!p.address.parcelPin, meta.parcelPin],
+    [m?.currentAssessedValue !== undefined, meta.assessedValue],
+    [m?.projectInvestment !== undefined, meta.projectInvestment],
+  ].filter(([has, mt]) => has && (!mt || ((mt as { state: string; source?: string; asOf?: string }).state === 'unknown' && !(mt as { source?: string }).source && !(mt as { asOf?: string }).asOf))).length;
 
   if (editing) {
     return (
@@ -51,9 +54,10 @@ export function RecordCard({ p }: { p: Property }) {
       id="record"
       title="Record"
       action={
-        <button className="btn" onClick={() => setEditing(true)}>
-          <Pencil className="h-3.5 w-3.5" /> Edit
-        </button>
+        <div className="flex items-center gap-4">
+          {unsourced > 0 && <span className="text-[13px] text-dm-dim">{unsourced} unsourced</span>}
+          <button className="btn" onClick={() => setEditing(true)}>Edit</button>
+        </div>
       }
     >
       <dl className="grid gap-x-10 sm:grid-cols-2">

@@ -10,14 +10,6 @@ import { NotesLog } from './NotesLog';
 import { RecordCard } from './RecordCard';
 import { TitleChainTimeline } from './TitleChainTimeline';
 
-const SECTIONS = [
-  ['record', 'Record'],
-  ['ownership', 'Ownership'],
-  ['title', 'Title chain'],
-  ['specs', 'Specifications'],
-  ['notes', 'Notes'],
-  ['history', 'History'],
-] as const;
 
 export function FacilityDossier({ property: p }: { property: Property }) {
   const { deeds, entities } = useDentimap();
@@ -26,10 +18,9 @@ export function FacilityDossier({ property: p }: { property: Property }) {
   const operator = entities.find((e) => e.id === p.operatingEntityId);
   const cs = p.clinicalSpecs;
   const hasSpecs = !!cs && (cs.operatingRooms !== undefined || cs.pacuBays !== undefined || cs.outpatientSharePercent !== undefined || !!cs.specialties?.length || !!cs.licensure);
-  const noteCount = (p.noteLog?.length ?? 0) + (p.notes ? 1 : 0);
+  const activityCount = useDentimap((s) => s.activity.filter((a) => a.propertyId === p.id).length);
   const openNotes = (p.noteLog ?? []).filter((n) => n.tag !== 'note' && !n.resolved).length;
 
-  const jump = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
@@ -40,18 +31,8 @@ export function FacilityDossier({ property: p }: { property: Property }) {
           <StatusPill status={p.status} />
         </div>
         <h1 className="mt-1.5 text-[28px] font-semibold leading-tight">{p.name}</h1>
-        {p.dbaName && <p className="mt-1 text-[14px] text-dm-muted">d/b/a {p.dbaName}</p>}
       </header>
 
-      <nav className="sticky top-[53px] z-30 -mx-1 flex gap-1 overflow-x-auto border-b border-dm-border bg-dm-bg/95 px-1 backdrop-blur scroll-thin" aria-label="Sections">
-        {SECTIONS.map(([id, label]) => (
-          <button key={id} onClick={() => jump(id)} className="whitespace-nowrap px-3 py-2.5 text-[13px] text-dm-muted transition-colors hover:text-dm-text">
-            {label}
-            {id === 'title' && <span className="ml-1.5 text-dm-dim">{propDeeds.length}</span>}
-            {id === 'notes' && noteCount > 0 && <span className={`ml-1.5 ${openNotes ? 'text-dm-amber' : 'text-dm-dim'}`}>{openNotes || noteCount}</span>}
-          </button>
-        ))}
-      </nav>
 
       <RecordCard p={p} />
 
@@ -66,8 +47,9 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         </div>
       </Card>
 
-      <Card id="specs" title="Specifications">
-        {hasSpecs && cs ? (
+
+      {hasSpecs && cs && (
+        <Card id="specs" title="Specifications">
           <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
             {(cs.operatingRooms !== undefined || cs.pacuBays !== undefined || cs.outpatientSharePercent !== undefined) && (
               <Group title="Capacity">
@@ -88,18 +70,21 @@ export function FacilityDossier({ property: p }: { property: Property }) {
               </div>
             )}
           </div>
-        ) : (
-          <p className="text-[13px] text-dm-dim">No clinical specifications on file for this facility.</p>
-        )}
-      </Card>
+        </Card>
+      )}
 
       <Card id="notes" title="Notes" action={openNotes > 0 ? <span className="text-[13px] text-dm-amber">{openNotes} open</span> : undefined}>
         <NotesLog property={p} />
       </Card>
 
-      <Card id="history" title="History">
-        <HistoryLog propertyId={p.id} />
-      </Card>
+      <details id="history" className="border-t border-dm-border pt-5">
+        <summary className="cursor-pointer list-none text-[15px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">
+          Activity <span className="ml-1 text-[13px] font-normal text-dm-dim">{activityCount}</span>
+        </summary>
+        <div className="mt-4">
+          <HistoryLog propertyId={p.id} />
+        </div>
+      </details>
     </div>
   );
 }
