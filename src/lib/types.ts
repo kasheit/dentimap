@@ -29,6 +29,7 @@ export interface FieldMeta {
 export type SourcedField =
   | 'legalName'
   | 'dbaName'
+  | 'sosId'
   | 'address'
   | 'county'
   | 'parcelPin'
@@ -44,6 +45,8 @@ export interface Property {
   legalName?: string;
   /** Trade name / doing business as. */
   dbaName?: string;
+  /** Secretary of State ID of the business at this location. */
+  sosId?: string;
   facilityType: FacilityType;
   status: FacilityStatus;
   address: {

@@ -7,6 +7,7 @@ type Draft = {
   name: string;
   legalName: string;
   dbaName: string;
+  sosId: string;
   facilityType: FacilityType;
   status: FacilityStatus;
   street: string;
@@ -44,6 +45,7 @@ function toDraft(p: Property): Draft {
     name: p.name,
     legalName: p.legalName ?? '',
     dbaName: p.dbaName ?? '',
+    sosId: p.sosId ?? '',
     facilityType: p.facilityType,
     status: p.status,
     street: p.address.street,
@@ -66,7 +68,7 @@ function toDraft(p: Property): Draft {
 }
 
 const blank: FieldMeta = { state: 'unknown' };
-const META_KEYS: SourcedField[] = ['legalName', 'dbaName', 'address', 'county', 'parcelPin', 'assessedValue', 'projectInvestment', 'landlord', 'operator'];
+const META_KEYS: SourcedField[] = ['legalName', 'dbaName', 'sosId', 'address', 'county', 'parcelPin', 'assessedValue', 'projectInvestment', 'landlord', 'operator'];
 const toMeta = (p: Property): MetaDraft =>
   Object.fromEntries(META_KEYS.map((k) => [k, p.meta?.[k] ?? blank])) as MetaDraft;
 
@@ -96,6 +98,7 @@ function toPatch(d: Draft, meta: MetaDraft, p: Property): Partial<Property> {
     name: d.name.trim(),
     legalName: text(d.legalName),
     dbaName: text(d.dbaName),
+    sosId: text(d.sosId),
     facilityType: d.facilityType,
     status: d.status,
     address: { street: d.street.trim(), city: d.city.trim(), state: d.state.trim(), zip: d.zip.trim(), county: withCounty(d.county), parcelPin: d.parcelPin.trim() },
@@ -171,6 +174,10 @@ export function PropertyEditForm({
             <Field label="Doing business as (trade name)">{input('dbaName')}</Field>
             <SourceRow label="Doing business as" meta={meta.dbaName} onMeta={setM('dbaName')} />
           </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Field label="Business SOS ID (Secretary of State)">{input('sosId', 'font-mono')}</Field>
+            <SourceRow label="Business SOS ID" meta={meta.sosId} onMeta={setM('sosId')} />
+          </div>
           <Field label="Type">
             <select className="field" value={d.facilityType} onChange={(e) => set('facilityType', e.target.value as FacilityType)}>
               {(Object.keys(facilityTypeLabel) as FacilityType[]).map((k) => <option key={k} value={k}>{facilityTypeLabel[k]}</option>)}
@@ -223,21 +230,6 @@ export function PropertyEditForm({
             <Field label="Outpatient share (%)">{input('outpatientSharePercent', 'tnum')}</Field>
             <Field label="Licensure" span="sm:col-span-3">{input('licensure')}</Field>
             <Field label="Services (comma-separated)" span="sm:col-span-3">{input('specialties')}</Field>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="mb-1 text-[13px] font-semibold">Ownership links</h3>
-          <p className="mb-3 text-xs text-dm-dim">Landlord and operator are linked from Ownership Entities. Set how well each is confirmed.</p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <span className="label block">Landlord</span>
-              <SourceRow label="Landlord" meta={meta.landlord} onMeta={setM('landlord')} />
-            </div>
-            <div className="space-y-2">
-              <span className="label block">Operator</span>
-              <SourceRow label="Operator" meta={meta.operator} onMeta={setM('operator')} />
-            </div>
           </div>
         </div>
 

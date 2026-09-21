@@ -39,7 +39,7 @@ function Row({ p, active, onClick, issues, percent }: { p: Property; active: boo
 }
 
 export function Sidebar() {
-  const { properties, deeds, entities, selectedPropertyId, select, addProperty } = useDentimap();
+  const { properties, deeds, selectedPropertyId, select, addProperty } = useDentimap();
   const [sort, setSort] = useState<Sort>('default');
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
@@ -174,7 +174,7 @@ export function Sidebar() {
             <h3 className="label mb-1.5 px-3">{g.title}</h3>
             <div className="space-y-0.5">
               {g.items.map((p) => (
-                <Row key={p.id} p={p} percent={completionFor(p, deeds, entities).percent} issues={attentionFor(p, deeds).issues} active={p.id === selectedPropertyId} onClick={() => select(p.id)} />
+                <Row key={p.id} p={p} percent={completionFor(p, deeds).percent} issues={attentionFor(p, deeds).issues} active={p.id === selectedPropertyId} onClick={() => select(p.id)} />
               ))}
             </div>
           </div>

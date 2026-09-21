@@ -13,11 +13,9 @@ import { TitleChainTimeline } from './TitleChainTimeline';
 
 
 export function FacilityDossier({ property: p }: { property: Property }) {
-  const { deeds, entities } = useDentimap();
-  const completion = completionFor(p, deeds, entities);
+  const { deeds } = useDentimap();
+  const completion = completionFor(p, deeds);
   const propDeeds = useMemo(() => deeds.filter((d) => d.propertyId === p.id), [deeds, p.id]);
-  const landlord = entities.find((e) => e.id === p.landlordEntityId);
-  const operator = entities.find((e) => e.id === p.operatingEntityId);
   const cs = p.clinicalSpecs;
   const hasSpecs = !!cs && (cs.operatingRooms !== undefined || cs.pacuBays !== undefined || cs.outpatientSharePercent !== undefined || !!cs.specialties?.length || !!cs.licensure);
   const activityCount = useDentimap((s) => s.activity.filter((a) => a.propertyId === p.id).length);
@@ -53,7 +51,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
       <RecordCard p={p} />
 
       <Card id="ownership" title="Ownership">
-        <OwnershipChain property={p} deeds={propDeeds} landlord={landlord} operator={operator} />
+        <OwnershipChain property={p} deeds={propDeeds} />
       </Card>
 
       <Card id="title" title="Title chain" action={<span className="text-[13px] text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>
