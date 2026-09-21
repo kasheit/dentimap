@@ -1,13 +1,10 @@
 import { useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, ArrowUpDown, CircleAlert, CircleCheck, CircleHelp } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { compactUsd, facilityTypeLabel, fmtDate, statusLabel } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { DeedRecord, FacilityStatus, Property } from '@/lib/types';
 
-type SortKey = 'name' | 'county' | 'assessed' | 'investment' | 'landlord';
-type DeedCheck = 'match' | 'mismatch' | 'no-deed' | 'no-landlord';
-
-const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+type SortKey = 'name' | 'county' | 'assessed' | 'investment';
 
 const statusTone: Record<FacilityStatus, string> = {
   active: 'text-dm-green',
@@ -16,12 +13,6 @@ const statusTone: Record<FacilityStatus, string> = {
   closed: 'text-dm-dim',
 };
 
-const checkMeta: Record<DeedCheck, { label: string; tone: string; icon: typeof CircleCheck }> = {
-  match: { label: 'Deed holder matches landlord', tone: 'text-dm-green', icon: CircleCheck },
-  mismatch: { label: 'Deed holder differs from landlord', tone: 'text-dm-red', icon: CircleAlert },
-  'no-deed': { label: 'No deed on file', tone: 'text-dm-amber', icon: CircleHelp },
-  'no-landlord': { label: 'No landlord linked', tone: 'text-dm-dim', icon: CircleHelp },
-};
 
 function latestDeed(deeds: DeedRecord[], propertyId: string) {
   return deeds
@@ -43,12 +34,11 @@ function SortHead({ label, k, sort, onSort, right }: { label: string; k: SortKey
 }
 
 export function MatrixView() {
-  const { properties, entities, deeds, openProperty } = useDentimap();
+  const { properties, deeds, openProperty } = useDentimap();
   const [county, setCounty] = useState('All');
   const [type, setType] = useState('All');
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: 'name', dir: 1 });
 
-  const entityName = (id?: string) => entities.find((e) => e.id === id)?.name;
   const counties = useMemo(() => ['All', ...[...new Set(properties.map((p) => p.address.county))].sort()], [properties]);
   const types = useMemo(() => ['All', ...[...new Set(properties.map((p) => p.facilityType))]], [properties]);
 
@@ -58,7 +48,6 @@ export function MatrixView() {
         case 'county': return p.address.county;
         case 'assessed': return p.metrics?.currentAssessedValue ?? -1;
         case 'investment': return p.metrics?.projectInvestment ?? -1;
-        case 'landlord': return entities.find((e) => e.id === p.landlordEntityId)?.name ?? '';
         default: return p.name;
       }
     };
@@ -69,7 +58,7 @@ export function MatrixView() {
         const bv = value(b);
         return (typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv))) * sort.dir;
       });
-  }, [properties, entities, county, type, sort]);
+  }, [properties, county, type, sort]);
 
 
   const onSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: 1 }));
@@ -103,7 +92,7 @@ export function MatrixView() {
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-dm-border bg-dm-surface scroll-thin">
-        <table className="w-full min-w-[1080px] border-collapse text-[13px]">
+        <table className="w-full min-w-[820px] border-collapse text-[13px]">
           <thead>
             <tr className="border-b border-dm-border text-xs text-dm-dim">
               <SortHead label="Facility" k="name" sort={sort} onSort={onSort} />
@@ -111,17 +100,12 @@ export function MatrixView() {
               <th className="px-4 py-3 text-left font-medium">Parcel PIN</th>
               <SortHead label="Assessed" k="assessed" sort={sort} onSort={onSort} right />
               <SortHead label="Investment" k="investment" sort={sort} onSort={onSort} right />
-              <SortHead label="Landlord" k="landlord" sort={sort} onSort={onSort} />
-              <th className="px-4 py-3 text-left font-medium">Operator</th>
               <th className="px-4 py-3 text-left font-medium">Last deed</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((p) => {
               const deed = latestDeed(deeds, p.id);
-              const landlord = entityName(p.landlordEntityId);
-              const check: DeedCheck = !landlord ? 'no-landlord' : !deed ? 'no-deed' : norm(deed.grantee) === norm(landlord) ? 'match' : 'mismatch';
-              const { label, tone, icon: Icon } = checkMeta[check];
               return (
                 <tr key={p.id} className="border-b border-dm-border/60 transition-colors last:border-0 hover:bg-dm-hover">
                   <td className="px-4 py-3">
@@ -135,19 +119,12 @@ export function MatrixView() {
                   <td className="px-4 py-3 font-mono text-xs text-dm-muted">{p.address.parcelPin || '—'}</td>
                   <td className="px-4 py-3 text-right tnum">{compactUsd(p.metrics?.currentAssessedValue)}</td>
                   <td className="px-4 py-3 text-right tnum">{compactUsd(p.metrics?.projectInvestment)}</td>
-                  <td className="px-4 py-3">{landlord ?? <span className="text-dm-dim">Not linked</span>}</td>
-                  <td className="px-4 py-3">{entityName(p.operatingEntityId) ?? <span className="text-dm-dim">Not linked</span>}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1.5 ${tone}`} title={label}>
-                      <Icon className="h-3.5 w-3.5 shrink-0" />
-                      <span className="tnum text-xs">{deed ? fmtDate(deed.recordingDate) : 'None'}</span>
-                    </span>
-                  </td>
+                  <td className="px-4 py-3 tnum text-xs text-dm-muted">{deed ? fmtDate(deed.recordingDate) : '—'}</td>
                 </tr>
               );
             })}
             {rows.length === 0 && (
-              <tr><td colSpan={8} className="px-4 py-12 text-center text-sm text-dm-dim">No facilities match these filters.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-12 text-center text-sm text-dm-dim">No facilities match these filters.</td></tr>
             )}
           </tbody>
         </table>

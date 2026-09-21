@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Pencil, X } from 'lucide-react';
-import { agentKey, buildAgentDirectory } from '@/lib/agents';
-import { entityTypeLabel, fmtDate } from '@/lib/format';
+import { entityTypeLabel, fmtDate, personRoleLabel } from '@/lib/format';
 import { newId, useDentimap } from '@/lib/store';
 import type { EntityType, LegalEntity } from '@/lib/types';
 
@@ -67,7 +66,7 @@ function EntityHeader({ e }: { e: LegalEntity }) {
         <button
           className="btn text-dm-red hover:text-dm-red"
           onClick={() => {
-            if (confirm(`Delete "${e.name}"? Facilities linked to it are kept but lose this landlord/operator link.`)) deleteEntity(e.id);
+            if (confirm(`Delete "${e.name}"? Facilities and people linked to it are kept.`)) deleteEntity(e.id);
           }}
         >
           Delete entity
@@ -98,28 +97,16 @@ function EntityHeader({ e }: { e: LegalEntity }) {
 }
 
 function EntityCard({ e }: { e: LegalEntity }) {
-  const { properties, deeds, entities, openProperty, updateEntity, linkProperty, unlinkProperty } = useDentimap();
-  const [editing, setEditing] = useState(false);
-  const [newAgent, setNewAgent] = useState('');
-  const agents = e.registeredAgentOrManagers ?? [];
+  const { properties, deeds, people, openProperty, openPerson, linkProperty, unlinkProperty, updatePerson } = useDentimap();
   const linked = e.associatedPropertyIds
     .map((id) => properties.find((p) => p.id === id))
     .filter((p): p is NonNullable<typeof p> => !!p);
   const available = properties.filter((p) => !e.associatedPropertyIds.includes(p.id));
+  const linkedPeople = people.filter((p) => p.entityIds.includes(e.id));
+  const otherPeople = people.filter((p) => !p.entityIds.includes(e.id));
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
   const acquired = deeds.filter((d) => norm(d.grantee) === norm(e.name)).length;
   const sold = deeds.filter((d) => norm(d.grantor) === norm(e.name)).length;
-
-  const directory = buildAgentDirectory(entities);
-  const setAgents = (next: string[]) => updateEntity(e.id, { registeredAgentOrManagers: next });
-  const addAgent = (name: string) => {
-    const clean = name.trim();
-    if (clean && !agents.some((x) => agentKey(x) === agentKey(clean))) setAgents([...agents, directory.find((d) => agentKey(d.name) === agentKey(clean))?.name ?? clean]);
-    setNewAgent('');
-  };
-  const removeAgent = (name: string) => setAgents(agents.filter((x) => x !== name));
-  const existing = directory.filter((d) => !agents.some((x) => agentKey(x) === agentKey(d.name)));
-  const sharedCount = (name: string) => directory.find((d) => agentKey(d.name) === agentKey(name))?.entities.length ?? 1;
 
   return (
     <article className="rounded-xl border border-dm-border bg-dm-surface">
@@ -141,149 +128,85 @@ function EntityCard({ e }: { e: LegalEntity }) {
       </dl>
 
       <div className="border-b border-dm-border px-5 py-4">
-        <div className="mb-2 text-sm font-semibold text-dm-text">Registered agents</div>
-        <div className="space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            {agents.length ? (
-              <ul className="flex flex-wrap gap-1.5">
-                {agents.map((m) => (
-                  <li key={m} className="inline-flex items-center gap-1.5 rounded-full border border-dm-border bg-dm-bg py-1 pl-2.5 pr-2 text-xs text-dm-text">
-                    {m}
-                    {sharedCount(m) > 1 && (
-                      <span className="tnum text-[11px] text-dm-dim" title={`Also registered on ${sharedCount(m) - 1} other ${sharedCount(m) === 2 ? 'entity' : 'entities'}`}>
-                        ×{sharedCount(m)}
-                      </span>
-                    )}
-                    {editing && (
-                      <button onClick={() => removeAgent(m)} className="text-dm-dim transition-colors hover:text-dm-red" aria-label={`Remove ${m}`}>
-                        <X className="h-3 w-3" />
-                      </button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-dm-dim">None recorded</p>
-            )}
-            <button
-              className={`shrink-0 text-xs transition-colors ${editing ? 'font-medium text-dm-blue' : 'text-dm-dim hover:text-dm-blue'}`}
-              onClick={() => setEditing((v) => !v)}
-              aria-label={editing ? 'Done editing registered agents' : 'Edit registered agents'}
-            >
-              {editing ? 'Done' : <Pencil className="h-3.5 w-3.5" />}
-            </button>
-          </div>
-          {editing && (
-            <div className="space-y-2">
-              {existing.length > 0 && (
-                <select className="field" value="" onChange={(ev) => ev.target.value && addAgent(ev.target.value)} aria-label="Add an existing registered agent">
-                  <option value="">+ Add an existing agent…</option>
-                  {existing.map((d) => (
-                    <option key={d.name} value={d.name}>{d.name} — on {d.entities.length} {d.entities.length === 1 ? 'entity' : 'entities'}</option>
-                  ))}
-                </select>
-              )}
-              <div className="flex gap-2">
-                <input className="field" value={newAgent} onChange={(ev) => setNewAgent(ev.target.value)} placeholder="New agent name" onKeyDown={(ev) => ev.key === 'Enter' && addAgent(newAgent)} />
-                <button className="btn" onClick={() => addAgent(newAgent)} disabled={!newAgent.trim()}>Add</button>
-              </div>
-            </div>
-          )}
-        </div>
+        <div className="mb-2 text-sm font-semibold text-dm-text">People</div>
+        {linkedPeople.length ? (
+          <ul className="space-y-0.5">
+            {linkedPeople.map((p) => (
+              <li key={p.id} className="group flex items-center gap-1 rounded-md hover:bg-dm-hover">
+                <button onClick={() => openPerson(p.id)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-3 py-1.5 text-left text-sm">
+                  <span className="truncate">{p.name}</span>
+                  <span className="shrink-0 text-[13px] text-dm-dim">{p.roles.map((r) => personRoleLabel[r]).join(' · ')}</span>
+                </button>
+                <button
+                  onClick={() => updatePerson(p.id, { entityIds: p.entityIds.filter((x) => x !== e.id) })}
+                  className="rounded p-1.5 text-dm-dim opacity-60 transition hover:bg-dm-raised hover:text-dm-red group-hover:opacity-100"
+                  aria-label={`Unlink ${p.name} from ${e.name}`}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-dm-dim">None</p>
+        )}
+        {otherPeople.length > 0 && (
+          <select
+            className="field mt-2"
+            value=""
+            onChange={(ev) => {
+              const person = people.find((x) => x.id === ev.target.value);
+              if (person) updatePerson(person.id, { entityIds: [...person.entityIds, e.id] });
+            }}
+            aria-label="Link a person"
+          >
+            <option value="">+ Link a person…</option>
+            {otherPeople.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+        )}
       </div>
 
-      <div className="space-y-5 p-5">
-        <div>
-          <div className="label mb-2">Associated properties ({linked.length})</div>
-          {linked.length ? (
-            <ul className="space-y-0.5">
-              {linked.map((p) => (
-                <li key={p.id} className="group flex items-center gap-1 rounded-md hover:bg-dm-hover">
-                  <button onClick={() => openProperty(p.id)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-3 py-2 text-left text-sm">
-                    <span className="truncate">{p.name}</span>
-                    <span className="shrink-0 text-[13px] text-dm-dim">{p.address.city}, {p.address.state}</span>
-                  </button>
-                  <button
-                    onClick={() => unlinkProperty(e.id, p.id)}
-                    className="rounded p-1.5 text-dm-dim opacity-60 transition hover:bg-dm-raised hover:text-dm-red group-hover:opacity-100"
-                    title="Remove from this entity (the property itself is kept)"
-                    aria-label={`Remove ${p.name} from ${e.name}`}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-dm-dim">No linked properties</p>
-          )}
-          {available.length > 0 && (
-            <select
-              className="field mt-3"
-              value=""
-              onChange={(ev) => ev.target.value && linkProperty(e.id, ev.target.value)}
-              aria-label="Add a property"
-            >
-              <option value="">+ Add a property…</option>
-              {available.map((p) => (
-                <option key={p.id} value={p.id}>{p.name} — {p.address.city}, {p.address.state}</option>
-              ))}
-            </select>
-          )}
-        </div>
+      <div className="p-5">
+        <div className="label mb-2">Associated properties ({linked.length})</div>
+        {linked.length ? (
+          <ul className="space-y-0.5">
+            {linked.map((p) => (
+              <li key={p.id} className="group flex items-center gap-1 rounded-md hover:bg-dm-hover">
+                <button onClick={() => openProperty(p.id)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-3 py-2 text-left text-sm">
+                  <span className="truncate">{p.name}</span>
+                  <span className="shrink-0 text-[13px] text-dm-dim">{p.address.city}, {p.address.state}</span>
+                </button>
+                <button
+                  onClick={() => unlinkProperty(e.id, p.id)}
+                  className="rounded p-1.5 text-dm-dim opacity-60 transition hover:bg-dm-raised hover:text-dm-red group-hover:opacity-100"
+                  title="Remove from this entity (the property itself is kept)"
+                  aria-label={`Remove ${p.name} from ${e.name}`}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-dm-dim">No linked properties</p>
+        )}
+        {available.length > 0 && (
+          <select
+            className="field mt-3"
+            value=""
+            onChange={(ev) => ev.target.value && linkProperty(e.id, ev.target.value)}
+            aria-label="Add a property"
+          >
+            <option value="">+ Add a property…</option>
+            {available.map((p) => (
+              <option key={p.id} value={p.id}>{p.name} — {p.address.city}, {p.address.state}</option>
+            ))}
+          </select>
+        )}
       </div>
     </article>
-  );
-}
-
-function AgentDirectory() {
-  const entities = useDentimap((s) => s.entities);
-  const updateEntity = useDentimap((s) => s.updateEntity);
-  const [renaming, setRenaming] = useState<string | null>(null);
-  const [value, setValue] = useState('');
-  const directory = buildAgentDirectory(entities);
-
-  // Fixes a typo or merges two spellings on every entity at once.
-  const rename = (from: string) => {
-    const to = value.trim();
-    setRenaming(null);
-    if (!to || to === from) return;
-    for (const ent of entities) {
-      const list = ent.registeredAgentOrManagers ?? [];
-      if (!list.some((x) => agentKey(x) === agentKey(from))) continue;
-      const next = list.map((x) => (agentKey(x) === agentKey(from) ? to : x));
-      updateEntity(ent.id, { registeredAgentOrManagers: next.filter((x, i) => next.findIndex((y) => agentKey(y) === agentKey(x)) === i) });
-    }
-  };
-
-  return (
-    <section className="mb-8">
-      <h2 className="mb-1 text-[15px] font-semibold">Agent directory <span className="ml-1 text-[13px] font-normal text-dm-dim">{directory.length}</span></h2>
-      <ul className="grid gap-x-6 gap-y-2 py-3 text-sm sm:grid-cols-2">
-        {directory.length === 0 && <li className="text-dm-dim">No registered agents recorded yet.</li>}
-        {directory.map((d) => (
-          <li key={d.name} className="flex items-baseline justify-between gap-3">
-            {renaming === d.name ? (
-              <input
-                className="field py-1"
-                autoFocus
-                value={value}
-                onChange={(ev) => setValue(ev.target.value)}
-                onBlur={() => rename(d.name)}
-                onKeyDown={(ev) => {
-                  if (ev.key === 'Enter') rename(d.name);
-                  if (ev.key === 'Escape') setRenaming(null);
-                }}
-                aria-label={`Rename ${d.name} on every entity`}
-              />
-            ) : (
-              <button className="text-left hover:text-dm-blue" title="Rename on every entity" onClick={() => { setRenaming(d.name); setValue(d.name); }}>{d.name}</button>
-            )}
-            <span className="truncate text-xs text-dm-dim">{d.entities.map((x) => x.name).join(' · ')}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }
 
@@ -296,14 +219,11 @@ export function EntitiesView() {
         <h1 className="text-2xl font-semibold tracking-tight">Ownership entities</h1>
         <button
           className="btn"
-          onClick={() =>
-            addEntity({ id: newId('entity'), name: 'New entity', entityType: 'landlord_holding', jurisdiction: 'North Carolina', associatedPropertyIds: [] })
-          }
+          onClick={() => addEntity({ id: newId('entity'), name: 'New entity', entityType: 'landlord_holding', jurisdiction: 'North Carolina', associatedPropertyIds: [] })}
         >
           Add entity
         </button>
       </div>
-      <AgentDirectory />
       <div className="grid gap-6 md:grid-cols-2">
         {entities.map((e) => <EntityCard key={e.id} e={e} />)}
       </div>

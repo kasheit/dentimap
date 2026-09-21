@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Users, Building2, Table2, CloudOff, FileText, Landmark } from 'lucide-react';
-import { exportCsv, exportJson } from '@/lib/exporters';
+import { backupDue, exportCsv, exportJson } from '@/lib/exporters';
+import { OPEN_SEARCH_EVENT } from './SearchPalette';
 import { isValidData, useDentimap } from '@/lib/store';
 import type { TabId } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
@@ -35,7 +36,8 @@ function SyncBadge() {
 }
 
 export function Header() {
-  const { tab, setTab, importData } = useDentimap();
+  const { tab, setTab, importData, properties } = useDentimap();
+  const [due, setDue] = useState(() => backupDue());
   const [menu, setMenu] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -77,7 +79,7 @@ export function Header() {
   const menuItem = 'flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text';
 
   return (
-    <header className="sticky top-0 z-40 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
+    <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
         <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none" draggable={false} />
 
@@ -99,6 +101,22 @@ export function Header() {
 
         <div className="ml-auto flex items-center gap-3">
           <SyncBadge />
+          {due && properties.length > 0 && (
+            <button
+              className="hidden text-[13px] text-dm-amber transition-colors hover:text-dm-text md:inline"
+              title="You have not downloaded a backup in over a week"
+              onClick={() => {
+                exportJson(snapshot());
+                setDue(false);
+                setNotice('Backup downloaded.');
+              }}
+            >
+              Back up
+            </button>
+          )}
+          <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))} title="Search everything (Ctrl K)">
+            Search
+          </button>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
           <button className="btn" onClick={() => fileRef.current?.click()} title="Import a Dentimap JSON export">
             Import
@@ -109,7 +127,7 @@ export function Header() {
             </button>
             {menu && (
               <div className="absolute right-0 mt-1.5 w-52 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-2xl shadow-black/50">
-                <button className={menuItem} onClick={() => { exportJson(snapshot()); setMenu(false); }}>
+                <button className={menuItem} onClick={() => { exportJson(snapshot()); setDue(false); setMenu(false); }}>
                   Full backup (JSON)
                 </button>
                 {(['properties', 'deeds', 'entities'] as const).map((w) => (

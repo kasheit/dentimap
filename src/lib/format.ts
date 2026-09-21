@@ -47,8 +47,8 @@ export const facilityTypeLabel: Record<FacilityType, string> = {
 };
 
 export const entityTypeLabel: Record<EntityType, string> = {
-  landlord_holding: 'Landlord Holding',
-  clinical_operator: 'Clinical Operator',
+  landlord_holding: 'Holding company',
+  clinical_operator: 'Operating company',
   mso: 'MSO',
   land_trust: 'Land Trust',
 };

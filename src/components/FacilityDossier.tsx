@@ -68,7 +68,9 @@ export function FacilityDossier({ property: p }: { property: Property }) {
 
 
       {hasSpecs && cs && (
-        <Card id="specs" title="Specifications">
+        <details id="specs" className="border-t border-dm-border pt-5">
+          <summary className="cursor-pointer list-none text-[15px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">Specifications</summary>
+          <div className="mt-4">
           <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
             {(cs.operatingRooms !== undefined || cs.pacuBays !== undefined || cs.outpatientSharePercent !== undefined) && (
               <Group title="Capacity">
@@ -89,7 +91,8 @@ export function FacilityDossier({ property: p }: { property: Property }) {
               </div>
             )}
           </div>
-        </Card>
+          </div>
+        </details>
       )}
 
       <Card id="notes" title="Notes" action={openNotes > 0 ? <span className="text-[13px] text-dm-amber">{openNotes} open</span> : undefined}>

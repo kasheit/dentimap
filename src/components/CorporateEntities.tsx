@@ -1,35 +1,25 @@
-import { levelFor } from '@/lib/completion';
 import { fmtDate } from '@/lib/format';
 import { sortedDeeds } from '@/lib/store';
-import type { DeedRecord, FieldMeta, Property } from '@/lib/types';
+import type { DeedRecord, Property, SourcedField } from '@/lib/types';
+import { ConfirmLabel } from './ConfirmLabel';
 import { LevelLabel } from './Chips';
 
-const detail = (meta?: FieldMeta) => {
-  const parts = [meta?.source, meta?.asOf ? `as of ${fmtDate(meta.asOf)}` : undefined].filter(Boolean);
-  return parts.length ? parts.join(' · ') : undefined;
-};
-
-function Step({ role, last, children }: { role: string; last?: boolean; children: React.ReactNode }) {
+function SubHeading({ children, first }: { children: React.ReactNode; first?: boolean }) {
   return (
-    <li className="relative grid grid-cols-[7.5rem_1fr] gap-4 pb-5 last:pb-0 sm:grid-cols-[9rem_1fr]">
-      {!last && <span className="absolute bottom-0 left-[7.5rem] top-2 hidden w-px bg-dm-border sm:left-[9rem]" aria-hidden />}
-      <div className="pt-0.5 text-[13px] text-dm-dim">{role}</div>
-      <div className="relative min-w-0 pl-5">
-        <span className="absolute -left-[3px] top-2 h-[7px] w-[7px] rounded-full bg-dm-dim" aria-hidden />
-        {children}
-      </div>
-    </li>
+    <div className={`text-[11px] font-semibold uppercase tracking-[0.08em] text-dm-blue/80 ${first ? '' : 'mt-6'} mb-1 border-b border-dm-border/70 pb-1.5`}>
+      {children}
+    </div>
   );
 }
 
-function Named({ label, value, meta, mono }: { label: string; value?: string; meta?: FieldMeta; mono?: boolean }) {
+function Row({ label, value, mono, status }: { label: string; value?: React.ReactNode; mono?: boolean; status: React.ReactNode }) {
   return (
-    <div className="first:mt-0 mt-3">
+    <div className="grid gap-x-4 gap-y-1 border-b border-dm-border/50 py-2.5 last:border-0 sm:grid-cols-[9rem_1fr_auto] sm:items-baseline">
       <div className="text-[13px] text-dm-dim">{label}</div>
-      <div className={`font-medium ${mono ? 'font-mono text-[14px]' : 'text-[15px]'}`}>{value || <span className="font-normal text-dm-dim">—</span>}</div>
-      <div className="mt-0.5">
-        <LevelLabel level={levelFor(!!value, meta)} detail={value ? detail(meta) : undefined} />
+      <div className={`min-w-0 break-words ${mono ? 'font-mono text-[14px]' : 'text-[15px]'} font-medium`}>
+        {value || <span className="font-normal text-dm-dim">—</span>}
       </div>
+      <div className="sm:text-right">{status}</div>
     </div>
   );
 }
@@ -37,31 +27,34 @@ function Named({ label, value, meta, mono }: { label: string; value?: string; me
 export function OwnershipChain({ property, deeds }: { property: Property; deeds: DeedRecord[] }) {
   const conveyances = sortedDeeds(deeds.filter((d) => d.deedType !== 'subdivision_plat'));
   const holder = conveyances[conveyances.length - 1];
-  const meta = property.meta ?? {};
+
+  const status = (field: SourcedField, label: string, has: boolean) => <ConfirmLabel property={property} field={field} label={label} has={has} />;
 
   return (
-    <ol>
-      <Step role="Business at this location">
-        <Named label="Legal name" value={property.legalName} meta={meta.legalName} />
-        <Named label="Doing business as" value={property.dbaName} meta={meta.dbaName} />
-        <Named label="Business SOS ID" value={property.sosId} meta={meta.sosId} mono />
-        <Named label="First filing" value={property.firstFilingDate ? fmtDate(property.firstFilingDate) : undefined} meta={meta.firstFilingDate} />
-      </Step>
-      <Step role="Property owner of record" last>
-        {holder ? (
-          <>
-            <div className="text-[15px] font-medium">{holder.grantee}</div>
-            <div className="mt-0.5 text-[13px] text-dm-muted">
-              Per {fmtDate(holder.recordingDate)} recorded deed · {holder.source}
-            </div>
-          </>
-        ) : (
-          <p className="text-[15px] text-dm-dim">—</p>
-        )}
-        <div className="mt-0.5">
-          <LevelLabel level={holder ? (holder.confidence === 'verified' ? 'confirmed' : 'partial') : 'missing'} detail={holder ? undefined : 'no deed on file'} />
-        </div>
-      </Step>
-    </ol>
+    <div>
+      <SubHeading first>Business</SubHeading>
+      <Row label="Legal name" value={property.legalName} status={status('legalName', 'Legal name', !!property.legalName)} />
+      <Row label="Doing business as" value={property.dbaName} status={status('dbaName', 'Doing business as', !!property.dbaName)} />
+      <Row label="Business SOS ID" mono value={property.sosId} status={status('sosId', 'Business SOS ID', !!property.sosId)} />
+      <Row
+        label="First filing"
+        value={property.firstFilingDate ? fmtDate(property.firstFilingDate) : undefined}
+        status={status('firstFilingDate', 'First filing date', !!property.firstFilingDate)}
+      />
+
+      <SubHeading>Property</SubHeading>
+      <Row
+        label="Owner of record"
+        value={
+          holder && (
+            <>
+              {holder.grantee}
+              <span className="ml-2 text-[13px] font-normal text-dm-dim">per {fmtDate(holder.recordingDate)} deed</span>
+            </>
+          )
+        }
+        status={<LevelLabel level={holder ? (holder.confidence === 'verified' ? 'confirmed' : 'partial') : 'missing'} detail={holder ? holder.source : 'no deed on file'} />}
+      />
+    </div>
   );
 }

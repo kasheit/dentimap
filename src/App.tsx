@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthGate } from '@/components/AuthGate';
 import { Header } from '@/components/Header';
+import { OPEN_SEARCH_EVENT, SearchPalette } from '@/components/SearchPalette';
 import { FOCUS_SEARCH } from '@/components/Sidebar';
 import { startSync, useDentimap } from '@/lib/store';
 import { DeedsView } from '@/views/DeedsView';
@@ -43,6 +44,13 @@ function ConflictBanner() {
 function Shell() {
   const tab = useDentimap((s) => s.tab);
   const setTab = useDentimap((s) => s.setTab);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const open = () => setSearchOpen(true);
+    window.addEventListener(OPEN_SEARCH_EVENT, open);
+    return () => window.removeEventListener(OPEN_SEARCH_EVENT, open);
+  }, []);
 
   useEffect(() => {
     startSync();
@@ -52,7 +60,10 @@ function Shell() {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
       const typing = !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
-      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') || (e.key === '/' && !typing)) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen((o) => !o);
+      } else if (e.key === '/' && !typing) {
         e.preventDefault();
         if (useDentimap.getState().tab !== 'properties') setTab('properties');
         setTimeout(() => window.dispatchEvent(new Event(FOCUS_SEARCH)), 0);
@@ -72,6 +83,7 @@ function Shell() {
       {tab === 'people' && <PeopleView />}
       {tab === 'deeds' && <DeedsView />}
       <UndoToast />
+      <SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }

@@ -22,8 +22,30 @@ const toCsv = (rows: Record<string, unknown>[]) => {
 
 const stamp = () => new Date().toISOString().slice(0, 10);
 
-export const exportJson = (d: DentimapData) =>
+const BACKUP_KEY = 'dentimap-last-backup';
+
+export function lastBackupAt(): string | null {
+  try {
+    return localStorage.getItem(BACKUP_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function backupDue(days = 7): boolean {
+  const last = lastBackupAt();
+  if (!last) return true;
+  return Date.now() - Date.parse(last) > days * 24 * 60 * 60 * 1000;
+}
+
+export const exportJson = (d: DentimapData) => {
   download(`dentimap-${stamp()}.json`, 'application/json', JSON.stringify(d, null, 2));
+  try {
+    localStorage.setItem(BACKUP_KEY, new Date().toISOString());
+  } catch {
+    /* storage unavailable */
+  }
+};
 
 export function exportCsv(d: DentimapData, which: 'properties' | 'deeds' | 'entities') {
   let rows: Record<string, unknown>[];

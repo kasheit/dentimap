@@ -116,14 +116,33 @@ const levelStyle = {
   missing: { dot: 'bg-dm-red', text: 'text-dm-red', label: 'Missing' },
 } as const;
 
-/** Green = confirmed from records, yellow = present but not fully confirmed, red = nothing there. */
-export function LevelLabel({ level, detail }: { level: 'confirmed' | 'partial' | 'missing'; detail?: ReactNode }) {
+/** Green = confirmed from records, yellow = present but not fully confirmed (or stale), red = nothing there. */
+export function LevelLabel({
+  level,
+  detail,
+  stale,
+  onClick,
+}: {
+  level: 'confirmed' | 'partial' | 'missing';
+  detail?: ReactNode;
+  stale?: boolean;
+  onClick?: () => void;
+}) {
   const s = levelStyle[level];
-  return (
-    <span className="inline-flex flex-wrap items-center justify-end gap-x-1.5 text-[12px]">
+  const text = stale ? 'Recheck' : s.label;
+  const body = (
+    <>
       <i className={`inline-block h-1.5 w-1.5 rounded-full ${s.dot}`} />
-      <span className={s.text}>{s.label}</span>
+      <span className={s.text}>{text}</span>
       {detail && <span className="text-dm-dim">· {detail}</span>}
-    </span>
+    </>
+  );
+  const cls = 'inline-flex flex-wrap items-center justify-end gap-x-1.5 text-[12px]';
+  return onClick ? (
+    <button type="button" onClick={onClick} className={`${cls} rounded px-1 py-0.5 text-left transition-colors hover:bg-dm-hover`} title={level === 'missing' ? 'Fill this in' : 'Click to confirm'}>
+      {body}
+    </button>
+  ) : (
+    <span className={cls}>{body}</span>
   );
 }

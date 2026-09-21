@@ -156,38 +156,20 @@ export const useDentimap = create<State>()(
         set((s) => ({
           entities: s.entities.filter((e) => e.id !== id),
           people: s.people.map((x) => ({ ...x, entityIds: x.entityIds.filter((y) => y !== id) })),
-          properties: s.properties.map((p) => ({
-            ...p,
-            landlordEntityId: p.landlordEntityId === id ? undefined : p.landlordEntityId,
-            operatingEntityId: p.operatingEntityId === id ? undefined : p.operatingEntityId,
-          })),
           activity: logged(s.activity, `Entity deleted: ${s.entities.find((e) => e.id === id)?.name ?? id}`),
         })),
       linkProperty: (entityId, propertyId) =>
         set((s) => {
           const ent = s.entities.find((e) => e.id === entityId);
           if (!ent) return {};
-          const role = ent.entityType === 'landlord_holding' ? 'landlordEntityId' : ent.entityType === 'clinical_operator' ? 'operatingEntityId' : null;
-          const prev = role ? s.properties.find((p) => p.id === propertyId)?.[role] : undefined;
           return {
-            entities: s.entities.map((e) => {
-              if (e.id === entityId) return e.associatedPropertyIds.includes(propertyId) ? e : { ...e, associatedPropertyIds: [...e.associatedPropertyIds, propertyId] };
-              // a property has one landlord and one operator, so drop it from the entity it is replacing
-              if (prev && e.id === prev) return { ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== propertyId) };
-              return e;
-            }),
-            properties: role ? s.properties.map((p) => (p.id === propertyId ? { ...p, [role]: entityId } : p)) : s.properties,
+            entities: s.entities.map((e) => (e.id === entityId && !e.associatedPropertyIds.includes(propertyId) ? { ...e, associatedPropertyIds: [...e.associatedPropertyIds, propertyId] } : e)),
             activity: logged(s.activity, `Linked to ${ent.name}`, propertyId),
           };
         }),
       unlinkProperty: (entityId, propertyId) =>
         set((s) => ({
           entities: s.entities.map((e) => (e.id === entityId ? { ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== propertyId) } : e)),
-          properties: s.properties.map((p) =>
-            p.id === propertyId
-              ? { ...p, landlordEntityId: p.landlordEntityId === entityId ? undefined : p.landlordEntityId, operatingEntityId: p.operatingEntityId === entityId ? undefined : p.operatingEntityId }
-              : p,
-          ),
           activity: logged(s.activity, `Unlinked from ${s.entities.find((e) => e.id === entityId)?.name ?? entityId}`, propertyId),
         })),
 
