@@ -89,7 +89,7 @@ export function OwnershipChain({
           <Named label="Legal name" value={property.legalName} meta={meta.legalName} />
           <Named label="Doing business as" value={property.dbaName} meta={meta.dbaName} />
         </Step>
-        <Step role="Land owner of record">
+        <Step role="Property owner of record">
           {holder ? (
             <>
               <div className="text-[15px] font-medium">{holder.grantee}</div>
@@ -104,10 +104,10 @@ export function OwnershipChain({
             <LevelLabel level={holder ? (holder.confidence === 'verified' ? 'confirmed' : 'partial') : 'missing'} detail={holder ? undefined : 'no deed on file'} />
           </div>
         </Step>
-        <Step role="Landlord (legal name)">
+        <Step role="Landlord">
           <EntityLine entity={landlord} meta={meta.landlord} />
         </Step>
-        <Step role="Operator (legal name)" last>
+        <Step role="Operator" last>
           <EntityLine entity={operator} meta={meta.operator} />
         </Step>
       </ol>
