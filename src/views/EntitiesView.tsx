@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pencil, X } from 'lucide-react';
+import { ChevronDown, Pencil, UserCheck, X } from 'lucide-react';
 import { entityTypeLabel, fmtDate } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { LegalEntity } from '@/lib/types';
@@ -8,6 +8,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
   const { properties, deeds, openProperty, updateEntity, linkProperty, unlinkProperty } = useDentimap();
   const [editing, setEditing] = useState(false);
   const [managers, setManagers] = useState((e.registeredAgentOrManagers ?? []).join(', '));
+  const agents = e.registeredAgentOrManagers ?? [];
   const linked = e.associatedPropertyIds
     .map((id) => properties.find((p) => p.id === id))
     .filter((p): p is NonNullable<typeof p> => !!p);
@@ -49,32 +50,45 @@ function EntityCard({ e }: { e: LegalEntity }) {
         </div>
       </dl>
 
-      <div className="space-y-5 p-5">
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <span className="label">Registered agent / managers</span>
-            {!editing && (
-              <button className="text-dm-dim transition-colors hover:text-dm-blue" onClick={() => setEditing(true)} title="Edit">
-                <Pencil className="h-3 w-3" />
-              </button>
-            )}
-          </div>
+      <details className="group/agents border-b border-dm-border bg-dm-blue/[0.06] open:pb-1">
+        <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 transition-colors hover:bg-dm-blue/10 [&::-webkit-details-marker]:hidden">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dm-blue/15 text-dm-blue">
+            <UserCheck className="h-4 w-4" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-dm-text">Registered Agents</span>
+            <span className="block text-xs text-dm-muted">
+              {agents.length ? `${agents.length} on record` : 'None recorded'}
+            </span>
+          </span>
+          <ChevronDown className="h-4 w-4 text-dm-dim transition-transform group-[[open]]/agents:rotate-180" />
+        </summary>
+        <div className="px-5 pb-4 pt-1">
           {editing ? (
             <div className="flex gap-2">
               <input className="field" value={managers} onChange={(ev) => setManagers(ev.target.value)} placeholder="Comma-separated names" autoFocus onKeyDown={(ev) => ev.key === 'Enter' && save()} />
               <button className="btn btn-primary" onClick={save}>Save</button>
             </div>
-          ) : e.registeredAgentOrManagers?.length ? (
-            <div className="flex flex-wrap gap-1.5">
-              {e.registeredAgentOrManagers.map((m) => (
-                <span key={m} className="rounded-full border border-dm-border bg-dm-bg px-2.5 py-1 text-xs text-dm-muted">{m}</span>
-              ))}
-            </div>
           ) : (
-            <p className="text-sm text-dm-dim">None recorded</p>
+            <div className="flex items-start justify-between gap-3">
+              {agents.length ? (
+                <ul className="flex flex-wrap gap-1.5">
+                  {agents.map((m) => (
+                    <li key={m} className="rounded-full border border-dm-blue/30 bg-dm-bg px-2.5 py-1 text-xs text-dm-text">{m}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-dm-dim">None recorded</p>
+              )}
+              <button className="text-dm-dim transition-colors hover:text-dm-blue" onClick={() => setEditing(true)} title="Edit registered agents" aria-label="Edit registered agents">
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </div>
           )}
         </div>
+      </details>
 
+      <div className="space-y-5 p-5">
         <div>
           <div className="label mb-2">Associated properties ({linked.length})</div>
           {linked.length ? (
