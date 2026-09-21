@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Building2, Cloud, CloudOff, Download, FileText, Landmark, Loader2, LogOut, MapPin, RotateCcw, Upload } from 'lucide-react';
+import { Building2, Cloud, Table2, CloudOff, Download, FileText, Landmark, Loader2, LogOut, MapPin, RotateCcw, Upload } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { isValidData, useDentimap } from '@/lib/store';
 import type { TabId } from '@/lib/store';
@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 
 const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
   { id: 'properties', label: 'Properties & Facilities', icon: Building2 },
+  { id: 'matrix', label: 'Real Estate Matrix', icon: Table2 },
   { id: 'entities', label: 'Ownership Entities', icon: Landmark },
   { id: 'deeds', label: 'Deeds & Title Registry', icon: FileText },
 ];

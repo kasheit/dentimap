@@ -5,6 +5,7 @@ import { FOCUS_SEARCH } from '@/components/Sidebar';
 import { startSync, useDentimap } from '@/lib/store';
 import { DeedsView } from '@/views/DeedsView';
 import { EntitiesView } from '@/views/EntitiesView';
+import { MatrixView } from '@/views/MatrixView';
 import { PropertiesView } from '@/views/PropertiesView';
 
 function UndoToast() {
@@ -47,6 +48,7 @@ function Shell() {
     <div className="min-h-screen bg-dm-bg">
       <Header />
       {tab === 'properties' && <PropertiesView />}
+      {tab === 'matrix' && <MatrixView />}
       {tab === 'entities' && <EntitiesView />}
       {tab === 'deeds' && <DeedsView />}
       <UndoToast />

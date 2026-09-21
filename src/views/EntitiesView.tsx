@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { ChevronDown, Pencil, UserCheck, X } from 'lucide-react';
+import { agentKey, buildAgentDirectory } from '@/lib/agents';
 import { entityTypeLabel, fmtDate } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { LegalEntity } from '@/lib/types';
 
 function EntityCard({ e }: { e: LegalEntity }) {
-  const { properties, deeds, openProperty, updateEntity, linkProperty, unlinkProperty } = useDentimap();
+  const { properties, deeds, entities, openProperty, updateEntity, linkProperty, unlinkProperty } = useDentimap();
   const [editing, setEditing] = useState(false);
-  const [managers, setManagers] = useState((e.registeredAgentOrManagers ?? []).join(', '));
+  const [newAgent, setNewAgent] = useState('');
   const agents = e.registeredAgentOrManagers ?? [];
   const linked = e.associatedPropertyIds
     .map((id) => properties.find((p) => p.id === id))
@@ -17,10 +18,16 @@ function EntityCard({ e }: { e: LegalEntity }) {
   const acquired = deeds.filter((d) => norm(d.grantee) === norm(e.name)).length;
   const sold = deeds.filter((d) => norm(d.grantor) === norm(e.name)).length;
 
-  const save = () => {
-    updateEntity(e.id, { registeredAgentOrManagers: managers.split(',').map((m) => m.trim()).filter(Boolean) });
-    setEditing(false);
+  const directory = buildAgentDirectory(entities);
+  const setAgents = (next: string[]) => updateEntity(e.id, { registeredAgentOrManagers: next });
+  const addAgent = (name: string) => {
+    const clean = name.trim();
+    if (clean && !agents.some((x) => agentKey(x) === agentKey(clean))) setAgents([...agents, directory.find((d) => agentKey(d.name) === agentKey(clean))?.name ?? clean]);
+    setNewAgent('');
   };
+  const removeAgent = (name: string) => setAgents(agents.filter((x) => x !== name));
+  const existing = directory.filter((d) => !agents.some((x) => agentKey(x) === agentKey(d.name)));
+  const sharedCount = (name: string) => directory.find((d) => agentKey(d.name) === agentKey(name))?.entities.length ?? 1;
 
   return (
     <article className="rounded-xl border border-dm-border bg-dm-surface">
@@ -63,26 +70,51 @@ function EntityCard({ e }: { e: LegalEntity }) {
           </span>
           <ChevronDown className="h-4 w-4 text-dm-dim transition-transform group-[[open]]/agents:rotate-180" />
         </summary>
-        <div className="px-5 pb-4 pt-1">
-          {editing ? (
-            <div className="flex gap-2">
-              <input className="field" value={managers} onChange={(ev) => setManagers(ev.target.value)} placeholder="Comma-separated names" autoFocus onKeyDown={(ev) => ev.key === 'Enter' && save()} />
-              <button className="btn btn-primary" onClick={save}>Save</button>
-            </div>
-          ) : (
-            <div className="flex items-start justify-between gap-3">
-              {agents.length ? (
-                <ul className="flex flex-wrap gap-1.5">
-                  {agents.map((m) => (
-                    <li key={m} className="rounded-full border border-dm-blue/30 bg-dm-bg px-2.5 py-1 text-xs text-dm-text">{m}</li>
+        <div className="space-y-3 px-5 pb-4 pt-1">
+          <div className="flex items-start justify-between gap-3">
+            {agents.length ? (
+              <ul className="flex flex-wrap gap-1.5">
+                {agents.map((m) => (
+                  <li key={m} className="inline-flex items-center gap-1.5 rounded-full border border-dm-blue/30 bg-dm-bg py-1 pl-2.5 pr-2 text-xs text-dm-text">
+                    {m}
+                    {sharedCount(m) > 1 && (
+                      <span className="tnum text-[11px] text-dm-dim" title={`Also registered on ${sharedCount(m) - 1} other ${sharedCount(m) === 2 ? 'entity' : 'entities'}`}>
+                        ×{sharedCount(m)}
+                      </span>
+                    )}
+                    {editing && (
+                      <button onClick={() => removeAgent(m)} className="text-dm-dim transition-colors hover:text-dm-red" aria-label={`Remove ${m}`}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-dm-dim">None recorded</p>
+            )}
+            <button
+              className={`shrink-0 text-xs transition-colors ${editing ? 'font-medium text-dm-blue' : 'text-dm-dim hover:text-dm-blue'}`}
+              onClick={() => setEditing((v) => !v)}
+              aria-label={editing ? 'Done editing registered agents' : 'Edit registered agents'}
+            >
+              {editing ? 'Done' : <Pencil className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+          {editing && (
+            <div className="space-y-2">
+              {existing.length > 0 && (
+                <select className="field" value="" onChange={(ev) => ev.target.value && addAgent(ev.target.value)} aria-label="Add an existing registered agent">
+                  <option value="">+ Add an existing agent…</option>
+                  {existing.map((d) => (
+                    <option key={d.name} value={d.name}>{d.name} — on {d.entities.length} {d.entities.length === 1 ? 'entity' : 'entities'}</option>
                   ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-dm-dim">None recorded</p>
+                </select>
               )}
-              <button className="text-dm-dim transition-colors hover:text-dm-blue" onClick={() => setEditing(true)} title="Edit registered agents" aria-label="Edit registered agents">
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
+              <div className="flex gap-2">
+                <input className="field" value={newAgent} onChange={(ev) => setNewAgent(ev.target.value)} placeholder="New agent name" onKeyDown={(ev) => ev.key === 'Enter' && addAgent(newAgent)} />
+                <button className="btn btn-primary" onClick={() => addAgent(newAgent)} disabled={!newAgent.trim()}>Add</button>
+              </div>
             </div>
           )}
         </div>
@@ -132,6 +164,29 @@ function EntityCard({ e }: { e: LegalEntity }) {
   );
 }
 
+function AgentDirectory() {
+  const entities = useDentimap((s) => s.entities);
+  const directory = buildAgentDirectory(entities);
+  return (
+    <details className="mb-6 rounded-xl border border-dm-blue/20 bg-dm-blue/[0.06]">
+      <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 [&::-webkit-details-marker]:hidden">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dm-blue/15 text-dm-blue"><UserCheck className="h-4 w-4" /></span>
+        <span className="flex-1 text-sm font-semibold">Registered Agents <span className="ml-1 font-normal text-dm-muted">· {directory.length} across {entities.length} entities</span></span>
+        <ChevronDown className="h-4 w-4 text-dm-dim" />
+      </summary>
+      <ul className="grid gap-x-6 gap-y-2 border-t border-dm-blue/15 px-5 py-4 text-sm sm:grid-cols-2">
+        {directory.length === 0 && <li className="text-dm-dim">No registered agents recorded yet.</li>}
+        {directory.map((d) => (
+          <li key={d.name} className="flex items-baseline justify-between gap-3">
+            <span>{d.name}</span>
+            <span className="truncate text-xs text-dm-dim">{d.entities.map((x) => x.name).join(' · ')}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
 export function EntitiesView() {
   const entities = useDentimap((s) => s.entities);
   return (
@@ -140,6 +195,7 @@ export function EntitiesView() {
         <h1 className="text-2xl font-semibold tracking-tight">Ownership entities</h1>
         <p className="mt-1 text-sm text-dm-muted">Landlord holding companies and clinical operators behind the facility network.</p>
       </div>
+      <AgentDirectory />
       <div className="grid gap-6 md:grid-cols-2">
         {entities.map((e) => <EntityCard key={e.id} e={e} />)}
       </div>

@@ -4,7 +4,7 @@ import { seedData } from './seed';
 import { supabase } from './supabase';
 import type { DeedRecord, DentimapData, LegalEntity, Property } from './types';
 
-export type TabId = 'properties' | 'entities' | 'deeds';
+export type TabId = 'properties' | 'matrix' | 'entities' | 'deeds';
 export type SyncStatus = 'off' | 'connecting' | 'synced' | 'saving' | 'error';
 
 interface State extends DentimapData {
