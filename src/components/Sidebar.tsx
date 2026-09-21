@@ -24,13 +24,13 @@ function Row({ p, active, onClick, issues, percent }: { p: Property; active: boo
     >
       {active && <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-dm-blue" />}
       <div className="flex items-start justify-between gap-2">
-        <span className={`text-[13px] font-medium ${active ? 'text-dm-text' : 'text-dm-muted group-hover:text-dm-text'}`}>
+        <span className={`text-label font-medium ${active ? 'text-dm-text' : 'text-dm-muted group-hover:text-dm-text'}`}>
           {p.name}
           {issues.length > 0 && <i className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-dm-amber align-middle" title={issues.join(' · ')} />}
         </span>
         <StatusPill status={p.status} />
       </div>
-      <div className="mt-0.5 flex items-center justify-between gap-2 tnum text-[13px] text-dm-dim">
+      <div className="mt-0.5 flex items-center justify-between gap-2 tnum text-label text-dm-dim">
         <span>{p.address.city || 'No city'}{p.address.state ? `, ${p.address.state}` : ''}</span>
         <span className={percent >= 80 ? 'text-dm-green' : percent >= 40 ? 'text-dm-amber' : 'text-dm-red'}>{percent}%</span>
       </div>
@@ -158,7 +158,7 @@ export function Sidebar() {
           {chip('vfd_practice', 'VFD')}
           {chip('attention', 'Needs attention')}
         </div>
-        <label className="flex items-center gap-2 text-[13px] text-dm-dim">
+        <label className="flex items-center gap-2 text-label text-dm-dim">
           Sort
           <select className="bg-transparent text-dm-muted outline-none" value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
             <option value="default">Original order</option>

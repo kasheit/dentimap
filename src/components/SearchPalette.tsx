@@ -80,7 +80,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
 
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center bg-dm-text/40 px-4 pt-[12vh]" onMouseDown={onClose} role="dialog" aria-label="Search">
-      <div className="w-full max-w-xl overflow-hidden rounded-xl border border-dm-border bg-dm-surface shadow-xl shadow-dm-text/20" onMouseDown={(e) => e.stopPropagation()} onKeyDown={onKeyDown}>
+      <div className="w-full max-w-xl animate-scale-in overflow-hidden rounded-xl border border-dm-border bg-dm-surface shadow-xl shadow-dm-text/20" onMouseDown={(e) => e.stopPropagation()} onKeyDown={onKeyDown}>
         <div className="relative border-b border-dm-border">
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-dm-dim" />
           <input
@@ -88,7 +88,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search locations, people, entities, deeds"
-            className="w-full bg-transparent py-3.5 pl-11 pr-4 text-[15px] outline-none placeholder:text-dm-dim"
+            className="w-full bg-transparent py-3.5 pl-11 pr-4 text-body outline-none placeholder:text-dm-dim"
           />
         </div>
         <ul className="scroll-thin max-h-[50vh] overflow-y-auto p-2">
@@ -99,10 +99,10 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
                 onClick={() => choose(r)}
                 className={`flex w-full items-baseline gap-3 rounded-md px-3 py-2 text-left ${i === idx ? 'bg-dm-hover' : ''}`}
               >
-                <span className="w-16 shrink-0 text-[13px] text-dm-dim">{r.kind}</span>
+                <span className="w-16 shrink-0 text-label text-dm-dim">{r.kind}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px]">{r.title}</span>
-                  {r.sub && <span className="block truncate text-[13px] text-dm-dim">{r.sub}</span>}
+                  <span className="block truncate text-body">{r.title}</span>
+                  {r.sub && <span className="block truncate text-label text-dm-dim">{r.sub}</span>}
                 </span>
               </button>
             </li>

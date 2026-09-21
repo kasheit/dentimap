@@ -56,12 +56,12 @@ export function TitleChainTimeline({ deeds }: { deeds: DeedRecord[] }) {
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="tnum text-sm font-medium">{fmtDate(d.recordingDate)}</span>
-                    <span className="text-[13px] text-dm-muted">{deedTypeLabel[d.deedType]}</span>
+                    <span className="text-label text-dm-muted">{deedTypeLabel[d.deedType]}</span>
                     {current && (
-                      <span className="text-[13px] font-medium text-dm-text">Current holder</span>
+                      <span className="text-label font-medium text-dm-text">Current holder</span>
                     )}
                   </div>
-                  <div className="mt-1 font-mono text-[13px] text-dm-dim">
+                  <div className="mt-1 font-mono text-label text-dm-dim">
                     {d.instrumentNumber && <>Instrument {d.instrumentNumber}</>}
                     {d.book && d.page && <>{d.instrumentNumber ? ' · ' : ''}Book {d.book}, page {d.page}</>}
                     {d.platReference && <> · {d.platReference}</>}
@@ -105,11 +105,11 @@ export function TitleChainTimeline({ deeds }: { deeds: DeedRecord[] }) {
                     {!d.isFormulaVerified && <FormulaChip consideration={d.consideration} stamps={d.exciseTaxStamps} ok={false} expected={expectedExcise(d.consideration)} />}
                   </>
                 ) : (
-                  <span className="tnum text-[13px] text-dm-dim">No consideration — plat / subdivision record</span>
+                  <span className="tnum text-label text-dm-dim">No consideration — plat / subdivision record</span>
                 )}
               </div>
 
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-dm-dim">
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-label text-dm-dim">
                 {d.source && <span>Source: {d.source}</span>}
                 {d.documentUrl && (
                   <a href={d.documentUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-dm-blue hover:underline">
@@ -119,7 +119,7 @@ export function TitleChainTimeline({ deeds }: { deeds: DeedRecord[] }) {
               </div>
 
               {brk && (
-                <p className="mt-3 flex items-start gap-2 rounded-md border border-dm-amber/30 bg-dm-amber/10 px-3 py-2 text-[13px] text-dm-amber">
+                <p className="mt-3 flex items-start gap-2 rounded-md border border-dm-amber/30 bg-dm-amber/10 px-3 py-2 text-label text-dm-amber">
                   <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   <span>
                     Chain gap: the prior instrument conveyed to <b className="font-medium">{brk.expected}</b>, but this grantor is <b className="font-medium">{brk.found}</b>. An intermediate deed may be missing.

@@ -3,7 +3,7 @@ import { completionFor } from '@/lib/completion';
 import { facilityTypeLabel } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
-import { Card, Fact, Group, StatusPill } from './Chips';
+import { DetailRow, Panel, StatusPill } from './Chips';
 import { OwnershipChain } from './CorporateEntities';
 import { DeedIngestionBuffer } from './DeedIngestionBuffer';
 import { HistoryLog } from './HistoryLog';
@@ -26,13 +26,13 @@ export function FacilityDossier({ property: p }: { property: Property }) {
   return (
     <div className="mx-auto w-full max-w-[1500px] space-y-5">
       <header className="min-w-0">
-        <div className="flex items-center gap-3 text-[13px] text-dm-muted">
+        <div className="flex items-center gap-3 text-label text-dm-muted">
           <span>{facilityTypeLabel[p.facilityType]}</span>
           <span className="text-dm-dim">·</span>
           <StatusPill status={p.status} />
         </div>
-        <h1 className="mt-1.5 text-[28px] font-semibold leading-tight">{p.name}</h1>
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px]">
+        <h1 className="mt-1.5 text-display font-semibold leading-tight">{p.name}</h1>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-label">
           <div className="flex items-center gap-2" title="Confirmed counts fully, unconfirmed counts half, missing counts zero">
             <div className="h-1.5 w-28 overflow-hidden rounded-full bg-dm-border">
               <div className="flex h-full">
@@ -53,57 +53,41 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         <RecordCard p={p} />
 
         <div className="min-w-0 space-y-5">
-          <Card id="ownership" title="Ownership">
+          <Panel id="ownership" title="Ownership">
             <OwnershipChain property={p} deeds={propDeeds} />
-          </Card>
-          <Card id="people" title="Key people">
+          </Panel>
+          <Panel id="people" title="Key people">
             <KeyPeople property={p} />
-          </Card>
+          </Panel>
         </div>
 
-        <Card id="notes" title="Notes" className="lg:col-span-2 2xl:col-span-1" action={openNotes > 0 ? <span className="text-[13px] text-dm-amber">{openNotes} open</span> : undefined}>
+        <Panel id="notes" title="Notes" className="lg:col-span-2 2xl:col-span-1" action={openNotes > 0 ? <span className="text-label text-dm-amber">{openNotes} open</span> : undefined}>
           <NotesLog property={p} />
-        </Card>
+        </Panel>
 
-        <Card id="title" title="Title chain" className="lg:col-span-2 2xl:col-span-3" action={<span className="text-[13px] text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>
+        <Panel id="title" title="Title chain" className="lg:col-span-2 2xl:col-span-3" action={<span className="text-label text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>
           <div className="space-y-6">
             <DeedIngestionBuffer property={p} />
             <TitleChainTimeline deeds={propDeeds} />
           </div>
-        </Card>
+        </Panel>
       </div>
 
       {hasSpecs && cs && (
-        <details id="specs" className="rounded-xl border border-dm-border bg-dm-surface p-5">
-          <summary className="cursor-pointer list-none text-[15px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">Specifications</summary>
-          <div className="mt-4">
-          <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
-            {(cs.operatingRooms !== undefined || cs.pacuBays !== undefined || cs.outpatientSharePercent !== undefined) && (
-              <Group title="Capacity">
-                {cs.operatingRooms !== undefined && <Fact label="Operating rooms">{cs.operatingRooms}</Fact>}
-                {cs.pacuBays !== undefined && <Fact label="PACU bays">{cs.pacuBays}</Fact>}
-                {cs.outpatientSharePercent !== undefined && <Fact label="Outpatient share">{cs.outpatientSharePercent}%</Fact>}
-              </Group>
-            )}
-            {cs.licensure && (
-              <Group title="Licensure">
-                <Fact label="Status">{cs.licensure}</Fact>
-              </Group>
-            )}
-            {cs.specialties && cs.specialties.length > 0 && (
-              <div className="sm:col-span-2">
-                <h3 className="mb-1 text-[13px] font-semibold">Services</h3>
-                <p className="text-[14px] leading-relaxed text-dm-muted">{cs.specialties.join(' · ')}</p>
-              </div>
-            )}
+        <Panel id="specs" title="Specifications">
+          <div className="grid gap-x-10 sm:grid-cols-2">
+            {cs.operatingRooms !== undefined && <DetailRow label="Operating rooms" value={String(cs.operatingRooms)} />}
+            {cs.pacuBays !== undefined && <DetailRow label="PACU bays" value={String(cs.pacuBays)} />}
+            {cs.outpatientSharePercent !== undefined && <DetailRow label="Outpatient share" value={`${cs.outpatientSharePercent}%`} />}
+            {cs.licensure && <DetailRow label="Licensure" value={cs.licensure} />}
+            {cs.specialties && cs.specialties.length > 0 && <DetailRow label="Services" value={cs.specialties.join(' · ')} />}
           </div>
-          </div>
-        </details>
+        </Panel>
       )}
 
-      <details id="history" className="rounded-xl border border-dm-border bg-dm-surface p-5">
-        <summary className="cursor-pointer list-none text-[15px] font-semibold text-dm-text [&::-webkit-details-marker]:hidden">
-          Activity <span className="ml-1 text-[13px] font-normal text-dm-dim">{activityCount}</span>
+      <details id="history" className="rounded-xl border border-dm-border/70 bg-dm-surface p-5">
+        <summary className="cursor-pointer list-none text-body font-semibold text-dm-text [&::-webkit-details-marker]:hidden">
+          Activity <span className="ml-1 text-label font-normal text-dm-dim">{activityCount}</span>
         </summary>
         <div className="mt-4">
           <HistoryLog propertyId={p.id} />

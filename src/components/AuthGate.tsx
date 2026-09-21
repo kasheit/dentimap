@@ -41,7 +41,7 @@ function AuthShell({ children }: { children: ReactNode }) {
 
 const primary =
   'mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-dm-blue/40 bg-dm-blue/10 px-4 py-2.5 text-sm font-medium text-dm-blue transition-colors hover:bg-dm-blue/20 disabled:opacity-50';
-const link = 'mt-2 w-full text-[13px] text-dm-dim transition-colors hover:text-dm-text';
+const link = 'mt-2 w-full text-label text-dm-dim transition-colors hover:text-dm-text';
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -102,7 +102,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       };
       return (
         <AuthShell>
-          <p className="mt-6 text-[13px] leading-relaxed text-dm-muted">
+          <p className="mt-6 text-label leading-relaxed text-dm-muted">
             Set up a passkey to sign in next time with your fingerprint, face, or device PIN — no email code needed.
           </p>
           <button onClick={setUpPasskey} disabled={passkeyBusy} className={primary}>
@@ -112,7 +112,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
           <button onClick={() => setPasskeyPrompt('done')} className={link}>
             Skip for now
           </button>
-          {error && <p className="mt-3 text-[13px] text-dm-red">{error}</p>}
+          {error && <p className="mt-3 text-label text-dm-red">{error}</p>}
         </AuthShell>
       );
     }
@@ -166,7 +166,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
       {mode === 'email-request' && (
         <>
-          <p className="mt-6 text-[13px] leading-relaxed text-dm-muted">
+          <p className="mt-6 text-label leading-relaxed text-dm-muted">
             We'll email a one-time code to <span className="font-medium text-dm-text">{maskEmail(OWNER_EMAIL)}</span>.
           </p>
           <button onClick={sendCode} disabled={sending} className={primary}>
@@ -186,7 +186,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
       {mode === 'email-verify' && (
         <>
-          <p className="mt-6 text-[13px] text-dm-muted">Enter the 6-digit code we just sent you.</p>
+          <p className="mt-6 text-label text-dm-muted">Enter the 6-digit code we just sent you.</p>
           <input
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -212,7 +212,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
         </>
       )}
 
-      {error && <p className="mt-3 text-[13px] text-dm-red">{error}</p>}
+      {error && <p className="mt-3 text-label text-dm-red">{error}</p>}
     </AuthShell>
   );
 }

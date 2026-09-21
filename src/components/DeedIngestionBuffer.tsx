@@ -14,7 +14,7 @@ function Token({ label, value }: { label: string; value?: string | number }) {
   const found = value !== undefined && value !== '';
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[13px] ${
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-label ${
         found ? 'border-dm-border bg-dm-surface text-dm-text' : 'border-dm-border/60 text-dm-dim'
       }`}
     >
@@ -98,7 +98,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
   return (
     <div className="rounded-lg border border-dm-border bg-dm-bg">
       <div className="flex items-center justify-between gap-3 border-b border-dm-border px-4 py-2.5">
-        <span className="text-[13px] font-medium text-dm-muted">Paste county record</span>
+        <span className="text-label font-medium text-dm-muted">Paste county record</span>
       </div>
       <div className="space-y-3 p-4">
         <textarea
@@ -129,7 +129,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
           rows={5}
           spellCheck={false}
           placeholder="Paste a deed record, or paste or drop a screenshot"
-          className="field scroll-thin resize-y font-mono text-[13px] leading-relaxed"
+          className="field scroll-thin resize-y font-mono text-label leading-relaxed"
         />
         <div className="flex flex-wrap items-center gap-2">
           <button className="btn" disabled={!raw.trim() || reading !== null} onClick={() => parse(raw)}>
@@ -143,7 +143,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
           <button className="btn" disabled={reading !== null} onClick={() => fileRef.current?.click()}>
             Upload screenshot
           </button>
-          {reading !== null && <span className="text-[13px] text-dm-muted">Reading screenshot… {Math.round(reading * 100)}%</span>}
+          {reading !== null && <span className="text-label text-dm-muted">Reading screenshot… {Math.round(reading * 100)}%</span>}
           {(raw || draft) && (
             <button className="btn" onClick={clear}>
               Clear
@@ -151,19 +151,19 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
           )}
         </div>
 
-        {ocrError && <p className="text-[13px] text-dm-red">{ocrError}</p>}
+        {ocrError && <p className="text-label text-dm-red">{ocrError}</p>}
 
         {parsed && draft && (
           <div className="space-y-4 border-t border-dm-border pt-4">
-            {fromImage && <p className="text-[13px] text-dm-muted">Read from a screenshot. Check every field against the original before adding.</p>}
+            {fromImage && <p className="text-label text-dm-muted">Read from a screenshot. Check every field against the original before adding.</p>}
             {parsed.saleDate && parsed.recordingDate && parsed.saleDate !== parsed.recordingDate && (
-              <p className="flex items-start gap-2 rounded-md border border-dm-amber/30 bg-dm-amber/10 px-3 py-2 text-[13px] text-dm-amber">
+              <p className="flex items-start gap-2 rounded-md border border-dm-amber/30 bg-dm-amber/10 px-3 py-2 text-label text-dm-amber">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 This page shows a sale on {fmtDate(parsed.saleDate)} and a deed dated {fmtDate(parsed.recordingDate)}. The price may belong to the sale, not that deed. Check it before adding.
               </p>
             )}
             {!applied && foundLabels.length > 0 && (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-dm-border px-3 py-2.5 text-[13px]">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-dm-border px-3 py-2.5 text-label">
                 <span className="text-dm-muted">Also found: {foundLabels.join(' · ')}</span>
                 <button
                   className="btn"
@@ -177,7 +177,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
               </div>
             )}
             {total > 1 && (
-              <div className="flex items-center justify-between text-[13px] text-dm-muted">
+              <div className="flex items-center justify-between text-label text-dm-muted">
                 <span>
                   Record {total - queue.length + 1} of {total}
                 </span>
@@ -199,7 +199,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
             </div>
 
             {pinMismatch && (
-              <p className="flex items-start gap-2 rounded-md border border-dm-amber/30 bg-dm-amber/10 px-3 py-2 text-[13px] text-dm-amber">
+              <p className="flex items-start gap-2 rounded-md border border-dm-amber/30 bg-dm-amber/10 px-3 py-2 text-label text-dm-amber">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 Parsed parcel PIN {parsed.parcelPin} does not match this location’s PIN ({property.address.parcelPin}). Check that you’re adding this to the right property.
               </p>

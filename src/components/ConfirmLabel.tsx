@@ -53,8 +53,8 @@ export function ConfirmLabel({ property, field, label, has, extra, showDetail = 
       </span>
       {open && (
         <span className="absolute right-0 top-full z-20 mt-2 grid w-[min(32rem,88vw)] gap-2 rounded-md border border-dm-border bg-dm-surface p-3 text-left shadow-lg shadow-dm-text/15 sm:grid-cols-[1fr_9rem_auto]">
-          <input className="field text-[13px]" placeholder="Source, e.g. county tax card" value={source} onChange={(e) => setSource(e.target.value)} autoFocus />
-          <input type="date" className="field text-[13px]" value={asOf} onChange={(e) => setAsOf(e.target.value)} aria-label="As-of date" />
+          <input className="field text-label" placeholder="Source, e.g. county tax card" value={source} onChange={(e) => setSource(e.target.value)} autoFocus />
+          <input type="date" className="field text-label" value={asOf} onChange={(e) => setAsOf(e.target.value)} aria-label="As-of date" />
           <span className="flex gap-2">
             <button className="btn" onClick={() => setOpen(false)}>Cancel</button>
             <button className="btn btn-primary" onClick={confirm}>Confirm</button>

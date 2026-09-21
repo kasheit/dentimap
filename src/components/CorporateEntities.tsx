@@ -6,7 +6,7 @@ import { DetailRow, LevelLabel } from './Chips';
 
 function SubHeading({ children, first }: { children: React.ReactNode; first?: boolean }) {
   return (
-    <div className={`text-[12px] font-semibold uppercase tracking-[0.08em] text-dm-blue/80 ${first ? '' : 'mt-6'} mb-1 border-b border-dm-border/70 pb-1.5`}>
+    <div className={`eyebrow ${first ? '' : 'mt-6'} mb-1 border-b border-dm-border/70 pb-1.5`}>
       {children}
     </div>
   );
@@ -39,7 +39,7 @@ export function OwnershipChain({ property, deeds }: { property: Property; deeds:
           holder && (
             <>
               {holder.grantee}
-              <span className="ml-2 text-[13px] font-normal text-dm-dim">per {fmtDate(holder.recordingDate)} deed</span>
+              <span className="ml-2 text-label font-normal text-dm-dim">per {fmtDate(holder.recordingDate)} deed</span>
             </>
           )
         }

@@ -63,10 +63,10 @@ export function NotesLog({ property }: { property: Property }) {
       </div>
 
       {log.length === 0 ? (
-        <p className="mt-4 text-[13px] text-dm-dim">No notes.</p>
+        <p className="mt-4 text-label text-dm-dim">No notes.</p>
       ) : (
         <>
-          <p className="mt-5 text-[13px] text-dm-dim">
+          <p className="mt-5 text-label text-dm-dim">
             {log.length} {log.length === 1 ? 'entry' : 'entries'}
             {open > 0 && <> · <span className="text-dm-amber">{open} open</span></>}
           </p>
@@ -88,13 +88,13 @@ export function NotesLog({ property }: { property: Property }) {
                     <span className="w-3.5" />
                   )}
                   <div className="min-w-0 flex-1">
-                    <div className="text-[13px] text-dm-dim">
+                    <div className="text-label text-dm-dim">
                       <span className={tagColor[n.tag]}>{tagLabel[n.tag]}</span>
                       {!legacy && <> · {stamp(n.createdAt)}</>}
                       {legacy && <> · earlier note</>}
                       {n.resolved && <> · resolved</>}
                     </div>
-                    <p className={`mt-0.5 whitespace-pre-wrap text-[14px] leading-relaxed ${n.resolved ? 'text-dm-dim line-through' : ''}`}>{n.text}</p>
+                    <p className={`mt-0.5 whitespace-pre-wrap text-body leading-relaxed ${n.resolved ? 'text-dm-dim line-through' : ''}`}>{n.text}</p>
                   </div>
                   <button
                     onClick={() => (legacy ? save(property.noteLog ?? [], 'Note deleted', true) : editReal((x) => (x.id === n.id ? null : x), 'Note deleted'))}

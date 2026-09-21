@@ -20,14 +20,14 @@ function SyncBadge() {
   if (sync === 'off' || sync === 'synced' || sync === 'connecting' || sync === 'saving') return null;
   if (sync === 'conflict') {
     return (
-      <span className="hidden items-center gap-1.5 tnum text-[13px] text-dm-red md:flex" title={message}>
+      <span className="hidden items-center gap-1.5 tnum text-label text-dm-red md:flex" title={message}>
         <AlertTriangle className="h-3.5 w-3.5" /> Conflict
       </span>
     );
   }
   if (sync === 'error') {
     return (
-      <span className="hidden items-center gap-1.5 tnum text-[13px] text-dm-amber md:flex" title={message}>
+      <span className="hidden items-center gap-1.5 tnum text-label text-dm-amber md:flex" title={message}>
         <CloudOff className="h-3.5 w-3.5" /> Not syncing
       </span>
     );
@@ -76,7 +76,7 @@ export function Header() {
     if (fileRef.current) fileRef.current.value = '';
   };
 
-  const menuItem = 'flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text';
+  const menuItem = 'flex w-full items-center gap-2 px-3 py-2 text-left text-label text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text';
 
   return (
     <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-surface/90 backdrop-blur">
@@ -88,7 +88,7 @@ export function Header() {
             <button
               key={id}
               onClick={() => setTab(id)}
-              className={`relative flex items-center gap-2 whitespace-nowrap px-3 py-2.5 text-[13px] font-medium transition-colors lg:py-2 ${
+              className={`relative flex items-center gap-2 whitespace-nowrap px-3 py-2.5 text-label font-medium transition-colors lg:py-2 ${
                 tab === id ? 'text-dm-text' : 'text-dm-dim hover:text-dm-muted'
               }`}
             >
@@ -103,7 +103,7 @@ export function Header() {
           <SyncBadge />
           {due && properties.length > 0 && (
             <button
-              className="hidden text-[13px] text-dm-amber transition-colors hover:text-dm-text md:inline"
+              className="hidden text-label text-dm-amber transition-colors hover:text-dm-text md:inline"
               title="You have not downloaded a backup in over a week"
               onClick={() => {
                 exportJson(snapshot());
@@ -147,7 +147,7 @@ export function Header() {
         </div>
       </div>
       {notice && (
-        <div className="border-t border-dm-border bg-dm-surface px-6 py-1.5 text-center tnum text-[13px] text-dm-muted">{notice}</div>
+        <div className="border-t border-dm-border bg-dm-surface px-6 py-1.5 text-center tnum text-label text-dm-muted">{notice}</div>
       )}
     </header>
   );

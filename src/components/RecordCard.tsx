@@ -3,7 +3,7 @@ import { ExternalLink } from 'lucide-react';
 import { addressLine, compactUsd, fmtDate, fmtMonth } from '@/lib/format';
 import { sortedDeeds, useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
-import { Card, DetailRow } from './Chips';
+import { Panel, DetailRow } from './Chips';
 import { ConfirmLabel, EDIT_RECORD_EVENT } from './ConfirmLabel';
 import { PropertyEditForm } from './PropertyEditForm';
 
@@ -18,8 +18,8 @@ const TABS: [Tab, string][] = [
 function Stat({ label, value, strong }: { label: string; value?: number; strong?: boolean }) {
   return (
     <div>
-      <div className="text-[13px] text-dm-dim">{label}</div>
-      <div className={`tnum mt-0.5 text-[24px] font-semibold ${strong ? 'text-dm-blue' : ''}`}>{value !== undefined ? compactUsd(value) : <span className="text-dm-dim">—</span>}</div>
+      <div className="text-label text-dm-dim">{label}</div>
+      <div className={`tnum mt-0.5 text-2xl font-semibold ${strong ? 'text-dm-blue' : ''}`}>{value !== undefined ? compactUsd(value) : <span className="text-dm-dim">—</span>}</div>
     </div>
   );
 }
@@ -66,7 +66,7 @@ export function RecordCard({ p }: { p: Property }) {
   );
 
   return (
-    <Card id="record" title="Property" action={<button className="btn" onClick={() => setEditing(true)}>Edit</button>}>
+    <Panel id="record" title="Property" action={<button className="btn" onClick={() => setEditing(true)}>Edit</button>}>
       <div role="tablist" className="scroll-thin -mt-1 mb-4 flex gap-1 overflow-x-auto border-b border-dm-border">
         {TABS.map(([id, label]) => (
           <button
@@ -74,7 +74,7 @@ export function RecordCard({ p }: { p: Property }) {
             role="tab"
             aria-selected={tab === id}
             onClick={() => setTab(id)}
-            className={`-mb-px whitespace-nowrap border-b-2 px-3 py-2 text-[14px] transition-colors ${
+            className={`-mb-px whitespace-nowrap border-b-2 px-3 py-2 text-body transition-colors ${
               tab === id ? 'border-dm-blue text-dm-text' : 'border-transparent text-dm-muted hover:text-dm-text'
             }`}
           >
@@ -95,7 +95,7 @@ export function RecordCard({ p }: { p: Property }) {
                 <>
                   {p.address.parcelPin}
                   {p.parcelUrl && (
-                    <a href={p.parcelUrl} target="_blank" rel="noreferrer" className="ml-3 inline-flex items-center gap-1 font-sans text-[13px] font-normal text-dm-blue hover:underline">
+                    <a href={p.parcelUrl} target="_blank" rel="noreferrer" className="ml-3 inline-flex items-center gap-1 font-sans text-label font-normal text-dm-blue hover:underline">
                       County record <ExternalLink className="h-3 w-3" />
                     </a>
                   )}
@@ -115,9 +115,9 @@ export function RecordCard({ p }: { p: Property }) {
         <div>
           <div className="mb-3 flex flex-wrap items-end gap-x-6 gap-y-3 border-b border-dm-border/50 pb-5">
             <Stat label="Land value" value={m?.landValue} />
-            <span className="pb-1 text-[22px] text-dm-dim" aria-hidden>+</span>
+            <span className="pb-1 text-2xl text-dm-dim" aria-hidden>+</span>
             <Stat label="Building value" value={m?.buildingValue} />
-            <span className="pb-1 text-[22px] text-dm-dim" aria-hidden>=</span>
+            <span className="pb-1 text-2xl text-dm-dim" aria-hidden>=</span>
             <Stat label="Total value" value={total} strong />
           </div>
           <DetailRow
@@ -147,7 +147,7 @@ export function RecordCard({ p }: { p: Property }) {
               lastDeed && lastDeed.consideration > 0 ? (
                 <>
                   {compactUsd(lastDeed.consideration)}
-                  <span className="ml-2 text-[13px] font-normal text-dm-dim">
+                  <span className="ml-2 text-label font-normal text-dm-dim">
                     {lastDeed.grantee} · {fmtMonth(lastDeed.recordingDate)}
                   </span>
                 </>
@@ -166,6 +166,6 @@ export function RecordCard({ p }: { p: Property }) {
           <DetailRow label="Target opening" value={m?.targetOpening} />
         </div>
       )}
-    </Card>
+    </Panel>
   );
 }

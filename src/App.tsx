@@ -19,7 +19,7 @@ function UndoToast() {
   }, [lastDeleted, dismissUndo]);
   if (!lastDeleted) return null;
   return (
-    <div className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-lg border border-dm-border bg-dm-raised px-4 py-2.5 text-[13px] shadow-lg shadow-dm-text/15">
+    <div className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-lg border border-dm-border bg-dm-raised px-4 py-2.5 text-label shadow-lg shadow-dm-text/15">
       <span className="text-dm-muted">Instrument removed</span>
       <button className="font-medium text-dm-blue hover:underline" onClick={undoDelete}>Undo</button>
     </div>
@@ -31,7 +31,7 @@ function ConflictBanner() {
   const resolve = useDentimap((s) => s.resolveConflict);
   if (sync !== 'conflict') return null;
   return (
-    <div className="border-b border-dm-red/30 bg-dm-red/10 px-4 py-2.5 text-[13px] text-dm-red sm:px-6">
+    <div className="border-b border-dm-red/30 bg-dm-red/10 px-4 py-2.5 text-label text-dm-red sm:px-6">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-4 gap-y-2">
         <span className="flex-1">This registry was changed somewhere else. Your latest edits are not saved yet.</span>
         <button className="btn" onClick={() => resolve('remote')}>Load latest (discard mine)</button>

@@ -87,7 +87,7 @@ export function MatrixView() {
       </div>
 
       <div className="max-h-[calc(100vh-13rem)] overflow-auto rounded-xl border border-dm-border bg-dm-surface scroll-thin">
-        <table className="w-full min-w-[820px] border-collapse text-[13px]">
+        <table className="w-full min-w-[820px] border-collapse text-label">
           <thead className="sticky top-0 z-10 bg-dm-surface">
             <tr className="eyebrow border-b border-dm-border bg-dm-surface">
               <SortHead label="Location" k="name" sort={sort} onSort={onSort} />
@@ -105,16 +105,16 @@ export function MatrixView() {
                 <tr key={p.id} className="border-b border-dm-border/60 transition-colors last:border-0 hover:bg-dm-hover">
                   <td className="px-4 py-3">
                     <button onClick={() => openProperty(p.id)} className="text-left font-medium text-dm-text hover:text-dm-blue hover:underline">{p.name}</button>
-                    {p.dbaName && <div className="mt-0.5 text-[13px] text-dm-muted">d/b/a {p.dbaName}</div>}
-                    <div className="mt-0.5 text-[13px] text-dm-dim">
+                    {p.dbaName && <div className="mt-0.5 text-label text-dm-muted">d/b/a {p.dbaName}</div>}
+                    <div className="mt-0.5 text-label text-dm-dim">
                       {facilityTypeLabel[p.facilityType]} · <span className={statusTone[p.status]}>{statusLabel[p.status]}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-dm-muted">{p.address.county.replace(/ County$/, '')}<div className="text-[13px] text-dm-dim">{p.address.city}, {p.address.state}</div></td>
-                  <td className="px-4 py-3 font-mono text-[13px] text-dm-muted">{p.address.parcelPin || '—'}</td>
+                  <td className="px-4 py-3 text-dm-muted">{p.address.county.replace(/ County$/, '')}<div className="text-label text-dm-dim">{p.address.city}, {p.address.state}</div></td>
+                  <td className="px-4 py-3 font-mono text-label text-dm-muted">{p.address.parcelPin || '—'}</td>
                   <td className="px-4 py-3 text-right tnum">{compactUsd(p.metrics?.currentAssessedValue)}</td>
                   <td className="px-4 py-3 text-right tnum">{compactUsd(p.metrics?.projectInvestment)}</td>
-                  <td className="px-4 py-3 tnum text-[13px] text-dm-muted">{deed ? fmtDate(deed.recordingDate) : '—'}</td>
+                  <td className="px-4 py-3 tnum text-label text-dm-muted">{deed ? fmtDate(deed.recordingDate) : '—'}</td>
                 </tr>
               );
             })}

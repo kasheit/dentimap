@@ -3,7 +3,8 @@ import { AlertTriangle, CheckCircle2, HelpCircle, ShieldQuestion } from 'lucide-
 import type { FacilityStatus, VerificationState } from '@/lib/types';
 import { statusLabel } from '@/lib/format';
 
-export function Card({
+/** The one container: bordered white panel, hairline-divided header, roomy body. */
+export function Panel({
   id,
   title,
   action,
@@ -19,7 +20,7 @@ export function Card({
   return (
     <section id={id} className={`scroll-mt-20 min-w-0 rounded-xl border border-dm-border bg-dm-surface p-5 ${className}`}>
       <header className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-[15px] font-semibold text-dm-text">{title}</h2>
+        <h2 className="text-body font-semibold text-dm-text">{title}</h2>
         {action}
       </header>
       <div>{children}</div>
@@ -27,51 +28,67 @@ export function Card({
   );
 }
 
-const statusDot: Record<FacilityStatus, string> = {
-  active: 'bg-dm-green',
-  pipeline_fitout: 'bg-dm-blue',
-  pipeline_pending: 'bg-dm-amber',
-  closed: 'bg-dm-dim',
+type Tone = 'green' | 'blue' | 'amber' | 'red' | 'neutral';
+
+const toneClass: Record<Tone, string> = {
+  green: 'bg-dm-green/10 text-dm-green',
+  blue: 'bg-dm-blue/10 text-dm-blue',
+  amber: 'bg-dm-amber/10 text-dm-amber',
+  red: 'bg-dm-red/10 text-dm-red',
+  neutral: 'bg-dm-hover text-dm-muted',
 };
 
-export function StatusPill({ status }: { status: FacilityStatus }) {
+/** Tinted pill: the one way to show a status, tag or verification state. */
+export function Badge({ tone = 'neutral', icon, dot, children, title }: { tone?: Tone; icon?: ReactNode; dot?: boolean; children: ReactNode; title?: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[13px] text-dm-muted">
-      <i className={`h-1.5 w-1.5 rounded-full ${statusDot[status]}`} />
-      {statusLabel[status]}
+    <span title={title} className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-medium ${toneClass[tone]}`}>
+      {dot && <i className="h-1.5 w-1.5 rounded-full bg-current" />}
+      {icon}
+      {children}
     </span>
   );
 }
 
-const verifyMeta: Record<VerificationState, { label: string; cls: string; Icon: typeof CheckCircle2 }> = {
-  verified: { label: 'Verified', cls: 'border-dm-green/30 bg-dm-green/10 text-dm-green', Icon: CheckCircle2 },
-  unverified: { label: 'Unverified', cls: 'border-dm-amber/30 bg-dm-amber/10 text-dm-amber', Icon: ShieldQuestion },
-  unknown: { label: 'Unknown', cls: 'border-dm-border bg-dm-hover text-dm-muted', Icon: HelpCircle },
+const statusTone: Record<FacilityStatus, Tone> = {
+  active: 'green',
+  pipeline_fitout: 'blue',
+  pipeline_pending: 'amber',
+  closed: 'neutral',
+};
+
+export function StatusPill({ status }: { status: FacilityStatus }) {
+  return (
+    <Badge tone={statusTone[status]} dot>
+      {statusLabel[status]}
+    </Badge>
+  );
+}
+
+const verifyMeta: Record<Exclude<VerificationState, 'verified'>, { label: string; tone: Tone; Icon: typeof CheckCircle2 }> = {
+  unverified: { label: 'Unverified', tone: 'amber', Icon: ShieldQuestion },
+  unknown: { label: 'Unknown', tone: 'neutral', Icon: HelpCircle },
 };
 
 export function VerifyChip({ state }: { state: VerificationState }) {
   if (state === 'verified') return null;
-  const { label, cls, Icon } = verifyMeta[state];
+  const { label, tone, Icon } = verifyMeta[state];
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[13px] ${cls}`}
-    >
-      <Icon className="h-3 w-3" />
+    <Badge tone={tone} icon={<Icon className="h-3 w-3" />}>
       {label}
-    </span>
+    </Badge>
   );
 }
 
 export function FormulaChip({ consideration, stamps, ok, expected }: { consideration: number; stamps: number; ok: boolean; expected: number }) {
   const fmt = (n: number, d = 0) => `$${n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })}`;
   return ok ? (
-    <span className="inline-flex items-center gap-1.5 rounded-md border border-dm-green/30 bg-dm-green/10 px-2 py-1 tnum text-[13px] text-dm-green">
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-dm-green/30 bg-dm-green/10 px-2 py-1 tnum text-label text-dm-green">
       <CheckCircle2 className="h-3 w-3" />
       {fmt(consideration)} / $500 = {fmt(stamps, 2)}
     </span>
   ) : (
     <span
-      className="inline-flex items-center gap-1.5 rounded-md border border-dm-red/30 bg-dm-red/10 px-2 py-1 tnum text-[13px] text-dm-red"
+      className="inline-flex items-center gap-1.5 rounded-md border border-dm-red/30 bg-dm-red/10 px-2 py-1 tnum text-label text-dm-red"
       title="North Carolina excise tax is $1 per $500 of consideration (G.S. 105-228.30)"
     >
       <AlertTriangle className="h-3 w-3" />
@@ -84,27 +101,6 @@ export function Empty({ children }: { children: ReactNode }) {
   return (
     <div className="rounded-lg border border-dashed border-dm-border px-4 py-8 text-center text-sm text-dm-dim">
       {children}
-    </div>
-  );
-}
-
-export function Fact({ label, children, mono, sub }: { label: string; children: ReactNode; mono?: boolean; sub?: ReactNode }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-dm-border/70 py-2 last:border-0">
-      <dt className="shrink-0 text-[13px] text-dm-dim">{label}</dt>
-      <dd className="min-w-0 text-right">
-        <div className={`break-words text-[13px] ${mono ? 'font-mono' : 'tnum'}`}>{children}</div>
-        {sub && <div className="mt-0.5 text-[13px] leading-snug">{sub}</div>}
-      </dd>
-    </div>
-  );
-}
-
-export function Group({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div>
-      <h3 className="mb-1 text-[13px] font-semibold">{title}</h3>
-      <dl>{children}</dl>
     </div>
   );
 }
@@ -136,7 +132,7 @@ export function LevelLabel({
       {detail && <span className="text-dm-dim">· {detail}</span>}
     </>
   );
-  const cls = 'inline-flex flex-wrap items-center justify-end gap-x-1.5 text-[13px]';
+  const cls = 'inline-flex flex-wrap items-center justify-end gap-x-1.5 text-label';
   return onClick ? (
     <button type="button" onClick={onClick} className={`${cls} rounded px-1 py-0.5 text-left transition-colors hover:bg-dm-hover`} title={level === 'missing' ? 'Fill this in' : 'Click to confirm'}>
       {body}
@@ -151,7 +147,7 @@ export function DetailRow({ label, value, mono, status }: { label: string; value
   return (
     <div className="grid grid-cols-[6rem_minmax(0,1fr)_auto] items-baseline gap-x-3 border-b border-dm-border/60 py-2 last:border-0">
       <div className="text-[12px] text-dm-dim">{label}</div>
-      <div className={`min-w-0 break-words font-medium ${mono ? 'font-mono text-[13px]' : 'text-[14px]'}`}>
+      <div className={`min-w-0 break-words font-medium ${mono ? 'font-mono text-label' : 'text-body'}`}>
         {value || <span className="font-normal text-dm-dim">—</span>}
       </div>
       {status ? <div className="max-w-[11rem] text-right">{status}</div> : <div />}

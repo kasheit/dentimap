@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { facilityTypeLabel, statusLabel } from '@/lib/format';
 import type { FacilityStatus, FacilityType, FieldMeta, Property, SourcedField, VerificationState } from '@/lib/types';
-import { Card } from './Chips';
+import { Panel } from './Chips';
 
 type Draft = {
   name: string;
@@ -170,13 +170,13 @@ function Field({ label, span = '', children }: { label: string; span?: string; c
 function SourceRow({ label, meta, onMeta }: { label: string; meta: FieldMeta; onMeta: (m: FieldMeta) => void }) {
   return (
     <div className="grid gap-2 sm:grid-cols-[7.5rem_1fr_9rem]">
-      <select className="field text-[13px]" value={meta.state} onChange={(e) => onMeta({ ...meta, state: e.target.value as VerificationState })} aria-label={`${label} verification`}>
+      <select className="field text-label" value={meta.state} onChange={(e) => onMeta({ ...meta, state: e.target.value as VerificationState })} aria-label={`${label} verification`}>
         <option value="unknown">Unsourced</option>
         <option value="unverified">Unverified</option>
         <option value="verified">Verified</option>
       </select>
-      <input className="field text-[13px]" placeholder="Source, e.g. Wake Co. tax card" value={meta.source ?? ''} onChange={(e) => onMeta({ ...meta, source: e.target.value })} aria-label={`${label} source`} />
-      <input type="date" className="field text-[13px]" value={meta.asOf ?? ''} onChange={(e) => onMeta({ ...meta, asOf: e.target.value })} aria-label={`${label} as-of date`} />
+      <input className="field text-label" placeholder="Source, e.g. Wake Co. tax card" value={meta.source ?? ''} onChange={(e) => onMeta({ ...meta, source: e.target.value })} aria-label={`${label} source`} />
+      <input type="date" className="field text-label" value={meta.asOf ?? ''} onChange={(e) => onMeta({ ...meta, asOf: e.target.value })} aria-label={`${label} as-of date`} />
     </div>
   );
 }
@@ -202,7 +202,7 @@ export function PropertyEditForm({
   const canSave = d.name.trim().length > 0;
 
   return (
-    <Card
+    <Panel
       id="record"
       className="col-span-full"
       title="Edit location"
@@ -249,7 +249,7 @@ export function PropertyEditForm({
         </div>
 
         <div>
-          <h3 className="mb-3 text-[13px] font-semibold">Location</h3>
+          <h3 className="mb-3 text-label font-semibold">Location</h3>
           <div className="grid gap-4 sm:grid-cols-6">
             <Field label="Street" span="sm:col-span-6">{input('street')}</Field>
             <Field label="City" span="sm:col-span-3">{input('city')}</Field>
@@ -267,7 +267,7 @@ export function PropertyEditForm({
         </div>
 
         <div>
-          <h3 className="mb-3 text-[13px] font-semibold">Owner per county</h3>
+          <h3 className="mb-3 text-label font-semibold">Owner per county</h3>
           <div className="grid gap-4">
             <Field label="Name">{input('ownerName')}</Field>
             <Field label="Mailing address">{input('ownerMailing')}</Field>
@@ -277,7 +277,7 @@ export function PropertyEditForm({
         </div>
         <div className="space-y-6">
         <div>
-          <h3 className="mb-3 text-[13px] font-semibold">Values</h3>
+          <h3 className="mb-3 text-label font-semibold">Values</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Field label="Assessed value">{input('currentAssessedValue', 'tnum')}</Field>
@@ -289,7 +289,7 @@ export function PropertyEditForm({
             </div>
             <Field label="Land value">{input('landValue', 'tnum')}</Field>
             <Field label="Building value">{input('buildingValue', 'tnum')}</Field>
-            <div className="text-[13px] text-dm-dim sm:col-span-2">
+            <div className="text-label text-dm-dim sm:col-span-2">
               Total value{' '}
               <span className="tnum font-medium text-dm-text">
                 {num(d.landValue) !== undefined && num(d.buildingValue) !== undefined ? `$${((num(d.landValue) ?? 0) + (num(d.buildingValue) ?? 0)).toLocaleString('en-US')}` : '—'}
@@ -302,7 +302,7 @@ export function PropertyEditForm({
         </div>
 
         <div>
-          <h3 className="mb-3 text-[13px] font-semibold">Specifications</h3>
+          <h3 className="mb-3 text-label font-semibold">Specifications</h3>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Operating rooms">{input('operatingRooms', 'tnum')}</Field>
             <Field label="PACU bays">{input('pacuBays', 'tnum')}</Field>
@@ -315,7 +315,7 @@ export function PropertyEditForm({
         </div>
 
         <div>
-          <h3 className="mb-3 text-[13px] font-semibold">Last sale and deed</h3>
+          <h3 className="mb-3 text-label font-semibold">Last sale and deed</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Date sold"><input type="date" className="field" value={d.saleDate} onChange={(e) => set('saleDate', e.target.value)} /></Field>
             <Field label="Sale price">{input('salePrice', 'tnum')}</Field>
@@ -328,7 +328,7 @@ export function PropertyEditForm({
         </div>
 
         <div>
-          <h3 className="mb-3 text-[13px] font-semibold">Building</h3>
+          <h3 className="mb-3 text-label font-semibold">Building</h3>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label="Heated area, sq ft">{input('heatedArea', 'tnum')}</Field>
             <Field label="Year built">{input('yearBuilt', 'tnum')}</Field>
@@ -346,6 +346,6 @@ export function PropertyEditForm({
           )}
         </div>
       </div>
-    </Card>
+    </Panel>
   );
 }

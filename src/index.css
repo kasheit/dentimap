@@ -24,7 +24,7 @@
     color-scheme: light;
   }
   body {
-    @apply bg-dm-bg font-sans text-[14px] leading-relaxed text-dm-text antialiased;
+    @apply bg-dm-bg font-sans text-body leading-relaxed text-dm-text antialiased;
     font-feature-settings: 'cv11', 'ss03', 'tnum';
     text-rendering: optimizeLegibility;
   }
@@ -41,13 +41,13 @@
     @apply w-full rounded-md border border-dm-border bg-dm-bg px-2.5 py-1.5 text-sm text-dm-text outline-none transition-colors placeholder:text-dm-dim focus:border-dm-blue/60;
   }
   .btn {
-    @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-[13px] font-medium text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-label font-medium text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text disabled:cursor-not-allowed disabled:opacity-40;
   }
   .btn-primary {
     @apply border-dm-blue/40 bg-dm-blue/10 text-dm-blue hover:bg-dm-blue/20 hover:text-dm-blue;
   }
   .label {
-    @apply text-[13px] font-medium text-dm-dim;
+    @apply text-label font-medium text-dm-dim;
   }
   /* small-caps style eyebrow for table heads and group titles */
   .eyebrow {
@@ -55,7 +55,7 @@
   }
   /* text filter tab with a blue underline when active */
   .tab-chip {
-    @apply whitespace-nowrap text-[13px] text-dm-dim transition-colors hover:text-dm-muted;
+    @apply whitespace-nowrap text-label text-dm-dim transition-colors hover:text-dm-muted;
   }
   .tab-chip[aria-pressed='true'] {
     @apply text-dm-text underline decoration-dm-blue decoration-2 underline-offset-[6px];

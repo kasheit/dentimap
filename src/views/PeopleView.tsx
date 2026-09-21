@@ -102,7 +102,7 @@ function LinkList({
 }) {
   return (
     <div>
-      <div className="mb-2 text-[13px] font-semibold">{title}</div>
+      <div className="mb-2 text-label font-semibold">{title}</div>
       {items.length ? (
         <ul className="space-y-0.5">
           {items.map((i) => (
@@ -209,13 +209,13 @@ function Profile({ person }: { person: Person }) {
       ) : (
         <header className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-[13px] text-dm-muted">
+            <div className="text-label text-dm-muted">
               {roleText(person)}
               {person.status === 'former' && <span className="text-dm-dim"> · Former</span>}
             </div>
-            <h1 className="mt-1 text-[26px] font-semibold leading-tight">{person.name}</h1>
-            {person.title && <p className="mt-1 text-[15px] text-dm-muted">{person.title}</p>}
-            {person.relevance && <p className="mt-3 max-w-2xl text-[15px] leading-relaxed">{person.relevance}</p>}
+            <h1 className="mt-1 text-display font-semibold leading-tight">{person.name}</h1>
+            {person.title && <p className="mt-1 text-body text-dm-muted">{person.title}</p>}
+            {person.relevance && <p className="mt-3 max-w-2xl text-body leading-relaxed">{person.relevance}</p>}
           </div>
           <button className="btn shrink-0" onClick={() => setEditing(true)}>Edit</button>
         </header>
@@ -223,19 +223,19 @@ function Profile({ person }: { person: Person }) {
 
       <section className="border-t border-dm-border pt-5">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-[18px] font-semibold">What they did</h2>
-          <span className="text-[13px] text-dm-dim">{actions.length}</span>
+          <h2 className="text-title font-semibold">What they did</h2>
+          <span className="text-label text-dm-dim">{actions.length}</span>
         </div>
         {actions.length === 0 ? (
-          <p className="mb-4 text-[13px] text-dm-dim">No entries.</p>
+          <p className="mb-4 text-label text-dm-dim">No entries.</p>
         ) : (
           <ul className="mb-4 divide-y divide-dm-border/70">
             {actions.map((a) => (
               <li key={a.id} className="grid gap-x-4 gap-y-1 py-3 sm:grid-cols-[7rem_1fr_auto]">
-                <span className="tnum text-[13px] text-dm-dim">{fmtDate(a.date)}</span>
+                <span className="tnum text-label text-dm-dim">{fmtDate(a.date)}</span>
                 <div className="min-w-0">
-                  <p className="text-[14px] leading-relaxed">{a.text}</p>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 text-[13px] text-dm-dim">
+                  <p className="text-body leading-relaxed">{a.text}</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 text-label text-dm-dim">
                     {propName(a.propertyId) && (
                       <button className="hover:text-dm-blue hover:underline" onClick={() => a.propertyId && openProperty(a.propertyId)}>
                         {propName(a.propertyId)}
@@ -278,7 +278,7 @@ function Profile({ person }: { person: Person }) {
       </section>
 
       <section className="border-t border-dm-border pt-5">
-        <h2 className="mb-3 text-[18px] font-semibold">Notes</h2>
+        <h2 className="mb-3 text-title font-semibold">Notes</h2>
         <textarea
           className="field scroll-thin resize-y leading-relaxed"
           rows={4}
@@ -340,7 +340,7 @@ export function PeopleView() {
               <Plus className="h-4 w-4" />
             </button>
           </div>
-          <select className="field text-[13px]" value={role} onChange={(e) => setRole(e.target.value as 'all' | PersonRole)} aria-label="Filter by role">
+          <select className="field text-label" value={role} onChange={(e) => setRole(e.target.value as 'all' | PersonRole)} aria-label="Filter by role">
             <option value="all">All roles</option>
             {ROLES.map((r) => (
               <option key={r} value={r}>{personRoleLabel[r]}</option>
@@ -356,8 +356,8 @@ export function PeopleView() {
                   selected?.id === p.id ? 'border-dm-blue/40 bg-dm-blue/[0.06]' : 'border-transparent hover:border-dm-border hover:bg-dm-hover'
                 }`}
               >
-                <div className="text-[13px] font-medium">{p.name}</div>
-                <div className="mt-0.5 text-[13px] text-dm-dim">
+                <div className="text-label font-medium">{p.name}</div>
+                <div className="mt-0.5 text-label text-dm-dim">
                   {roleText(p)}
                   {p.status === 'former' && ' · Former'}
                 </div>

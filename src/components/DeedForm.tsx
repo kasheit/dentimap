@@ -126,15 +126,15 @@ export function DeedForm({ draft, onChange, withConfidence }: { draft: Draft; on
         </label>
         <label className="space-y-1">
           <span className="label">Instrument #</span>
-          <input className="field font-mono text-[13px]" value={draft.instrumentNumber} onChange={(e) => set('instrumentNumber', e.target.value)} />
+          <input className="field font-mono text-label" value={draft.instrumentNumber} onChange={(e) => set('instrumentNumber', e.target.value)} />
         </label>
         <label className="space-y-1">
           <span className="label">Book</span>
-          <input className="field font-mono text-[13px]" value={draft.book} onChange={(e) => set('book', e.target.value)} />
+          <input className="field font-mono text-label" value={draft.book} onChange={(e) => set('book', e.target.value)} />
         </label>
         <label className="space-y-1">
           <span className="label">Page</span>
-          <input className="field font-mono text-[13px]" value={draft.page} onChange={(e) => set('page', e.target.value)} />
+          <input className="field font-mono text-label" value={draft.page} onChange={(e) => set('page', e.target.value)} />
         </label>
         <label className="space-y-1 sm:col-span-2">
           <span className="label">Source (optional)</span>
@@ -142,7 +142,7 @@ export function DeedForm({ draft, onChange, withConfidence }: { draft: Draft; on
         </label>
         <label className="space-y-1 sm:col-span-2 lg:col-span-3">
           <span className="label">Document link</span>
-          <input className="field text-[13px]" placeholder="https://… link to the recorded instrument" value={draft.documentUrl} onChange={(e) => set('documentUrl', e.target.value)} />
+          <input className="field text-label" placeholder="https://… link to the recorded instrument" value={draft.documentUrl} onChange={(e) => set('documentUrl', e.target.value)} />
         </label>
       </div>
       <div>

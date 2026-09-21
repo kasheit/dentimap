@@ -39,7 +39,7 @@ export function DeedsView() {
         <button className={`btn ${onlyFlagged ? 'text-dm-text' : ''}`} onClick={() => setOnlyFlagged((f) => !f)}>
           <AlertTriangle className="h-3.5 w-3.5" /> Mismatches only
         </button>
-        <span className="ml-auto tnum text-[13px] text-dm-dim">{rows.length} shown</span>
+        <span className="ml-auto tnum text-label text-dm-dim">{rows.length} shown</span>
       </div>
 
       <div className="scroll-thin overflow-x-auto rounded-xl border border-dm-border bg-dm-surface">
@@ -59,7 +59,7 @@ export function DeedsView() {
           <tbody>
             {rows.map(({ d, prop }) => (
               <tr key={d.id} className="border-b border-dm-border/60 align-top transition-colors last:border-0 hover:bg-dm-hover">
-                <td className="whitespace-nowrap px-4 py-3 tnum text-[13px]">{fmtDate(d.recordingDate)}</td>
+                <td className="whitespace-nowrap px-4 py-3 tnum text-label">{fmtDate(d.recordingDate)}</td>
                 <td className="px-4 py-3">
                   {prop ? (
                     <button className="text-left font-medium transition-colors hover:text-dm-blue" onClick={() => openProperty(prop.id)}>{prop.name}</button>
@@ -68,8 +68,8 @@ export function DeedsView() {
                   )}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="text-[13px]">{deedTypeLabel[d.deedType]}{d.documentUrl && <> · <a href={d.documentUrl} target="_blank" rel="noreferrer" className="text-dm-blue hover:underline">Document</a></>}</div>
-                  <div className="mt-0.5 font-mono text-[13px] text-dm-dim">
+                  <div className="text-label">{deedTypeLabel[d.deedType]}{d.documentUrl && <> · <a href={d.documentUrl} target="_blank" rel="noreferrer" className="text-dm-blue hover:underline">Document</a></>}</div>
+                  <div className="mt-0.5 font-mono text-label text-dm-dim">
                     {[d.instrumentNumber, d.book && d.page ? `Book ${d.book}, page ${d.page}` : undefined].filter(Boolean).join(' · ') || '—'}
                   </div>
                 </td>
@@ -80,8 +80,8 @@ export function DeedsView() {
                     <span>{d.grantee}</span>
                   </div>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 tnum text-[13px]" title={usd(d.consideration)}>{compactUsd(d.consideration)}</td>
-                <td className="whitespace-nowrap px-4 py-3 tnum text-[13px]">
+                <td className="whitespace-nowrap px-4 py-3 tnum text-label" title={usd(d.consideration)}>{compactUsd(d.consideration)}</td>
+                <td className="whitespace-nowrap px-4 py-3 tnum text-label">
                   {d.isFormulaVerified ? (
                     <span>{usd(d.exciseTaxStamps, 2)}</span>
                   ) : (

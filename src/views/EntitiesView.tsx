@@ -21,9 +21,9 @@ function EntityHeader({ e }: { e: LegalEntity }) {
     return (
       <header className="flex items-start justify-between gap-3 border-b border-dm-border p-5">
         <div>
-          <h2 className="text-[17px] font-semibold leading-snug">{e.name}</h2>
-          {e.dbaName && <div className="mt-0.5 text-[13px] text-dm-muted">d/b/a {e.dbaName}</div>}
-          <div className="mt-1 text-[13px] text-dm-dim">{entityTypeLabel[e.entityType]} · {e.jurisdiction || 'Jurisdiction not set'}</div>
+          <h2 className="text-title font-semibold leading-snug">{e.name}</h2>
+          {e.dbaName && <div className="mt-0.5 text-label text-dm-muted">d/b/a {e.dbaName}</div>}
+          <div className="mt-1 text-label text-dm-dim">{entityTypeLabel[e.entityType]} · {e.jurisdiction || 'Jurisdiction not set'}</div>
         </div>
         <button className="rounded p-1.5 text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-blue" onClick={() => setEditing(true)} aria-label={`Edit ${e.name}`} title="Edit entity">
           <Pencil className="h-3.5 w-3.5" />
@@ -55,7 +55,7 @@ function EntityHeader({ e }: { e: LegalEntity }) {
         </label>
         <label className="block space-y-1">
           <span className="label">SOS ID</span>
-          <input className="field font-mono text-[13px]" value={d.sosId} onChange={(ev) => set('sosId', ev.target.value)} />
+          <input className="field font-mono text-label" value={d.sosId} onChange={(ev) => set('sosId', ev.target.value)} />
         </label>
         <label className="block space-y-1">
           <span className="label">Formation date</span>
@@ -115,7 +115,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
       <dl className="grid grid-cols-3 gap-4 border-b border-dm-border p-5">
         <div>
           <dt className="label">SOS ID</dt>
-          <dd className="mt-1 font-mono text-[13px]">{e.sosId ?? '—'}</dd>
+          <dd className="mt-1 font-mono text-label">{e.sosId ?? '—'}</dd>
         </div>
         <div>
           <dt className="label">Formed</dt>
@@ -135,7 +135,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
               <li key={p.id} className="group flex items-center gap-1 rounded-md hover:bg-dm-hover">
                 <button onClick={() => openPerson(p.id)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-3 py-1.5 text-left text-sm">
                   <span className="truncate">{p.name}</span>
-                  <span className="shrink-0 text-[13px] text-dm-dim">{p.roles.map((r) => personRoleLabel[r]).join(' · ')}</span>
+                  <span className="shrink-0 text-label text-dm-dim">{p.roles.map((r) => personRoleLabel[r]).join(' · ')}</span>
                 </button>
                 <button
                   onClick={() => updatePerson(p.id, { entityIds: p.entityIds.filter((x) => x !== e.id) })}
@@ -176,7 +176,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
               <li key={p.id} className="group flex items-center gap-1 rounded-md hover:bg-dm-hover">
                 <button onClick={() => openProperty(p.id)} className="flex min-w-0 flex-1 items-center justify-between gap-3 px-3 py-2 text-left text-sm">
                   <span className="truncate">{p.name}</span>
-                  <span className="shrink-0 text-[13px] text-dm-dim">{p.address.city}, {p.address.state}</span>
+                  <span className="shrink-0 text-label text-dm-dim">{p.address.city}, {p.address.state}</span>
                 </button>
                 <button
                   onClick={() => unlinkProperty(e.id, p.id)}

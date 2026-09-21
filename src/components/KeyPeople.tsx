@@ -11,7 +11,7 @@ export function KeyPeople({ property }: { property: Property }) {
   return (
     <div>
       {linked.length === 0 ? (
-        <p className="text-[13px] text-dm-dim">No people linked.</p>
+        <p className="text-label text-dm-dim">No people linked.</p>
       ) : (
         <ul className="divide-y divide-dm-border/70">
           {linked.map((p) => {
@@ -19,21 +19,21 @@ export function KeyPeople({ property }: { property: Property }) {
             return (
               <li key={p.id} className="py-3 first:pt-0">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-                  <button onClick={() => openPerson(p.id)} className="text-left text-[15px] font-medium hover:text-dm-blue">
+                  <button onClick={() => openPerson(p.id)} className="text-left text-body font-medium hover:text-dm-blue">
                     {p.name}
                   </button>
-                  <span className="text-[13px] text-dm-dim">
+                  <span className="text-label text-dm-dim">
                     {p.roles.map((r) => personRoleLabel[r]).join(' · ')}
                     {p.status === 'former' && ' · Former'}
                   </span>
                 </div>
-                {p.relevance && <p className="mt-1 text-[13px] leading-relaxed text-dm-muted">{p.relevance}</p>}
+                {p.relevance && <p className="mt-1 text-label leading-relaxed text-dm-muted">{p.relevance}</p>}
                 {acts.length > 0 && (
                   <ul className="mt-2 space-y-1.5">
                     {acts.map((a) => (
                       <li key={a.id} className="grid gap-x-3 sm:grid-cols-[6.5rem_1fr]">
-                        <span className="tnum text-[13px] text-dm-dim">{fmtDate(a.date)}</span>
-                        <div className="text-[13px]">
+                        <span className="tnum text-label text-dm-dim">{fmtDate(a.date)}</span>
+                        <div className="text-label">
                           {a.text}
                           <div className="mt-0.5">
                             <LevelLabel level={a.state === 'verified' ? 'confirmed' : 'partial'} detail={a.source} />
