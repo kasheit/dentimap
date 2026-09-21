@@ -18,7 +18,7 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <section id={id} className={`scroll-mt-20 min-w-0 rounded-xl border border-dm-border bg-dm-surface p-5 ${className}`}>
+    <section id={id} className={`scroll-mt-20 min-w-0 rounded-lg border border-dm-border bg-dm-surface p-5 ${className}`}>
       <header className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-body font-semibold text-dm-text">{title}</h2>
         {action}
@@ -152,5 +152,15 @@ export function DetailRow({ label, value, mono, status }: { label: string; value
       </div>
       {status ? <div className="max-w-[11rem] text-right">{status}</div> : <div />}
     </div>
+  );
+}
+
+/** Initials avatar for people; neutral so it never competes with status colour. */
+export function Avatar({ name }: { name: string }) {
+  const initials = name.replace(/^Dr\.?\s+/i, '').split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+  return (
+    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-dm-border bg-dm-hover text-[11px] font-medium text-dm-muted">
+      {initials}
+    </span>
   );
 }

@@ -79,9 +79,9 @@ export function Header() {
   const menuItem = 'flex w-full items-center gap-2 px-3 py-2 text-left text-label text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text';
 
   return (
-    <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-surface/90 backdrop-blur">
+    <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none" draggable={false} />
+        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-0 invert" draggable={false} />
 
         <nav className="order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto">
           {tabs.map(({ id, label, icon: Icon }) => (
@@ -94,7 +94,7 @@ export function Header() {
             >
               <Icon className="h-3.5 w-3.5" />
               {label}
-              {tab === id && <span className="absolute inset-x-2 bottom-0 h-px bg-dm-blue" />}
+              {tab === id && <span className="absolute inset-x-2 bottom-0 h-px bg-dm-text" />}
             </button>
           ))}
         </nav>
@@ -126,7 +126,7 @@ export function Header() {
               Export
             </button>
             {menu && (
-              <div className="absolute right-0 mt-1.5 w-52 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-lg shadow-dm-text/10">
+              <div className="absolute right-0 mt-1.5 w-52 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-lg shadow-black/60">
                 <button className={menuItem} onClick={() => { exportJson(snapshot()); setDue(false); setMenu(false); }}>
                   Full backup (JSON)
                 </button>

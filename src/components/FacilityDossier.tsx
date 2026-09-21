@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { completionFor } from '@/lib/completion';
-import { facilityTypeLabel } from '@/lib/format';
+import { compactUsd, facilityTypeLabel } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
 import { DetailRow, Panel, StatusPill } from './Chips';
@@ -49,6 +49,20 @@ export function FacilityDossier({ property: p }: { property: Property }) {
       </header>
 
 
+      <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-dm-border/70 bg-dm-surface sm:grid-cols-4">
+        {[
+          ['Assessed', compactUsd(p.metrics?.currentAssessedValue)],
+          ['Investment', compactUsd(p.metrics?.projectInvestment)],
+          ['Last sale', compactUsd(p.lastSale?.price)],
+          ['Footprint', p.metrics?.footprintSqFt ? `${p.metrics.footprintSqFt.toLocaleString()} sf` : '—'],
+        ].map(([label, value]) => (
+          <div key={label} className="border-dm-border/70 px-4 py-3 [&:not(:last-child)]:sm:border-r">
+            <div className="eyebrow">{label}</div>
+            <div className="tnum mt-0.5 font-mono text-2xl font-medium">{value}</div>
+          </div>
+        ))}
+      </div>
+
       <div className="grid items-start gap-5 lg:grid-cols-2 2xl:grid-cols-3">
         <RecordCard p={p} />
 
@@ -85,7 +99,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         </Panel>
       )}
 
-      <details id="history" className="rounded-xl border border-dm-border/70 bg-dm-surface p-5">
+      <details id="history" className="rounded-lg border border-dm-border/70 bg-dm-surface p-5">
         <summary className="cursor-pointer list-none text-body font-semibold text-dm-text [&::-webkit-details-marker]:hidden">
           Activity <span className="ml-1 text-label font-normal text-dm-dim">{activityCount}</span>
         </summary>

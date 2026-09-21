@@ -86,7 +86,7 @@ export function MatrixView() {
         </div>
       </div>
 
-      <div className="max-h-[calc(100vh-13rem)] overflow-auto rounded-xl border border-dm-border bg-dm-surface scroll-thin">
+      <div className="max-h-[calc(100vh-13rem)] overflow-auto rounded-lg border border-dm-border bg-dm-surface scroll-thin">
         <table className="w-full min-w-[820px] border-collapse text-label">
           <thead className="sticky top-0 z-10 bg-dm-surface">
             <tr className="eyebrow border-b border-dm-border bg-dm-surface">

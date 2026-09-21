@@ -42,7 +42,7 @@ export function DeedsView() {
         <span className="ml-auto tnum text-label text-dm-dim">{rows.length} shown</span>
       </div>
 
-      <div className="scroll-thin overflow-x-auto rounded-xl border border-dm-border bg-dm-surface">
+      <div className="scroll-thin overflow-x-auto rounded-lg border border-dm-border bg-dm-surface">
         <table className="w-full min-w-[900px] text-left text-sm">
           <thead>
             <tr className="border-b border-dm-border">

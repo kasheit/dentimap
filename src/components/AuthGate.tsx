@@ -28,9 +28,9 @@ function FullScreenLoader() {
 function AuthShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-dm-bg px-4">
-      <div className="w-full max-w-sm rounded-xl border border-dm-border bg-dm-surface p-8">
+      <div className="w-full max-w-sm rounded-lg border border-dm-border bg-dm-surface p-8">
         <h1>
-          <img src="/dentimap-logo.png" alt="Dentimap" className="h-10 w-auto" />
+          <img src="/dentimap-logo.png" alt="Dentimap" className="h-10 w-auto brightness-0 invert" />
         </h1>
         <p className="mt-3 text-sm text-dm-muted">Owner access only.</p>
         {children}
@@ -40,7 +40,7 @@ function AuthShell({ children }: { children: ReactNode }) {
 }
 
 const primary =
-  'mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-dm-blue/40 bg-dm-blue/10 px-4 py-2.5 text-sm font-medium text-dm-blue transition-colors hover:bg-dm-blue/20 disabled:opacity-50';
+  'mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-dm-text bg-dm-text px-4 py-2.5 text-sm font-medium text-dm-bg transition-colors hover:bg-dm-text/85 disabled:opacity-50';
 const link = 'mt-2 w-full text-label text-dm-dim transition-colors hover:text-dm-text';
 
 export function AuthGate({ children }: { children: ReactNode }) {

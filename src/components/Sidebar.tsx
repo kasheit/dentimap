@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
+import { compactUsd } from '@/lib/format';
 import { attentionFor } from '@/lib/attention';
 import { completionFor } from '@/lib/completion';
 import { newId, useDentimap } from '@/lib/store';
@@ -7,9 +8,12 @@ import type { Property } from '@/lib/types';
 import { StatusPill } from './Chips';
 
 type Filter = 'all' | 'valleygate_asc' | 'vfd_practice' | 'attention';
+type StatusFilter = 'all' | 'active' | 'pipeline' | 'closed';
 type Sort = 'default' | 'name' | 'status' | 'county';
 
 const STATUS_ORDER = { active: 0, pipeline_fitout: 1, pipeline_pending: 2, closed: 3 } as const;
+
+const statusGroup = (s: Property['status']): StatusFilter => (s === 'active' ? 'active' : s === 'closed' ? 'closed' : 'pipeline');
 
 export const FOCUS_SEARCH = 'dentimap:focus-search';
 
@@ -19,7 +23,7 @@ function Row({ p, active, onClick, issues, percent }: { p: Property; active: boo
       data-active={active}
       onClick={onClick}
       className={`group relative block w-full rounded-lg border px-3 py-2.5 text-left transition-colors ${
-        active ? 'border-dm-blue/40 bg-dm-blue/[0.06]' : 'border-transparent hover:border-dm-border hover:bg-dm-hover'
+        active ? 'border-dm-border bg-dm-hover' : 'border-transparent hover:border-dm-border hover:bg-dm-hover'
       }`}
     >
       {active && <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-dm-blue" />}
@@ -43,6 +47,7 @@ export function Sidebar() {
   const [sort, setSort] = useState<Sort>('default');
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -67,6 +72,21 @@ export function Sidebar() {
     [properties, deeds],
   );
 
+  const overview = useMemo(() => {
+    const sum = (pick: (p: Property) => number | undefined) => properties.reduce((t, p) => t + (pick(p) ?? 0), 0);
+    return {
+      assessed: sum((p) => p.metrics?.currentAssessedValue),
+      investment: sum((p) => p.metrics?.projectInvestment),
+      complete: properties.length ? Math.round(properties.reduce((t, p) => t + completionFor(p, deeds).percent, 0) / properties.length) : 0,
+      status: {
+        all: properties.length,
+        active: properties.filter((p) => statusGroup(p.status) === 'active').length,
+        pipeline: properties.filter((p) => statusGroup(p.status) === 'pipeline').length,
+        closed: properties.filter((p) => statusGroup(p.status) === 'closed').length,
+      } as Record<StatusFilter, number>,
+    };
+  }, [properties, deeds]);
+
   const visible = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const list = properties.filter((p) => {
@@ -74,6 +94,7 @@ export function Sidebar() {
         const a = attentionFor(p, deeds);
         if (!a.issues.length && !a.pipeline) return false;
       } else if (filter !== 'all' && p.facilityType !== filter) return false;
+      if (statusFilter !== 'all' && statusGroup(p.status) !== statusFilter) return false;
       if (!needle) return true;
       return [p.name, p.address.street, p.address.city, p.address.county, p.address.zip, p.address.parcelPin, p.address.state]
         .join(' ')
@@ -88,7 +109,7 @@ export function Sidebar() {
     };
     const cmp = by[sort];
     return cmp ? [...list].sort(cmp) : list;
-  }, [properties, deeds, q, filter, sort]);
+  }, [properties, deeds, q, filter, statusFilter, sort]);
 
   const groups = [
     { title: 'Valleygate Dental Surgery Centers', items: visible.filter((p) => p.facilityType === 'valleygate_asc') },
@@ -136,6 +157,28 @@ export function Sidebar() {
   return (
     <aside onKeyDown={onKeyDown} className="flex min-h-0 flex-col border-b border-dm-border bg-dm-bg lg:w-80 lg:shrink-0 lg:border-b-0 lg:border-r">
       <div className="space-y-3 border-b border-dm-border p-4">
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-dm-border bg-dm-border">
+          {[
+            ['Locations', String(properties.length)],
+            ['Complete', `${overview.complete}%`],
+            ['Assessed', compactUsd(overview.assessed || undefined)],
+            ['Investment', compactUsd(overview.investment || undefined)],
+          ].map(([label, value]) => (
+            <div key={label} className="bg-dm-surface px-3 py-2">
+              <div className="eyebrow">{label}</div>
+              <div className="tnum mt-0.5 font-mono text-title font-medium">{value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="flex h-1.5 overflow-hidden rounded-full bg-dm-border" title="Valleygate ASC, VFD practices, other">
+          <div className="bg-dm-text" style={{ width: `${(counts.valleygate_asc / Math.max(1, counts.all)) * 100}%` }} />
+          <div className="bg-dm-blue" style={{ width: `${(counts.vfd_practice / Math.max(1, counts.all)) * 100}%` }} />
+        </div>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-label text-dm-dim">
+          <span className="flex items-center gap-1.5"><i className="h-1.5 w-1.5 rounded-full bg-dm-text" />Valleygate {counts.valleygate_asc}</span>
+          <span className="flex items-center gap-1.5"><i className="h-1.5 w-1.5 rounded-full bg-dm-blue" />VFD {counts.vfd_practice}</span>
+          <span className="flex items-center gap-1.5"><i className="h-1.5 w-1.5 rounded-full bg-dm-border" />Other {counts.all - counts.valleygate_asc - counts.vfd_practice}</span>
+        </div>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dm-dim" />
@@ -157,6 +200,14 @@ export function Sidebar() {
           {chip('valleygate_asc', 'Valleygate ASC')}
           {chip('vfd_practice', 'VFD')}
           {chip('attention', 'Needs attention')}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+          <span className="label">Status</span>
+          {(['all', 'active', 'pipeline', 'closed'] as StatusFilter[]).map((id) => (
+            <button key={id} aria-pressed={statusFilter === id} onClick={() => setStatusFilter(id)} className="tab-chip tnum capitalize">
+              {id} ({overview.status[id]})
+            </button>
+          ))}
         </div>
         <label className="flex items-center gap-2 text-label text-dm-dim">
           Sort

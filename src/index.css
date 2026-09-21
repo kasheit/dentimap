@@ -5,23 +5,23 @@
 @tailwind utilities;
 
 @layer base {
-  /* Clinical light theme: cool off-white canvas, white panels, ink text, one steel-blue accent (matches the logo). */
+  /* Black theme: pure black canvas, near-black panels, hairline borders, white as the emphasis colour, blue only for links and focus. */
   :root {
-    --dm-bg: 244 247 250;
-    --dm-surface: 255 255 255;
-    --dm-raised: 255 255 255;
-    --dm-border: 217 225 232;
-    --dm-hover: 236 241 245;
-    --dm-text: 16 33 48;
-    --dm-muted: 62 84 104;
-    --dm-dim: 92 113 132;
-    --dm-blue: 26 99 148;
-    --dm-green: 15 122 88;
-    --dm-amber: 154 96 0;
-    --dm-red: 184 50 50;
+    --dm-bg: 0 0 0;
+    --dm-surface: 10 10 10;
+    --dm-raised: 20 20 20;
+    --dm-border: 38 38 38;
+    --dm-hover: 26 26 26;
+    --dm-text: 237 237 237;
+    --dm-muted: 161 161 161;
+    --dm-dim: 128 128 128;
+    --dm-blue: 50 145 255;
+    --dm-green: 62 207 142;
+    --dm-amber: 245 166 35;
+    --dm-red: 255 90 90;
   }
   html {
-    color-scheme: light;
+    color-scheme: dark;
   }
   body {
     @apply bg-dm-bg font-sans text-body leading-relaxed text-dm-text antialiased;
@@ -44,7 +44,7 @@
     @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-label font-medium text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text disabled:cursor-not-allowed disabled:opacity-40;
   }
   .btn-primary {
-    @apply border-dm-blue/40 bg-dm-blue/10 text-dm-blue hover:bg-dm-blue/20 hover:text-dm-blue;
+    @apply border-dm-text bg-dm-text text-dm-bg hover:bg-dm-text/85 hover:text-dm-bg;
   }
   .label {
     @apply text-label font-medium text-dm-dim;
@@ -58,7 +58,7 @@
     @apply whitespace-nowrap text-label text-dm-dim transition-colors hover:text-dm-muted;
   }
   .tab-chip[aria-pressed='true'] {
-    @apply text-dm-text underline decoration-dm-blue decoration-2 underline-offset-[6px];
+    @apply text-dm-text underline decoration-dm-text decoration-2 underline-offset-[6px];
   }
   .kbd {
     @apply rounded border border-dm-border bg-dm-bg px-1 font-mono text-[11px] leading-4 text-dm-dim;

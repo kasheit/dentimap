@@ -109,7 +109,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
   const sold = deeds.filter((d) => norm(d.grantor) === norm(e.name)).length;
 
   return (
-    <article className="rounded-xl border border-dm-border bg-dm-surface">
+    <article className="rounded-lg border border-dm-border bg-dm-surface">
       <EntityHeader e={e} />
 
       <dl className="grid grid-cols-3 gap-4 border-b border-dm-border p-5">

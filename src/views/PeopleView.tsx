@@ -353,7 +353,7 @@ export function PeopleView() {
               <button
                 onClick={() => selectPerson(p.id)}
                 className={`block w-full rounded-lg border px-3 py-2.5 text-left transition-colors ${
-                  selected?.id === p.id ? 'border-dm-blue/40 bg-dm-blue/[0.06]' : 'border-transparent hover:border-dm-border hover:bg-dm-hover'
+                  selected?.id === p.id ? 'border-dm-border bg-dm-hover' : 'border-transparent hover:border-dm-border hover:bg-dm-hover'
                 }`}
               >
                 <div className="text-label font-medium">{p.name}</div>

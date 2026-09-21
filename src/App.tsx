@@ -19,7 +19,7 @@ function UndoToast() {
   }, [lastDeleted, dismissUndo]);
   if (!lastDeleted) return null;
   return (
-    <div className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-lg border border-dm-border bg-dm-raised px-4 py-2.5 text-label shadow-lg shadow-dm-text/15">
+    <div className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-lg border border-dm-border bg-dm-raised px-4 py-2.5 text-label shadow-lg shadow-black/60">
       <span className="text-dm-muted">Instrument removed</span>
       <button className="font-medium text-dm-blue hover:underline" onClick={undoDelete}>Undo</button>
     </div>
