@@ -1,6 +1,6 @@
 export type VerificationState = 'verified' | 'unverified' | 'unknown';
 export type FacilityType = 'valleygate_asc' | 'vfd_practice' | 'affiliate';
-export type FacilityStatus = 'active' | 'pipeline_fitout' | 'pipeline_pending' | 'closed';
+export type FacilityStatus = 'active' | 'closed';
 export type DeedType =
   | 'warranty_deed'
   | 'special_warranty_deed'

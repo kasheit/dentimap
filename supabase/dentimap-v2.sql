@@ -29,7 +29,7 @@ values ('main', $seed$
       "id": "vg-garner",
       "name": "Valleygate - Garner",
       "facilityType": "valleygate_asc",
-      "status": "pipeline_fitout",
+      "status": "active",
       "address": {
         "street": "305 Timber Dr.",
         "city": "Garner",
@@ -112,7 +112,7 @@ values ('main', $seed$
       "id": "vg-south-charlotte",
       "name": "Valleygate - South Charlotte",
       "facilityType": "valleygate_asc",
-      "status": "pipeline_fitout",
+      "status": "active",
       "address": {
         "street": "13515 Steele Creek Road",
         "city": "Charlotte",
@@ -126,7 +126,7 @@ values ('main', $seed$
       "id": "vg-asheville",
       "name": "Valleygate - Asheville",
       "facilityType": "valleygate_asc",
-      "status": "pipeline_pending",
+      "status": "active",
       "address": {
         "street": "1088 Sweeten Creek Road",
         "city": "Asheville",
@@ -140,7 +140,7 @@ values ('main', $seed$
       "id": "vg-wilmington",
       "name": "Valleygate - Wilmington",
       "facilityType": "valleygate_asc",
-      "status": "pipeline_pending",
+      "status": "active",
       "address": {
         "street": "1709 South 16th Street",
         "city": "Wilmington",

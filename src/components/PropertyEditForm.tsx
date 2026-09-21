@@ -242,8 +242,8 @@ export function PropertyEditForm({
             </select>
           </Field>
           <Field label="Status">
-            <select className="field" value={d.status === 'pipeline_fitout' ? 'pipeline_pending' : d.status} onChange={(e) => set('status', e.target.value as FacilityStatus)}>
-              {(['active', 'pipeline_pending', 'closed'] as FacilityStatus[]).map((k) => <option key={k} value={k}>{statusLabel[k]}</option>)}
+            <select className="field" value={d.status} onChange={(e) => set('status', e.target.value as FacilityStatus)}>
+              {(['active', 'closed'] as FacilityStatus[]).map((k) => <option key={k} value={k}>{statusLabel[k]}</option>)}
             </select>
           </Field>
         </div>

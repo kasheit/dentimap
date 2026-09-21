@@ -41,7 +41,7 @@
     @apply w-full rounded-md border border-dm-border bg-dm-bg px-2.5 py-1.5 text-sm text-dm-text outline-none transition-colors placeholder:text-dm-dim focus:border-dm-blue/60;
   }
   .btn {
-    @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-label font-medium text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-label font-medium text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.97];
   }
   .btn-primary {
     @apply border-dm-text bg-dm-text text-dm-bg hover:bg-dm-text/85 hover:text-dm-bg;
@@ -63,11 +63,31 @@
 }
 
 @layer utilities {
+  /* children rise in one after another */
+  .stagger > * {
+    animation: rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .stagger > *:nth-child(2) { animation-delay: 40ms; }
+  .stagger > *:nth-child(3) { animation-delay: 80ms; }
+  .stagger > *:nth-child(4) { animation-delay: 120ms; }
+  .stagger > *:nth-child(5) { animation-delay: 160ms; }
+  .stagger > *:nth-child(6) { animation-delay: 200ms; }
+  .stagger > *:nth-child(n + 7) { animation-delay: 240ms; }
+
   .tnum {
     font-variant-numeric: tabular-nums;
   }
   .scroll-thin {
     scrollbar-width: thin;
     scrollbar-color: rgb(var(--dm-border)) transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

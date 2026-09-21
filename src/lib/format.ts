@@ -35,8 +35,6 @@ export const deedTypeLabel: Record<DeedType, string> = {
 
 export const statusLabel: Record<FacilityStatus, string> = {
   active: 'Active',
-  pipeline_fitout: 'Not open yet',
-  pipeline_pending: 'Not open yet',
   closed: 'Closed',
 };
 

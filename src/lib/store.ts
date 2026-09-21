@@ -58,6 +58,8 @@ export function isValidData(d: unknown): d is DentimapData {
   );
 }
 
+const currentStatus = (p: Property): Property => (p.status === 'closed' ? p : { ...p, status: 'active' });
+
 const pick = (s: State): DentimapData => ({
   properties: s.properties,
   deeds: s.deeds,
@@ -187,7 +189,7 @@ export const useDentimap = create<State>()(
           return [...map.values()];
         };
         set((s) => {
-          const properties = merge(s.properties, d.properties);
+          const properties = merge(s.properties, d.properties.map(currentStatus));
           return {
             properties,
             deeds: merge(s.deeds, d.deeds),
@@ -213,6 +215,10 @@ export const useDentimap = create<State>()(
     {
       name: 'dentimap-v2',
       partialize: (s) => pick(s),
+      merge: (saved, cur) => {
+        const data = saved as Partial<DentimapData> | undefined;
+        return { ...cur, ...data, properties: (data?.properties ?? cur.properties).map(currentStatus) };
+      },
     },
   ),
 );
@@ -257,7 +263,7 @@ async function pull(): Promise<string | null> {
     const sel = useDentimap.getState().selectedPropertyId;
     applyingRemote = true;
     useDentimap.setState({
-      properties: d.properties,
+      properties: d.properties.map(currentStatus),
       deeds: d.deeds,
       entities: d.entities,
       activity: d.activity ?? [],

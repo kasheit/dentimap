@@ -8,8 +8,6 @@ type SortKey = 'name' | 'county' | 'assessed' | 'investment';
 
 const statusTone: Record<FacilityStatus, string> = {
   active: 'text-dm-green',
-  pipeline_fitout: 'text-dm-amber',
-  pipeline_pending: 'text-dm-amber',
   closed: 'text-dm-dim',
 };
 
@@ -35,11 +33,9 @@ function SortHead({ label, k, sort, onSort, right }: { label: string; k: SortKey
 
 export function MatrixView() {
   const { properties, deeds, openProperty } = useDentimap();
-  const [county, setCounty] = useState('All');
   const [type, setType] = useState('All');
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: 'name', dir: 1 });
 
-  const counties = useMemo(() => ['All', ...[...new Set(properties.map((p) => p.address.county))].sort()], [properties]);
   const types = useMemo(() => ['All', ...[...new Set(properties.map((p) => p.facilityType))]], [properties]);
 
   const rows = useMemo(() => {
@@ -52,13 +48,13 @@ export function MatrixView() {
       }
     };
     return properties
-      .filter((p) => (county === 'All' || p.address.county === county) && (type === 'All' || p.facilityType === type))
+      .filter((p) => type === 'All' || p.facilityType === type)
       .sort((a, b) => {
         const av = value(a);
         const bv = value(b);
         return (typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv))) * sort.dir;
       });
-  }, [properties, county, type, sort]);
+  }, [properties, type, sort]);
 
 
   const onSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: 1 }));
@@ -70,12 +66,6 @@ export function MatrixView() {
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5" role="group" aria-label="Filter by county">
-          <span className="label">County</span>
-          {counties.map((c) => (
-            <button key={c} aria-pressed={county === c} className="tab-chip" onClick={() => setCounty(c)}>{c.replace(/ County$/, '')}</button>
-          ))}
-        </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5" role="group" aria-label="Filter by type">
           <span className="label">Type</span>
           {types.map((t) => (

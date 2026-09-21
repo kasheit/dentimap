@@ -25,6 +25,17 @@ export default {
         title: ['16px', '24px'],
         display: ['28px', '34px'],
       },
+      animation: {
+        rise: 'rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'pulse-ring': 'pulseRing 2.4s ease-out infinite',
+      },
+      keyframes: {
+        rise: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+        pulseRing: {
+          '0%': { boxShadow: '0 0 0 0 rgb(var(--dm-green) / 0.55)' },
+          '70%, 100%': { boxShadow: '0 0 0 6px rgb(var(--dm-green) / 0)' },
+        },
+      },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],

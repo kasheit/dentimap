@@ -29,15 +29,13 @@ export function Panel({
 
 const statusDot: Record<FacilityStatus, string> = {
   active: 'bg-dm-green',
-  pipeline_fitout: 'bg-dm-amber',
-  pipeline_pending: 'bg-dm-amber',
   closed: 'bg-dm-dim',
 };
 
 export function StatusPill({ status }: { status: FacilityStatus }) {
   return (
     <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-label text-dm-muted">
-      <i className={`h-1.5 w-1.5 rounded-full ${statusDot[status]}`} />
+      <i className={`h-1.5 w-1.5 rounded-full ${statusDot[status]} ${status === 'active' ? 'animate-pulse-ring' : ''}`} />
       {statusLabel[status]}
     </span>
   );

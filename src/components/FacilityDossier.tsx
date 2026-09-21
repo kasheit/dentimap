@@ -36,7 +36,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
       </header>
 
 
-      <div className="grid items-start gap-5 lg:grid-cols-2 2xl:grid-cols-3">
+      <div className="stagger grid items-start gap-5 lg:grid-cols-2 2xl:grid-cols-3">
         <RecordCard p={p} />
 
         <div className="min-w-0 space-y-5">

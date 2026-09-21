@@ -8,16 +8,13 @@ import type { FacilityStatus, Property } from '@/lib/types';
 import { StatusPill } from './Chips';
 
 type TypeFilter = 'all' | 'valleygate_asc' | 'vfd_practice' | 'attention';
-type StatusFilter = 'all' | 'active' | 'notopen' | 'closed';
+type StatusFilter = 'all' | FacilityStatus;
 type SortKey = 'type' | 'name' | 'city' | 'status' | 'complete';
 
 export const FOCUS_SEARCH = 'dentimap:focus-search';
 
-const statusNames: Record<StatusFilter, string> = { all: 'All', active: 'Active', notopen: 'Not open yet', closed: 'Closed' };
-
 const TYPE_ORDER = { valleygate_asc: 0, vfd_practice: 1, affiliate: 2 } as const;
-const STATUS_ORDER: Record<FacilityStatus, number> = { active: 0, pipeline_fitout: 1, pipeline_pending: 1, closed: 2 };
-const statusGroup = (s: FacilityStatus): StatusFilter => (s === 'active' ? 'active' : s === 'closed' ? 'closed' : 'notopen');
+const STATUS_ORDER: Record<FacilityStatus, number> = { active: 0, closed: 1 };
 
 export const byType = (a: Property, b: Property) => TYPE_ORDER[a.facilityType] - TYPE_ORDER[b.facilityType];
 
@@ -85,9 +82,8 @@ export function LocationsTable() {
       } as Record<TypeFilter, number>,
       status: {
         all: rows.length,
-        active: rows.filter((r) => statusGroup(r.p.status) === 'active').length,
-        notopen: rows.filter((r) => statusGroup(r.p.status) === 'notopen').length,
-        closed: rows.filter((r) => statusGroup(r.p.status) === 'closed').length,
+        active: rows.filter((r) => r.p.status === 'active').length,
+        closed: rows.filter((r) => r.p.status === 'closed').length,
       } as Record<StatusFilter, number>,
     }),
     [rows],
@@ -107,7 +103,7 @@ export function LocationsTable() {
     return rows
       .filter((r) => {
         if (type === 'attention' ? !r.needs : type !== 'all' && r.p.facilityType !== type) return false;
-        if (status !== 'all' && statusGroup(r.p.status) !== status) return false;
+        if (status !== 'all' && r.p.status !== status) return false;
         if (!needle) return true;
         const a = r.p.address;
         return [r.p.name, r.p.dbaName, a.street, a.city, a.county, a.zip, a.parcelPin, a.state].join(' ').toLowerCase().includes(needle);
@@ -175,7 +171,7 @@ export function LocationsTable() {
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 overflow-hidden rounded-lg border border-dm-border bg-dm-surface sm:grid-cols-4">
+      <div className="stagger mb-4 grid grid-cols-2 overflow-hidden rounded-lg border border-dm-border bg-dm-surface sm:grid-cols-4">
         {kpis.map(([label, value]) => (
           <div key={label} className="border-dm-border px-4 py-3 [&:not(:last-child)]:sm:border-r">
             <div className="text-label text-dm-dim">{label}</div>
@@ -189,9 +185,9 @@ export function LocationsTable() {
         <label className="flex items-center gap-2 text-label text-dm-dim">
           Status
           <select className="rounded-md border border-dm-border bg-dm-bg px-2 py-1 text-label text-dm-muted outline-none focus:border-dm-muted" value={status} onChange={(e) => setStatus(e.target.value as StatusFilter)}>
-            {(['all', 'active', 'notopen', 'closed'] as StatusFilter[]).map((id) => (
+            {(['all', 'active', 'closed'] as StatusFilter[]).map((id) => (
               <option key={id} value={id}>
-                {statusNames[id]} ({counts.status[id]})
+                {id[0].toUpperCase() + id.slice(1)} ({counts.status[id]})
               </option>
             ))}
           </select>
@@ -209,7 +205,7 @@ export function LocationsTable() {
                 <Head label="Done" k="complete" sort={sort} onSort={onSort} />
               </tr>
             </thead>
-            <tbody>
+            <tbody className="stagger">
               {visible.map(({ p, percent, issues }) => {
                 const on = p.id === preview?.p.id;
                 return (
@@ -249,7 +245,7 @@ export function LocationsTable() {
         </div>
 
         {preview && (
-          <aside className="hidden space-y-4 rounded-lg border border-dm-border bg-dm-surface p-5 lg:sticky lg:top-20 lg:block" aria-label="Location preview">
+          <aside key={preview.p.id} className="hidden animate-rise space-y-4 rounded-lg border border-dm-border bg-dm-surface p-5 lg:sticky lg:top-20 lg:block" aria-label="Location preview">
             <div>
               <h2 className="text-title font-semibold">{preview.p.name}</h2>
               <p className="mt-0.5 text-label text-dm-dim">
