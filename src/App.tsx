@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AuthGate } from '@/components/AuthGate';
 import { Header } from '@/components/Header';
 import { OPEN_SEARCH_EVENT, SearchPalette } from '@/components/SearchPalette';
-import { FOCUS_SEARCH } from '@/components/Sidebar';
+import { FOCUS_SEARCH } from '@/components/LocationsTable';
 import { startSync, useDentimap } from '@/lib/store';
 import { DeedsView } from '@/views/DeedsView';
 import { EntitiesView } from '@/views/EntitiesView';
@@ -65,7 +65,8 @@ function Shell() {
         setSearchOpen((o) => !o);
       } else if (e.key === '/' && !typing) {
         e.preventDefault();
-        if (useDentimap.getState().tab !== 'properties') setTab('properties');
+        setTab('properties');
+        useDentimap.getState().select('');
         setTimeout(() => window.dispatchEvent(new Event(FOCUS_SEARCH)), 0);
       }
     };

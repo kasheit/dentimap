@@ -124,7 +124,7 @@ export const useDentimap = create<State>()(
             deeds: s.deeds.filter((d) => d.propertyId !== id),
             entities: s.entities.map((e) => ({ ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== id) })),
             people: s.people.map((x) => ({ ...x, propertyIds: x.propertyIds.filter((y) => y !== id), actions: x.actions.map((a) => (a.propertyId === id ? { ...a, propertyId: undefined } : a)) })),
-            selectedPropertyId: s.selectedPropertyId === id ? (rest[0]?.id ?? '') : s.selectedPropertyId,
+            selectedPropertyId: s.selectedPropertyId === id ? '' : s.selectedPropertyId,
             activity: logged(s.activity, `Location deleted: ${nameOf(s, id)}`),
           };
         }),
@@ -193,7 +193,7 @@ export const useDentimap = create<State>()(
             deeds: merge(s.deeds, d.deeds),
             entities: merge(s.entities, d.entities),
             people: merge(s.people, d.people ?? []),
-            selectedPropertyId: properties.some((p) => p.id === s.selectedPropertyId) ? s.selectedPropertyId : (properties[0]?.id ?? ''),
+            selectedPropertyId: properties.some((p) => p.id === s.selectedPropertyId) ? s.selectedPropertyId : '',
             activity: logged(s.activity, `Imported file: ${added} new, ${updated} updated`),
           };
         });
@@ -212,7 +212,7 @@ export const useDentimap = create<State>()(
     }),
     {
       name: 'dentimap-v2',
-      partialize: (s) => ({ ...pick(s), selectedPropertyId: s.selectedPropertyId }),
+      partialize: (s) => pick(s),
     },
   ),
 );
@@ -262,7 +262,7 @@ async function pull(): Promise<string | null> {
       entities: d.entities,
       activity: d.activity ?? [],
       people: d.people ?? [],
-      selectedPropertyId: d.properties.some((p) => p.id === sel) ? sel : (d.properties[0]?.id ?? ''),
+      selectedPropertyId: d.properties.some((p) => p.id === sel) ? sel : '',
     });
     applyingRemote = false;
   } else {
