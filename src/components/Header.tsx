@@ -114,8 +114,8 @@ export function Header() {
               Back up
             </button>
           )}
-          <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))} title="Search (Ctrl K)">
-            Search <span className="kbd hidden md:inline">Ctrl K</span>
+          <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))} title="Search">
+            Search
           </button>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
           <button className="btn" onClick={() => fileRef.current?.click()} title="Import a JSON backup">
