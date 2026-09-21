@@ -6,6 +6,7 @@ import { addressLine, compactUsd, facilityTypeLabel } from '@/lib/format';
 import { newId, useDentimap } from '@/lib/store';
 import type { FacilityStatus, Property } from '@/lib/types';
 import { StatusPill } from './Chips';
+import { DocumentIntake } from './DocumentIntake';
 
 type TypeFilter = 'all' | 'valleygate_asc' | 'vfd_practice' | 'attention';
 type StatusFilter = 'all' | FacilityStatus;
@@ -179,6 +180,8 @@ export function LocationsTable() {
           </div>
         ))}
       </div>
+
+      <DocumentIntake />
 
       <div className="mb-4 flex flex-wrap items-center gap-x-8 gap-y-3">
         {chips('Type', ['all', 'valleygate_asc', 'vfd_practice', 'attention'] as const, { all: 'All', valleygate_asc: 'Valleygate', vfd_practice: 'VFD', attention: 'Needs attention' }, type, setType, counts.type)}

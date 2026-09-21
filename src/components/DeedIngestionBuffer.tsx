@@ -3,7 +3,8 @@ import { AlertTriangle } from 'lucide-react';
 import { parseCountyDeedClipboard, splitDeedBlocks } from '@/lib/deedParser';
 import type { ParsedDeedResult } from '@/lib/deedParser';
 import { deedTypeLabel, fmtDate } from '@/lib/format';
-import { isImageFile, readImageText } from '@/lib/ocr';
+import { isSupportedDocument, readDocumentText } from '@/lib/documents';
+import { isImageFile } from '@/lib/ocr';
 import { newId, useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
 import { describeFound, propertyPatch } from '@/lib/countyPage';
@@ -57,13 +58,13 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
     setOcrError(null);
     setReading(0);
     try {
-      const text = await readImageText(file, setReading);
+      const text = await readDocumentText(file, setReading);
       setRaw(text);
       parse(text);
       setFromImage(true);
       setApplied(false);
     } catch (err) {
-      setOcrError(err instanceof Error ? err.message : 'Could not read that image.');
+      setOcrError(err instanceof Error ? err.message : 'Could not read that file.');
     } finally {
       setReading(null);
     }
@@ -106,7 +107,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
           onChange={(e) => setRaw(e.target.value)}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
-            const img = [...e.dataTransfer.files].find(isImageFile);
+            const img = [...e.dataTransfer.files].find(isSupportedDocument);
             if (img) {
               e.preventDefault();
               readImage(img);
@@ -135,15 +136,15 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
           <button className="btn" disabled={!raw.trim() || reading !== null} onClick={() => parse(raw)}>
             Parse
           </button>
-          <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => {
+          <input ref={fileRef} type="file" accept="image/*,application/pdf,text/plain,.pdf,.txt" hidden onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) readImage(f);
             if (fileRef.current) fileRef.current.value = '';
           }} />
           <button className="btn" disabled={reading !== null} onClick={() => fileRef.current?.click()}>
-            Upload screenshot
+            Upload file
           </button>
-          {reading !== null && <span className="text-label text-dm-muted">Reading screenshot… {Math.round(reading * 100)}%</span>}
+          {reading !== null && <span className="text-label text-dm-muted">Reading file… {Math.round(reading * 100)}%</span>}
           {(raw || draft) && (
             <button className="btn" onClick={clear}>
               Clear
@@ -155,7 +156,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
 
         {parsed && draft && (
           <div className="space-y-4 border-t border-dm-border pt-4">
-            {fromImage && <p className="text-label text-dm-muted">Read from a screenshot. Check every field against the original before adding.</p>}
+            {fromImage && <p className="text-label text-dm-muted">Read from a file. Check every field against the original before adding.</p>}
             {parsed.saleDate && parsed.recordingDate && parsed.saleDate !== parsed.recordingDate && (
               <p className="flex items-start gap-2 rounded-md border border-dm-amber/30 bg-dm-amber/10 px-3 py-2 text-label text-dm-amber">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
