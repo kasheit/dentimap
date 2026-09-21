@@ -56,7 +56,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
       <RecordCard p={p} />
 
       <Card id="ownership" title="Ownership & control">
-        <OwnershipChain deeds={propDeeds} landlord={landlord} operator={operator} />
+        <OwnershipChain business={p} deeds={propDeeds} landlord={landlord} operator={operator} />
       </Card>
 
       <Card id="title" title="Title chain" action={<span className="text-[13px] text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>

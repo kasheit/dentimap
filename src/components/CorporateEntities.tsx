@@ -43,7 +43,9 @@ export function OwnershipChain({
   deeds,
   landlord,
   operator,
+  business,
 }: {
+  business?: { legalName?: string; dbaName?: string };
   deeds: DeedRecord[];
   landlord?: LegalEntity;
   operator?: LegalEntity;
@@ -55,6 +57,18 @@ export function OwnershipChain({
   return (
     <div>
       <ol>
+        <Step role="Business at this location">
+          {business?.legalName || business?.dbaName ? (
+            <>
+              <div className="text-[13px] text-dm-dim">Legal name</div>
+              <div className="text-[15px] font-medium">{business.legalName || <span className="font-normal text-dm-dim">Not set</span>}</div>
+              <div className="mt-2 text-[13px] text-dm-dim">Doing business as</div>
+              <div className="text-[15px] font-medium">{business.dbaName || <span className="font-normal text-dm-dim">Not set</span>}</div>
+            </>
+          ) : (
+            <p className="text-[15px] text-dm-dim">Legal and d/b/a names not set. Add them from Edit in the Record section.</p>
+          )}
+        </Step>
         <Step role="Land owner of record">
           {holder ? (
             <>
