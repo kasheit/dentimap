@@ -17,7 +17,6 @@ const TYPE_ORDER = { valleygate_asc: 0, vfd_practice: 1, affiliate: 2 } as const
 const STATUS_ORDER: Record<FacilityStatus, number> = { active: 0, pipeline_fitout: 1, pipeline_pending: 2, closed: 3 };
 const statusGroup = (s: FacilityStatus): StatusFilter => (s === 'active' ? 'active' : s === 'closed' ? 'closed' : 'pipeline');
 
-/** Order used for the table's default sort and for previous/next on the location page. */
 export const byType = (a: Property, b: Property) => TYPE_ORDER[a.facilityType] - TYPE_ORDER[b.facilityType];
 
 function Head({ label, k, sort, onSort, right }: { label: string; k: SortKey; sort: { key: SortKey; dir: 1 | -1 }; onSort: (k: SortKey) => void; right?: boolean }) {
@@ -232,7 +231,7 @@ export function LocationsTable() {
               {visible.length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-4 py-12 text-center text-body text-dm-dim">
-                    {properties.length ? 'No locations match these filters.' : 'No locations yet. Add one, or import a backup.'}
+                    {properties.length ? 'No matches.' : 'No locations.'}
                   </td>
                 </tr>
               )}
@@ -241,7 +240,7 @@ export function LocationsTable() {
         </div>
 
         {preview && (
-          <aside className="hidden animate-fade-in space-y-4 rounded-lg border border-dm-border bg-dm-surface p-5 lg:sticky lg:top-20 lg:block" aria-label="Location preview">
+          <aside className="hidden space-y-4 rounded-lg border border-dm-border bg-dm-surface p-5 lg:sticky lg:top-20 lg:block" aria-label="Location preview">
             <div>
               <StatusPill status={preview.p.status} />
               <h2 className="mt-2 text-title font-semibold">{preview.p.name}</h2>

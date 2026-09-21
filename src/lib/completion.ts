@@ -1,7 +1,6 @@
 import { chainBreaks, sortedDeeds } from './store';
 import type { DeedRecord, FieldMeta, Property, SourcedField } from './types';
 
-/** confirmed = directly confirmed from records, partial = present but not fully confirmed, missing = nothing there. */
 export type Level = 'confirmed' | 'partial' | 'missing';
 
 export interface CompletionItem {

@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react';
-import { AlertTriangle, CheckCircle2, HelpCircle, ShieldQuestion } from 'lucide-react';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import type { FacilityStatus, VerificationState } from '@/lib/types';
 import { statusLabel } from '@/lib/format';
 
-/** The one container: bordered white panel, hairline-divided header, roomy body. */
 export function Panel({
   id,
   title,
@@ -28,54 +27,35 @@ export function Panel({
   );
 }
 
-type Tone = 'green' | 'blue' | 'amber' | 'red' | 'neutral';
-
-const toneClass: Record<Tone, string> = {
-  green: 'bg-dm-green/10 text-dm-green',
-  blue: 'bg-dm-blue/10 text-dm-blue',
-  amber: 'bg-dm-amber/10 text-dm-amber',
-  red: 'bg-dm-red/10 text-dm-red',
-  neutral: 'bg-dm-hover text-dm-muted',
-};
-
-/** Tinted pill: the one way to show a status, tag or verification state. */
-export function Badge({ tone = 'neutral', icon, dot, children, title }: { tone?: Tone; icon?: ReactNode; dot?: boolean; children: ReactNode; title?: string }) {
-  return (
-    <span title={title} className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-medium ${toneClass[tone]}`}>
-      {dot && <i className="h-1.5 w-1.5 rounded-full bg-current" />}
-      {icon}
-      {children}
-    </span>
-  );
-}
-
-const statusTone: Record<FacilityStatus, Tone> = {
-  active: 'green',
-  pipeline_fitout: 'blue',
-  pipeline_pending: 'amber',
-  closed: 'neutral',
+const statusDot: Record<FacilityStatus, string> = {
+  active: 'bg-dm-green',
+  pipeline_fitout: 'bg-dm-blue',
+  pipeline_pending: 'bg-dm-amber',
+  closed: 'bg-dm-dim',
 };
 
 export function StatusPill({ status }: { status: FacilityStatus }) {
   return (
-    <Badge tone={statusTone[status]} dot>
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-label text-dm-muted">
+      <i className={`h-1.5 w-1.5 rounded-full ${statusDot[status]}`} />
       {statusLabel[status]}
-    </Badge>
+    </span>
   );
 }
 
-const verifyMeta: Record<Exclude<VerificationState, 'verified'>, { label: string; tone: Tone; Icon: typeof CheckCircle2 }> = {
-  unverified: { label: 'Unverified', tone: 'amber', Icon: ShieldQuestion },
-  unknown: { label: 'Unknown', tone: 'neutral', Icon: HelpCircle },
+const verifyMeta: Record<Exclude<VerificationState, 'verified'>, { label: string; cls: string }> = {
+  unverified: { label: 'Unverified', cls: 'text-dm-amber' },
+  unknown: { label: 'Unknown', cls: 'text-dm-dim' },
 };
 
 export function VerifyChip({ state }: { state: VerificationState }) {
   if (state === 'verified') return null;
-  const { label, tone, Icon } = verifyMeta[state];
+  const { label, cls } = verifyMeta[state];
   return (
-    <Badge tone={tone} icon={<Icon className="h-3 w-3" />}>
+    <span className={`inline-flex items-center gap-1.5 text-label ${cls}`}>
+      <i className="h-1.5 w-1.5 rounded-full bg-current" />
       {label}
-    </Badge>
+    </span>
   );
 }
 
@@ -111,7 +91,6 @@ const levelStyle = {
   missing: { dot: 'bg-dm-red', text: 'text-dm-red', label: 'Missing' },
 } as const;
 
-/** Green = confirmed from records, yellow = present but not fully confirmed (or stale), red = nothing there. */
 export function LevelLabel({
   level,
   detail,
@@ -142,7 +121,6 @@ export function LevelLabel({
   );
 }
 
-/** One detail: label and value on one line, with its confirmation status at the right. */
 export function DetailRow({ label, value, mono, status }: { label: string; value?: ReactNode; mono?: boolean; status?: ReactNode }) {
   return (
     <div className="grid grid-cols-[6rem_minmax(0,1fr)_auto] items-baseline gap-x-3 border-b border-dm-border/60 py-2 last:border-0">
@@ -152,15 +130,5 @@ export function DetailRow({ label, value, mono, status }: { label: string; value
       </div>
       {status ? <div className="max-w-[11rem] text-right">{status}</div> : <div />}
     </div>
-  );
-}
-
-/** Initials avatar for people; neutral so it never competes with status colour. */
-export function Avatar({ name }: { name: string }) {
-  const initials = name.replace(/^Dr\.?\s+/i, '').split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
-  return (
-    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-dm-border bg-dm-hover text-[11px] font-medium text-dm-muted">
-      {initials}
-    </span>
   );
 }

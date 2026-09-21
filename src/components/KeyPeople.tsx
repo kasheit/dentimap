@@ -1,4 +1,4 @@
-import { Avatar, LevelLabel } from './Chips';
+import { LevelLabel } from './Chips';
 import { fmtDate, personRoleLabel } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
@@ -18,8 +18,7 @@ export function KeyPeople({ property }: { property: Property }) {
             const acts = p.actions.filter((a) => a.propertyId === property.id).sort((a, b) => b.date.localeCompare(a.date));
             return (
               <li key={p.id} className="py-3 first:pt-0">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <Avatar name={p.name} />
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <button onClick={() => openPerson(p.id)} className="mr-auto text-left text-body font-medium hover:text-dm-blue">
                     {p.name}
                   </button>

@@ -104,7 +104,7 @@ export function Header() {
           {due && properties.length > 0 && (
             <button
               className="hidden text-label text-dm-amber transition-colors hover:text-dm-text md:inline"
-              title="You have not downloaded a backup in over a week"
+              title="No backup in over a week"
               onClick={() => {
                 exportJson(snapshot());
                 setDue(false);
@@ -114,11 +114,11 @@ export function Header() {
               Back up
             </button>
           )}
-          <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))} title="Search everything (Ctrl K)">
+          <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))} title="Search (Ctrl K)">
             Search <span className="kbd hidden md:inline">Ctrl K</span>
           </button>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
-          <button className="btn" onClick={() => fileRef.current?.click()} title="Import a Dentimap JSON export">
+          <button className="btn" onClick={() => fileRef.current?.click()} title="Import a JSON backup">
             Import
           </button>
           <div className="relative" ref={menuRef}>

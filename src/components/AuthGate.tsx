@@ -29,10 +29,7 @@ function AuthShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-dm-bg px-4">
       <div className="w-full max-w-sm rounded-lg border border-dm-border bg-dm-surface p-8">
-        <h1>
-          <img src="/dentimap-logo.png" alt="Dentimap" className="h-10 w-auto brightness-0 invert" />
-        </h1>
-        <p className="mt-3 text-sm text-dm-muted">Owner access only.</p>
+        <h1 className="text-title font-semibold">Sign in</h1>
         {children}
       </div>
     </div>
@@ -54,6 +51,18 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   // 'done' means past the passkey-registration nudge for this session, not "has a passkey".
   const [passkeyPrompt, setPasskeyPrompt] = useState<'checking' | 'offer' | 'done'>('checking');
+
+  const open = !supabase || !!session;
+  useEffect(() => {
+    document.title = open ? 'Dentimap' : 'Sign in';
+    let icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (open && !icon) {
+      icon = document.createElement('link');
+      icon.rel = 'icon';
+      document.head.appendChild(icon);
+    }
+    if (icon) icon.href = open ? '/favicon.png' : 'data:,';
+  }, [open]);
 
   useEffect(() => {
     if (!supabase) {
@@ -103,11 +112,11 @@ export function AuthGate({ children }: { children: ReactNode }) {
       return (
         <AuthShell>
           <p className="mt-6 text-label leading-relaxed text-dm-muted">
-            Set up a passkey to sign in next time with your fingerprint, face, or device PIN — no email code needed.
+            Add a passkey to skip the email code next time.
           </p>
           <button onClick={setUpPasskey} disabled={passkeyBusy} className={primary}>
             <Fingerprint className="h-4 w-4" />
-            {passkeyBusy ? 'Setting up…' : 'Set up a passkey'}
+            {passkeyBusy ? 'Setting up…' : 'Add a passkey'}
           </button>
           <button onClick={() => setPasskeyPrompt('done')} className={link}>
             Skip for now
@@ -150,7 +159,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
         <>
           <button onClick={signInPasskey} disabled={passkeyBusy} className={`${primary} mt-6`}>
             <Fingerprint className="h-4 w-4" />
-            {passkeyBusy ? 'Waiting…' : 'Sign in with a passkey'}
+            {passkeyBusy ? 'Waiting…' : 'Use passkey'}
           </button>
           <button
             onClick={() => {
@@ -167,7 +176,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       {mode === 'email-request' && (
         <>
           <p className="mt-6 text-label leading-relaxed text-dm-muted">
-            We'll email a one-time code to <span className="font-medium text-dm-text">{maskEmail(OWNER_EMAIL)}</span>.
+            We'll email a code to <span className="font-medium text-dm-text">{maskEmail(OWNER_EMAIL)}</span>.
           </p>
           <button onClick={sendCode} disabled={sending} className={primary}>
             {sending ? 'Sending…' : 'Send code'}
@@ -186,7 +195,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
       {mode === 'email-verify' && (
         <>
-          <p className="mt-6 text-label text-dm-muted">Enter the 6-digit code we just sent you.</p>
+          <p className="mt-6 text-label text-dm-muted">Enter the 6-digit code.</p>
           <input
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -197,7 +206,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
             className="field mt-3 py-2 text-center tnum text-lg tracking-[0.3em]"
           />
           <button onClick={verifyCode} disabled={verifying || code.length < 6} className={primary}>
-            {verifying ? 'Verifying…' : 'Verify & sign in'}
+            {verifying ? 'Verifying…' : 'Verify'}
           </button>
           <button
             onClick={() => {

@@ -9,10 +9,6 @@ export const EDIT_RECORD_EVENT = 'dentimap:edit-record';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-/**
- * Confirmation status for one detail. Green is confirmed from records; yellow (or a verified
- * date older than a year) is click-to-confirm; red means nothing is there yet and opens the editor.
- */
 export function ConfirmLabel({ property, field, label, has, extra, showDetail = true }: { property: Property; field: SourcedField; label: string; has: boolean; extra?: React.ReactNode; showDetail?: boolean }) {
   const updateProperty = useDentimap((s) => s.updateProperty);
   const meta = property.meta?.[field];

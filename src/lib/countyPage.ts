@@ -2,7 +2,6 @@ import { compactUsd } from './format';
 import type { ParsedDeedResult } from './deedParser';
 import type { Property } from './types';
 
-/** Short list of the property-level details a pasted county page contained. */
 export function describeFound(p: ParsedDeedResult): string[] {
   const out: string[] = [];
   if (p.landValue !== undefined) out.push(`land ${compactUsd(p.landValue)}`);
