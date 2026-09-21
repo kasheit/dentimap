@@ -86,6 +86,14 @@ export interface Property {
     parcelPin: string;
   };
   parcelUrl?: string;
+  /** County parcel identifiers and classification. */
+  reid?: string;
+  landClass?: string;
+  /** Owner as listed by the county tax record (may differ from the deed holder). */
+  countyOwner?: { name?: string; mailing?: string };
+  lastSale?: { date?: string; price?: number };
+  countyDeed?: { book?: string; page?: string; date?: string; acres?: number; description?: string };
+  building?: { heatedAreaSqFt?: number; yearBuilt?: number; useType?: string };
   metrics?: {
     projectInvestment?: number;
     footprintSqFt?: number;

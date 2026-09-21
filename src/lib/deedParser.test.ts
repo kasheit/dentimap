@@ -88,3 +88,36 @@ describe('assessor sale vs deed date', () => {
     expect(r.consideration).toBe(490000);
   });
 });
+
+describe('county property page', () => {
+  it('reads the sections of a Wake County iMaps record', () => {
+    const NL = String.fromCharCode(10);
+    const page = [
+      'General', 'PIN 1710645509', 'REID 0047915', 'City Garner', 'Land Class Commercial',
+      'Owner', 'WAKE REAL ESTATE PARTNERS LLC', '2028 LITHO PL STE 300', 'FAYETTEVILLE NC 28304-2538',
+      'Valuation', 'Building Value $4,272,934', 'Land Value $1,667,472', 'Total Value $5,940,406', 'Billing Class Business',
+      'Last Sale', 'Date Sold 9/29/2000', 'Sale Price $490,000',
+      'Deeds', 'Book 019281', 'Page 01592', 'Deed Date 3/10/2023', 'Deed Acres 3.19',
+      'Property Description TR2 CENTERMARK PROP & MITCHINER GR PT BM1986 -2245',
+      'Building', 'Heated Area 15,154', 'Year Built 2025', 'Design/Style Conventional', 'Use Type MED OFC GROSS',
+    ].join(NL);
+    const r = parseCountyDeedClipboard(page);
+    expect(r.reid).toBe('0047915');
+    expect(r.landClass).toBe('Commercial');
+    expect(r.ownerName).toBe('WAKE REAL ESTATE PARTNERS LLC');
+    expect(r.ownerMailing).toBe('2028 LITHO PL STE 300, FAYETTEVILLE NC 28304-2538');
+    expect(r.landValue).toBe(1667472);
+    expect(r.buildingValue).toBe(4272934);
+    expect(r.assessedValue).toBe(5940406);
+    expect(r.saleDate).toBe('2000-09-29');
+    expect(r.salePrice).toBe(490000);
+    expect(r.deedDate).toBe('2023-03-10');
+    expect(r.book).toBe('019281');
+    expect(r.page).toBe('01592');
+    expect(r.acres).toBe(3.19);
+    expect(r.description).toBe('TR2 CENTERMARK PROP & MITCHINER GR PT BM1986 -2245');
+    expect(r.heatedArea).toBe(15154);
+    expect(r.yearBuilt).toBe(2025);
+    expect(r.useType).toBe('MED OFC GROSS');
+  });
+});

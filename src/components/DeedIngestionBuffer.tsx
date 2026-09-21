@@ -2,10 +2,11 @@ import { useRef, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { parseCountyDeedClipboard, splitDeedBlocks } from '@/lib/deedParser';
 import type { ParsedDeedResult } from '@/lib/deedParser';
-import { compactUsd, deedTypeLabel, fmtDate } from '@/lib/format';
+import { deedTypeLabel, fmtDate } from '@/lib/format';
 import { isImageFile, readImageText } from '@/lib/ocr';
 import { newId, useDentimap } from '@/lib/store';
 import type { Property } from '@/lib/types';
+import { describeFound, propertyPatch } from '@/lib/countyPage';
 import { canSaveDraft, DeedForm, draftFromParsed, draftToDeed } from './DeedForm';
 import type { Draft } from './DeedForm';
 
@@ -37,6 +38,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
   const [draft, setDraft] = useState<Draft | null>(null);
 
   const parsed = queue[0];
+  const foundLabels = parsed ? describeFound(parsed) : [];
 
   const load = (q: ParsedDeedResult[]) => {
     setQueue(q);
@@ -160,31 +162,13 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
                 This page shows a sale on {fmtDate(parsed.saleDate)} and a deed dated {fmtDate(parsed.recordingDate)}. The price may belong to the sale, not that deed. Check it before adding.
               </p>
             )}
-            {!applied && (parsed.landValue !== undefined || parsed.buildingValue !== undefined || parsed.assessedValue !== undefined) && (
+            {!applied && foundLabels.length > 0 && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-dm-border px-3 py-2.5 text-[13px]">
-                <span className="text-dm-muted">
-                  Also found:{' '}
-                  {[
-                    parsed.landValue !== undefined && `land ${compactUsd(parsed.landValue)}`,
-                    parsed.buildingValue !== undefined && `building ${compactUsd(parsed.buildingValue)}`,
-                    parsed.assessedValue !== undefined && `assessed ${compactUsd(parsed.assessedValue)}`,
-                  ].filter(Boolean).join(' · ')}
-                </span>
+                <span className="text-dm-muted">Also found: {foundLabels.join(' · ')}</span>
                 <button
                   className="btn"
                   onClick={() => {
-                    updateProperty(
-                      property.id,
-                      {
-                        metrics: {
-                          ...property.metrics,
-                          ...(parsed.landValue !== undefined && { landValue: parsed.landValue }),
-                          ...(parsed.buildingValue !== undefined && { buildingValue: parsed.buildingValue }),
-                          ...(parsed.assessedValue !== undefined && { currentAssessedValue: parsed.assessedValue }),
-                        },
-                      },
-                      'Values applied from a record',
-                    );
+                    updateProperty(property.id, propertyPatch(parsed, property), 'Details applied from a county record');
                     setApplied(true);
                   }}
                 >

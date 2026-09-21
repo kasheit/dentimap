@@ -24,6 +24,20 @@ type Draft = {
   buildingValue: string;
   footprintSqFt: string;
   targetOpening: string;
+  reid: string;
+  landClass: string;
+  ownerName: string;
+  ownerMailing: string;
+  saleDate: string;
+  salePrice: string;
+  deedBook: string;
+  deedPage: string;
+  deedDate: string;
+  deedAcres: string;
+  deedDescription: string;
+  heatedArea: string;
+  yearBuilt: string;
+  useType: string;
   operatingRooms: string;
   pacuBays: string;
   outpatientSharePercent: string;
@@ -65,6 +79,20 @@ function toDraft(p: Property): Draft {
     buildingValue: str(p.metrics?.buildingValue),
     footprintSqFt: str(p.metrics?.footprintSqFt),
     targetOpening: p.metrics?.targetOpening ?? '',
+    reid: p.reid ?? '',
+    landClass: p.landClass ?? '',
+    ownerName: p.countyOwner?.name ?? '',
+    ownerMailing: p.countyOwner?.mailing ?? '',
+    saleDate: p.lastSale?.date ?? '',
+    salePrice: str(p.lastSale?.price),
+    deedBook: p.countyDeed?.book ?? '',
+    deedPage: p.countyDeed?.page ?? '',
+    deedDate: p.countyDeed?.date ?? '',
+    deedAcres: str(p.countyDeed?.acres),
+    deedDescription: p.countyDeed?.description ?? '',
+    heatedArea: str(p.building?.heatedAreaSqFt),
+    yearBuilt: str(p.building?.yearBuilt),
+    useType: p.building?.useType ?? '',
     operatingRooms: str(p.clinicalSpecs?.operatingRooms),
     pacuBays: str(p.clinicalSpecs?.pacuBays),
     outpatientSharePercent: str(p.clinicalSpecs?.outpatientSharePercent),
@@ -112,6 +140,18 @@ function toPatch(d: Draft, meta: MetaDraft, p: Property): Partial<Property> {
     status: d.status,
     address: { street: d.street.trim(), city: d.city.trim(), state: d.state.trim(), zip: d.zip.trim(), county: withCounty(d.county), parcelPin: d.parcelPin.trim() },
     parcelUrl: text(d.parcelUrl),
+    reid: text(d.reid),
+    landClass: text(d.landClass),
+    countyOwner: d.ownerName.trim() || d.ownerMailing.trim() ? { name: text(d.ownerName), mailing: text(d.ownerMailing) } : undefined,
+    lastSale: d.saleDate || d.salePrice.trim() ? { date: text(d.saleDate), price: num(d.salePrice) } : undefined,
+    countyDeed:
+      d.deedBook.trim() || d.deedPage.trim() || d.deedDate || d.deedAcres.trim() || d.deedDescription.trim()
+        ? { book: text(d.deedBook), page: text(d.deedPage), date: text(d.deedDate), acres: num(d.deedAcres), description: text(d.deedDescription) }
+        : undefined,
+    building:
+      d.heatedArea.trim() || d.yearBuilt.trim() || d.useType.trim()
+        ? { heatedAreaSqFt: num(d.heatedArea), yearBuilt: num(d.yearBuilt), useType: text(d.useType) }
+        : undefined,
     metrics,
     meta: Object.fromEntries(META_KEYS.map((k) => [k, keep(k)]).filter(([, v]) => v !== undefined)) as Property['meta'],
     clinicalSpecs: hasSpecs ? specs : undefined,
@@ -220,6 +260,16 @@ export function PropertyEditForm({
             <Field label="Parcel PIN" span="sm:col-span-3">{input('parcelPin', 'font-mono')}</Field>
             <div className="sm:col-span-6"><SourceRow label="Parcel PIN" meta={meta.parcelPin} onMeta={setM('parcelPin')} /></div>
             <Field label="County record link" span="sm:col-span-6">{input('parcelUrl')}</Field>
+            <Field label="REID" span="sm:col-span-3">{input('reid', 'font-mono')}</Field>
+            <Field label="Land class" span="sm:col-span-3">{input('landClass')}</Field>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="mb-3 text-[13px] font-semibold">Owner per county</h3>
+          <div className="grid gap-4">
+            <Field label="Name">{input('ownerName')}</Field>
+            <Field label="Mailing address">{input('ownerMailing')}</Field>
           </div>
         </div>
 
@@ -261,6 +311,28 @@ export function PropertyEditForm({
           </div>
         </div>
 
+        </div>
+
+        <div>
+          <h3 className="mb-3 text-[13px] font-semibold">Last sale and deed</h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Date sold"><input type="date" className="field" value={d.saleDate} onChange={(e) => set('saleDate', e.target.value)} /></Field>
+            <Field label="Sale price">{input('salePrice', 'tnum')}</Field>
+            <Field label="Deed book">{input('deedBook', 'font-mono')}</Field>
+            <Field label="Deed page">{input('deedPage', 'font-mono')}</Field>
+            <Field label="Deed date"><input type="date" className="field" value={d.deedDate} onChange={(e) => set('deedDate', e.target.value)} /></Field>
+            <Field label="Acres">{input('deedAcres', 'tnum')}</Field>
+            <Field label="Property description" span="sm:col-span-2">{input('deedDescription')}</Field>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="mb-3 text-[13px] font-semibold">Building</h3>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label="Heated area, sq ft">{input('heatedArea', 'tnum')}</Field>
+            <Field label="Year built">{input('yearBuilt', 'tnum')}</Field>
+            <Field label="Use type">{input('useType')}</Field>
+          </div>
         </div>
         </div>
 
