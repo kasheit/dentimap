@@ -5,20 +5,20 @@
 @tailwind utilities;
 
 @layer base {
-  /* Warm charcoal theme: dark graphite with a brass accent, not a flat black/white/blue scheme. */
+  /* "Equifinal Command" theme: deep bedrock-green canvas, polished-stone surfaces, convergence teal accent. */
   :root {
-    --dm-bg: 12 11 10;
-    --dm-surface: 20 18 16;
-    --dm-raised: 29 26 23;
-    --dm-border: 54 47 40;
-    --dm-hover: 33 29 26;
-    --dm-text: 241 236 228;
-    --dm-muted: 176 166 153;
-    --dm-dim: 133 122 108;
-    --dm-blue: 205 164 97;
-    --dm-green: 122 199 125;
-    --dm-amber: 232 160 58;
-    --dm-red: 224 96 84;
+    --dm-bg: 19 28 26;
+    --dm-surface: 27 38 36;
+    --dm-raised: 33 48 45;
+    --dm-border: 42 56 53;
+    --dm-hover: 36 51 48;
+    --dm-text: 228 239 235;
+    --dm-muted: 141 163 156;
+    --dm-dim: 90 112 106;
+    --dm-blue: 31 184 181;
+    --dm-green: 91 201 160;
+    --dm-amber: 232 184 75;
+    --dm-red: 224 96 96;
   }
   html {
     color-scheme: dark;
