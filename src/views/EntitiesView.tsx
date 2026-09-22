@@ -109,7 +109,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
   const sold = deeds.filter((d) => norm(d.grantor) === norm(e.name)).length;
 
   return (
-    <article className="rounded-lg border border-dm-border bg-dm-surface">
+    <article className="lift rounded-lg border border-dm-border bg-dm-surface">
       <EntityHeader e={e} />
 
       <dl className="grid grid-cols-3 gap-4 border-b border-dm-border p-5">
@@ -224,7 +224,7 @@ export function EntitiesView() {
           Add entity
         </button>
       </div>
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="stagger grid gap-6 md:grid-cols-2">
         {entities.map((e) => <EntityCard key={e.id} e={e} />)}
       </div>
     </main>

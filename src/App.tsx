@@ -8,7 +8,6 @@ import { DeedsView } from '@/views/DeedsView';
 import { EntitiesView } from '@/views/EntitiesView';
 import { GlossaryView } from '@/views/GlossaryView';
 import { HomeView } from '@/views/HomeView';
-import { MatrixView } from '@/views/MatrixView';
 import { PeopleView } from '@/views/PeopleView';
 import { PropertiesView } from '@/views/PropertiesView';
 
@@ -21,9 +20,9 @@ function UndoToast() {
   }, [lastDeleted, dismissUndo]);
   if (!lastDeleted) return null;
   return (
-    <div className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-lg border border-dm-border bg-dm-raised px-4 py-2.5 text-label shadow-lg shadow-black/60">
+    <div className="animate-sheet-in fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-lg border border-dm-border bg-dm-raised px-4 py-2.5 text-label shadow-lg shadow-black/60">
       <span className="text-dm-muted">Instrument removed</span>
-      <button className="font-medium text-dm-blue hover:underline" onClick={undoDelete}>Undo</button>
+      <button className="font-medium text-dm-blue transition-colors hover:underline" onClick={undoDelete}>Undo</button>
     </div>
   );
 }
@@ -33,7 +32,7 @@ function ConflictBanner() {
   const resolve = useDentimap((s) => s.resolveConflict);
   if (sync !== 'conflict') return null;
   return (
-    <div className="border-b border-dm-red/30 bg-dm-red/10 px-4 py-2.5 text-label text-dm-red sm:px-6">
+    <div className="animate-fade-in border-b border-dm-red/30 bg-dm-red/10 px-4 py-2.5 text-label text-dm-red sm:px-6">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-4 gap-y-2">
         <span className="flex-1">This registry was changed somewhere else. Your latest edits are not saved yet.</span>
         <button className="btn" onClick={() => resolve('remote')}>Load latest (discard mine)</button>
@@ -80,13 +79,14 @@ function Shell() {
     <div className="min-h-screen bg-dm-bg">
       <Header />
       <ConflictBanner />
-      {tab === 'home' && <HomeView />}
-      {tab === 'properties' && <PropertiesView />}
-      {tab === 'matrix' && <MatrixView />}
-      {tab === 'entities' && <EntitiesView />}
-      {tab === 'people' && <PeopleView />}
-      {tab === 'deeds' && <DeedsView />}
-      {tab === 'glossary' && <GlossaryView />}
+      <div key={tab} className="animate-view-in">
+        {tab === 'home' && <HomeView />}
+        {tab === 'properties' && <PropertiesView />}
+        {tab === 'entities' && <EntitiesView />}
+        {tab === 'people' && <PeopleView />}
+        {tab === 'deeds' && <DeedsView />}
+        {tab === 'glossary' && <GlossaryView />}
+      </div>
       <UndoToast />
       <SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>

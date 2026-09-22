@@ -5,8 +5,19 @@ import { completionFor } from '@/lib/completion';
 import { addressLine, compactUsd, facilityTypeLabel } from '@/lib/format';
 import { newId, useDentimap } from '@/lib/store';
 import type { FacilityStatus, Property } from '@/lib/types';
+import { useCountUp } from '@/lib/useCountUp';
 import { StatusPill } from './Chips';
 import { DocumentIntake } from './DocumentIntake';
+
+function KpiTile({ label, n, fmt }: { label: string; n: number; fmt: (v: number) => string }) {
+  const v = useCountUp(n);
+  return (
+    <div className="border-dm-border px-4 py-3 [&:not(:last-child)]:sm:border-r">
+      <div className="text-label text-dm-dim">{label}</div>
+      <div className="tnum mt-0.5 font-mono text-2xl font-medium">{fmt(v)}</div>
+    </div>
+  );
+}
 
 type TypeFilter = 'all' | 'valleygate_asc' | 'vfd_practice' | 'attention';
 type StatusFilter = 'all' | FacilityStatus;
@@ -66,10 +77,10 @@ export function LocationsTable() {
     const investment = sum((p) => p.metrics?.projectInvestment);
     const complete = rows.length ? Math.round(rows.reduce((t, r) => t + r.percent, 0) / rows.length) : 0;
     return [
-      ['Locations', String(properties.length)],
-      ['Avg. complete', `${complete}%`],
-      ['Assessed', compactUsd(assessed || undefined)],
-      ['Investment', compactUsd(investment || undefined)],
+      { label: 'Locations', n: properties.length, fmt: (v: number) => String(v) },
+      { label: 'Avg. complete', n: complete, fmt: (v: number) => `${v}%` },
+      { label: 'Assessed', n: assessed, fmt: (v: number) => compactUsd(v || undefined) },
+      { label: 'Investment', n: investment, fmt: (v: number) => compactUsd(v || undefined) },
     ];
   }, [properties, rows]);
 
@@ -173,12 +184,7 @@ export function LocationsTable() {
       </div>
 
       <div className="stagger mb-4 grid grid-cols-2 overflow-hidden rounded-lg border border-dm-border bg-dm-surface sm:grid-cols-4">
-        {kpis.map(([label, value]) => (
-          <div key={label} className="border-dm-border px-4 py-3 [&:not(:last-child)]:sm:border-r">
-            <div className="text-label text-dm-dim">{label}</div>
-            <div className="tnum mt-0.5 font-mono text-2xl font-medium">{value}</div>
-          </div>
-        ))}
+        {kpis.map((k) => <KpiTile key={k.label} {...k} />)}
       </div>
 
       <DocumentIntake />

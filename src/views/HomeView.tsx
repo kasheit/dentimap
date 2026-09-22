@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { attentionQueue } from '@/lib/attention';
 import { useDentimap } from '@/lib/store';
+import { useCountUp } from '@/lib/useCountUp';
 
 /** Single-owner app: this is who "Home" greets, not an account field. */
 const OWNER_NAME = 'Eshan';
@@ -9,6 +10,16 @@ function greeting(hour: number) {
   if (hour < 12) return 'Good morning';
   if (hour < 18) return 'Good afternoon';
   return 'Good evening';
+}
+
+function Stat({ label, n }: { label: string; n: number }) {
+  const v = useCountUp(n);
+  return (
+    <div className="text-center">
+      <div className="tnum text-lg font-semibold">{v}</div>
+      <div className="text-label text-dm-dim">{label}</div>
+    </div>
+  );
 }
 
 export function HomeView() {
@@ -44,7 +55,8 @@ export function HomeView() {
             <button
               key={item.id}
               onClick={() => (item.goToEntities ? setTab('entities') : item.propertyId && openProperty(item.propertyId))}
-              className="group flex items-center gap-4 rounded-lg border border-dm-border bg-dm-surface px-5 py-4 text-left transition-colors hover:border-dm-blue/40"
+              className="lift group flex animate-rise items-center gap-4 rounded-lg border border-dm-border bg-dm-surface px-5 py-4 text-left hover:border-dm-blue/40"
+              style={{ animationDelay: `${i * 40}ms` }}
             >
               <span className={`w-6 shrink-0 text-label font-semibold tnum ${item.severity === 'red' ? 'text-dm-red' : item.severity === 'amber' ? 'text-dm-amber' : 'text-dm-dim'}`}>
                 {String(i + 1).padStart(2, '0')}
@@ -53,23 +65,16 @@ export function HomeView() {
                 <span className="block truncate text-sm font-medium">{item.title}</span>
                 <span className="mt-0.5 block truncate text-label text-dm-dim">{item.sub}</span>
               </span>
-              <span className="shrink-0 text-dm-dim transition-colors group-hover:text-dm-muted">→</span>
+              <span className="shrink-0 text-dm-dim transition-all duration-200 ease-luxury group-hover:translate-x-0.5 group-hover:text-dm-muted">→</span>
             </button>
           ))}
         </div>
       )}
 
       <div className="flex justify-center gap-8 pt-2">
-        {[
-          ['Locations', properties.length],
-          ['Deeds', deeds.length],
-          ['Entities', entities.length],
-        ].map(([label, n]) => (
-          <div key={label} className="text-center">
-            <div className="tnum text-lg font-semibold">{n}</div>
-            <div className="text-label text-dm-dim">{label}</div>
-          </div>
-        ))}
+        <Stat label="Locations" n={properties.length} />
+        <Stat label="Deeds" n={deeds.length} />
+        <Stat label="Entities" n={entities.length} />
       </div>
     </main>
   );

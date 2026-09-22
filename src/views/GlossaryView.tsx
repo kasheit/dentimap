@@ -76,7 +76,7 @@ function TermCard({ t }: { t: GlossaryTerm }) {
   }
 
   return (
-    <article className="group rounded-lg border border-dm-border bg-dm-surface p-5">
+    <article className="lift group rounded-lg border border-dm-border bg-dm-surface p-5">
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="text-body font-semibold">{t.term}</h3>
@@ -142,7 +142,7 @@ export function GlossaryView() {
       )}
 
       {filtered.length ? (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="stagger grid gap-4 sm:grid-cols-2">
           {filtered.map((t) => <TermCard key={t.id} t={t} />)}
         </div>
       ) : (
