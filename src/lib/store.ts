@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from './supabase';
-import type { ActivityEntry, DeedRecord, DentimapData, LegalEntity, Person, Property } from './types';
+import type { ActivityEntry, DeedRecord, DentimapData, GlossaryTerm, LegalEntity, Person, Property } from './types';
 
-export type TabId = 'properties' | 'matrix' | 'entities' | 'people' | 'deeds';
+export type TabId = 'properties' | 'matrix' | 'entities' | 'people' | 'deeds' | 'glossary';
 export type SyncStatus = 'off' | 'connecting' | 'synced' | 'saving' | 'error' | 'conflict';
 
 interface State {
@@ -12,6 +12,7 @@ interface State {
   entities: LegalEntity[];
   activity: ActivityEntry[];
   people: Person[];
+  glossary: GlossaryTerm[];
   selectedPersonId: string;
   selectedPropertyId: string;
   lastDeleted: DeedRecord | null;
@@ -40,6 +41,9 @@ interface State {
   deleteEntity: (id: string) => void;
   linkProperty: (entityId: string, propertyId: string) => void;
   unlinkProperty: (entityId: string, propertyId: string) => void;
+  addTerm: (t: GlossaryTerm) => void;
+  updateTerm: (id: string, patch: Partial<GlossaryTerm>) => void;
+  deleteTerm: (id: string) => void;
   importData: (d: DentimapData) => { added: number; updated: number };
   resolveConflict: (choice: 'remote' | 'mine') => Promise<void>;
 }
@@ -54,7 +58,8 @@ export function isValidData(d: unknown): d is DentimapData {
     x.properties.every((p) => p && typeof p.id === 'string' && typeof p.name === 'string' && p.address) &&
     x.deeds.every((e) => e && typeof e.id === 'string' && typeof e.propertyId === 'string') &&
     x.entities.every((e) => e && typeof e.id === 'string' && typeof e.name === 'string') &&
-    (x.people === undefined || (Array.isArray(x.people) && x.people.every((e) => e && typeof e.id === 'string' && typeof e.name === 'string')))
+    (x.people === undefined || (Array.isArray(x.people) && x.people.every((e) => e && typeof e.id === 'string' && typeof e.name === 'string'))) &&
+    (x.glossary === undefined || (Array.isArray(x.glossary) && x.glossary.every((e) => e && typeof e.id === 'string' && typeof e.term === 'string' && typeof e.definition === 'string')))
   );
 }
 
@@ -66,6 +71,7 @@ const pick = (s: State): DentimapData => ({
   entities: s.entities,
   activity: s.activity,
   people: s.people,
+  glossary: s.glossary,
 });
 
 const uid = (p: string) => `${p}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
@@ -83,6 +89,7 @@ export const useDentimap = create<State>()(
       entities: [],
       activity: [],
       people: [],
+      glossary: [],
       selectedPersonId: '',
       selectedPropertyId: '',
       tab: 'properties',
@@ -175,6 +182,15 @@ export const useDentimap = create<State>()(
           activity: logged(s.activity, `Unlinked from ${s.entities.find((e) => e.id === entityId)?.name ?? entityId}`, propertyId),
         })),
 
+      addTerm: (t) => set((s) => ({ glossary: [...s.glossary, t], activity: logged(s.activity, `Glossary term added: ${t.term}`) })),
+      updateTerm: (id, patch) =>
+        set((s) => ({ glossary: s.glossary.map((t) => (t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t)) })),
+      deleteTerm: (id) =>
+        set((s) => ({
+          glossary: s.glossary.filter((t) => t.id !== id),
+          activity: logged(s.activity, `Glossary term deleted: ${s.glossary.find((t) => t.id === id)?.term ?? id}`),
+        })),
+
       // Merge by id: records in the file win over matching records here; nothing else is removed.
       importData: (d) => {
         let added = 0;
@@ -195,6 +211,7 @@ export const useDentimap = create<State>()(
             deeds: merge(s.deeds, d.deeds),
             entities: merge(s.entities, d.entities),
             people: merge(s.people, d.people ?? []),
+            glossary: merge(s.glossary, d.glossary ?? []),
             selectedPropertyId: properties.some((p) => p.id === s.selectedPropertyId) ? s.selectedPropertyId : '',
             activity: logged(s.activity, `Imported file: ${added} new, ${updated} updated`),
           };
@@ -268,6 +285,7 @@ async function pull(): Promise<string | null> {
       entities: d.entities,
       activity: d.activity ?? [],
       people: d.people ?? [],
+      glossary: d.glossary ?? [],
       selectedPropertyId: d.properties.some((p) => p.id === sel) ? sel : '',
     });
     applyingRemote = false;
@@ -307,7 +325,7 @@ export async function startSync() {
   let timer: ReturnType<typeof setTimeout> | undefined;
   useDentimap.subscribe((s, prev) => {
     if (applyingRemote || s.sync === 'conflict') return;
-    if (s.properties === prev.properties && s.deeds === prev.deeds && s.entities === prev.entities && s.activity === prev.activity && s.people === prev.people) return;
+    if (s.properties === prev.properties && s.deeds === prev.deeds && s.entities === prev.entities && s.activity === prev.activity && s.people === prev.people && s.glossary === prev.glossary) return;
     set({ sync: 'saving' });
     clearTimeout(timer);
     timer = setTimeout(async () => {

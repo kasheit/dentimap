@@ -5,7 +5,7 @@ import { useDentimap } from '@/lib/store';
 
 interface Result {
   key: string;
-  kind: 'Location' | 'Person' | 'Entity' | 'Deed';
+  kind: 'Location' | 'Person' | 'Entity' | 'Deed' | 'Term';
   title: string;
   sub: string;
   go: () => void;
@@ -14,7 +14,7 @@ interface Result {
 export const OPEN_SEARCH_EVENT = 'dentimap:open-search';
 
 export function SearchPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { properties, people, entities, deeds, openProperty, openPerson, setTab } = useDentimap();
+  const { properties, people, entities, deeds, glossary, openProperty, openPerson, setTab } = useDentimap();
   const [q, setQ] = useState('');
   const [idx, setIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -54,8 +54,13 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
         out.push({ key: d.id, kind: 'Deed', title: `${d.grantor} → ${d.grantee}`, sub: `${fmtDate(d.recordingDate)} · ${propName(d.propertyId)}`, go: () => openProperty(d.propertyId) });
       }
     }
+    for (const t of glossary) {
+      if (hit([t.term, t.expansion, t.definition].filter(Boolean).join(' '))) {
+        out.push({ key: t.id, kind: 'Term', title: t.term, sub: t.expansion ?? t.definition, go: () => setTab('glossary') });
+      }
+    }
     return out.slice(0, 30);
-  }, [q, properties, people, entities, deeds, openProperty, openPerson, setTab]);
+  }, [q, properties, people, entities, deeds, glossary, openProperty, openPerson, setTab]);
 
   useEffect(() => setIdx(0), [q]);
 

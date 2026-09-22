@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Users, Building2, Table2, CloudOff, FileText, Landmark } from 'lucide-react';
+import { AlertTriangle, Users, Building2, Table2, CloudOff, FileText, Landmark, BookOpen } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { OPEN_SEARCH_EVENT } from './SearchPalette';
 import { isValidData, useDentimap } from '@/lib/store';
@@ -12,6 +12,7 @@ const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
   { id: 'entities', label: 'Entities', icon: Landmark },
   { id: 'people', label: 'People', icon: Users },
   { id: 'deeds', label: 'Deeds', icon: FileText },
+  { id: 'glossary', label: 'Glossary', icon: BookOpen },
 ];
 
 function SyncBadge() {
@@ -57,8 +58,8 @@ export function Header() {
   }, [notice]);
 
   const snapshot = () => {
-    const { properties, deeds, entities, people, activity } = useDentimap.getState();
-    return { properties, deeds, entities, people, activity };
+    const { properties, deeds, entities, people, activity, glossary } = useDentimap.getState();
+    return { properties, deeds, entities, people, activity, glossary };
   };
 
   const onImport = async (file?: File) => {

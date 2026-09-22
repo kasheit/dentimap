@@ -157,10 +157,24 @@ export interface ActivityEntry {
   propertyId?: string;
 }
 
+/** A term the user has defined in their own words, e.g. an acronym like MSO or LLC. */
+export interface GlossaryTerm {
+  id: string;
+  /** The term or acronym itself, e.g. "MSO". */
+  term: string;
+  /** What the acronym stands for, if it is one, e.g. "Management Services Organization". */
+  expansion?: string;
+  /** The user's own-words definition. */
+  definition: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DentimapData {
   properties: Property[];
   deeds: DeedRecord[];
   entities: LegalEntity[];
   activity?: ActivityEntry[];
   people?: Person[];
+  glossary?: GlossaryTerm[];
 }

@@ -6,6 +6,7 @@ import { FOCUS_SEARCH } from '@/components/LocationsTable';
 import { startSync, useDentimap } from '@/lib/store';
 import { DeedsView } from '@/views/DeedsView';
 import { EntitiesView } from '@/views/EntitiesView';
+import { GlossaryView } from '@/views/GlossaryView';
 import { MatrixView } from '@/views/MatrixView';
 import { PeopleView } from '@/views/PeopleView';
 import { PropertiesView } from '@/views/PropertiesView';
@@ -83,6 +84,7 @@ function Shell() {
       {tab === 'entities' && <EntitiesView />}
       {tab === 'people' && <PeopleView />}
       {tab === 'deeds' && <DeedsView />}
+      {tab === 'glossary' && <GlossaryView />}
       <UndoToast />
       <SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
