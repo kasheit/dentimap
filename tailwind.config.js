@@ -34,11 +34,13 @@ export default {
         'scale-in': 'scaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both',
         'fade-in': 'fadeIn 0.18s ease-out both',
         'sheet-in': 'sheetIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'view-out': 'viewOut 0.14s cubic-bezier(0.4, 0, 1, 1) both',
         'pulse-ring': 'pulseRing 2.4s ease-out infinite',
       },
       keyframes: {
         rise: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
         viewIn: { '0%': { opacity: '0', transform: 'translateY(10px) scale(0.994)' }, '100%': { opacity: '1', transform: 'translateY(0) scale(1)' } },
+        viewOut: { '0%': { opacity: '1', transform: 'translateY(0) scale(1)' }, '100%': { opacity: '0', transform: 'translateY(-6px) scale(0.996)' } },
         scaleIn: { '0%': { opacity: '0', transform: 'scale(0.97) translateY(-4px)' }, '100%': { opacity: '1', transform: 'scale(1) translateY(0)' } },
         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
         sheetIn: { '0%': { opacity: '0', transform: 'translateY(14px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },

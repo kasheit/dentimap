@@ -44,6 +44,8 @@ export function Header() {
   const navRef = useRef<HTMLElement>(null);
   const tabRefs = useRef<Partial<Record<TabId, HTMLButtonElement>>>({});
   const [indicator, setIndicator] = useState<{ left: number; width: number; ready: boolean }>({ left: 0, width: 0, ready: false });
+  const [hovered, setHovered] = useState<TabId | null>(null);
+  const [hoverBox, setHoverBox] = useState<{ left: number; width: number; top: number; height: number }>({ left: 0, width: 0, top: 0, height: 0 });
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -58,6 +60,12 @@ export function Header() {
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
   }, [tab]);
+
+  useLayoutEffect(() => {
+    if (!hovered) return;
+    const el = tabRefs.current[hovered];
+    if (el) setHoverBox({ left: el.offsetLeft, width: el.offsetWidth, top: el.offsetTop, height: el.offsetHeight });
+  }, [hovered]);
 
   useEffect(() => {
     const close = (e: MouseEvent) => {
@@ -101,7 +109,21 @@ export function Header() {
           <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-0 invert" draggable={false} />
         </button>
 
-        <nav ref={navRef} className="relative order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto">
+        <nav
+          ref={navRef}
+          onMouseLeave={() => setHovered(null)}
+          className="relative order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto"
+        >
+          <span
+            className="pointer-events-none absolute rounded-md bg-dm-hover transition-all duration-200 ease-luxury"
+            style={{
+              left: hoverBox.left,
+              width: hoverBox.width,
+              top: hoverBox.top,
+              height: hoverBox.height,
+              opacity: hovered ? 1 : 0,
+            }}
+          />
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -109,6 +131,7 @@ export function Header() {
                 if (el) tabRefs.current[id] = el;
               }}
               onClick={() => setTab(id)}
+              onMouseEnter={() => setHovered(id)}
               className={`relative flex items-center gap-2 whitespace-nowrap px-3 py-2.5 text-label font-medium transition-colors duration-200 ease-luxury lg:py-2 ${
                 tab === id ? 'text-dm-text' : 'text-dm-dim hover:text-dm-muted'
               }`}

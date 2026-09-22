@@ -4,12 +4,42 @@ import { Header } from '@/components/Header';
 import { OPEN_SEARCH_EVENT, SearchPalette } from '@/components/SearchPalette';
 import { FOCUS_SEARCH } from '@/components/LocationsTable';
 import { startSync, useDentimap } from '@/lib/store';
+import type { TabId } from '@/lib/store';
 import { DeedsView } from '@/views/DeedsView';
 import { EntitiesView } from '@/views/EntitiesView';
 import { GlossaryView } from '@/views/GlossaryView';
 import { HomeView } from '@/views/HomeView';
 import { PeopleView } from '@/views/PeopleView';
 import { PropertiesView } from '@/views/PropertiesView';
+
+const OUT_MS = 130;
+
+/** Fades the outgoing tab down-and-out, then eases the new one up-and-in, instead of a hard cut. */
+function TabViewport({ tab }: { tab: TabId }) {
+  const [renderedTab, setRenderedTab] = useState(tab);
+  const [leaving, setLeaving] = useState(false);
+
+  useEffect(() => {
+    if (tab === renderedTab) return;
+    setLeaving(true);
+    const t = setTimeout(() => {
+      setRenderedTab(tab);
+      setLeaving(false);
+    }, OUT_MS);
+    return () => clearTimeout(t);
+  }, [tab, renderedTab]);
+
+  return (
+    <div key={renderedTab} className={leaving ? 'animate-view-out' : 'animate-view-in'}>
+      {renderedTab === 'home' && <HomeView />}
+      {renderedTab === 'properties' && <PropertiesView />}
+      {renderedTab === 'entities' && <EntitiesView />}
+      {renderedTab === 'people' && <PeopleView />}
+      {renderedTab === 'deeds' && <DeedsView />}
+      {renderedTab === 'glossary' && <GlossaryView />}
+    </div>
+  );
+}
 
 function UndoToast() {
   const { lastDeleted, undoDelete, dismissUndo } = useDentimap();
@@ -79,14 +109,7 @@ function Shell() {
     <div className="min-h-screen bg-dm-bg">
       <Header />
       <ConflictBanner />
-      <div key={tab} className="animate-view-in">
-        {tab === 'home' && <HomeView />}
-        {tab === 'properties' && <PropertiesView />}
-        {tab === 'entities' && <EntitiesView />}
-        {tab === 'people' && <PeopleView />}
-        {tab === 'deeds' && <DeedsView />}
-        {tab === 'glossary' && <GlossaryView />}
-      </div>
+      <TabViewport tab={tab} />
       <UndoToast />
       <SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
