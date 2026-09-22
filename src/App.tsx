@@ -7,6 +7,7 @@ import { startSync, useDentimap } from '@/lib/store';
 import { DeedsView } from '@/views/DeedsView';
 import { EntitiesView } from '@/views/EntitiesView';
 import { GlossaryView } from '@/views/GlossaryView';
+import { HomeView } from '@/views/HomeView';
 import { MatrixView } from '@/views/MatrixView';
 import { PeopleView } from '@/views/PeopleView';
 import { PropertiesView } from '@/views/PropertiesView';
@@ -79,6 +80,7 @@ function Shell() {
     <div className="min-h-screen bg-dm-bg">
       <Header />
       <ConflictBanner />
+      {tab === 'home' && <HomeView />}
       {tab === 'properties' && <PropertiesView />}
       {tab === 'matrix' && <MatrixView />}
       {tab === 'entities' && <EntitiesView />}

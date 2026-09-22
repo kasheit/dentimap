@@ -81,7 +81,9 @@ export function Header() {
   return (
     <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-0 invert" draggable={false} />
+        <button onClick={() => setTab('home')} aria-label="Go to home">
+          <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-0 invert" draggable={false} />
+        </button>
 
         <nav className="order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto">
           {tabs.map(({ id, label, icon: Icon }) => (
