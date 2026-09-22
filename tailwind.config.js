@@ -29,12 +29,12 @@ export default {
         luxury: 'cubic-bezier(0.16, 1, 0.3, 1)',
       },
       animation: {
-        rise: 'rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both',
-        'view-in': 'viewIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both',
-        'scale-in': 'scaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both',
-        'fade-in': 'fadeIn 0.18s ease-out both',
-        'sheet-in': 'sheetIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both',
-        'view-out': 'viewOut 0.14s cubic-bezier(0.4, 0, 1, 1) both',
+        rise: 'rise 0.26s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'view-in': 'viewIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'scale-in': 'scaleIn 0.14s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'fade-in': 'fadeIn 0.12s ease-out both',
+        'sheet-in': 'sheetIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'view-out': 'viewOut 0.09s cubic-bezier(0.4, 0, 1, 1) both',
         'pulse-ring': 'pulseRing 2.4s ease-out infinite',
       },
       keyframes: {

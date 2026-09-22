@@ -5,20 +5,20 @@
 @tailwind utilities;
 
 @layer base {
-  /* Black theme: pure black canvas, near-black panels, hairline borders, white as the emphasis colour, blue only for links and focus. */
+  /* Warm charcoal theme: dark graphite with a brass accent, not a flat black/white/blue scheme. */
   :root {
-    --dm-bg: 0 0 0;
-    --dm-surface: 10 10 10;
-    --dm-raised: 20 20 20;
-    --dm-border: 38 38 38;
-    --dm-hover: 26 26 26;
-    --dm-text: 237 237 237;
-    --dm-muted: 161 161 161;
-    --dm-dim: 128 128 128;
-    --dm-blue: 50 145 255;
-    --dm-green: 62 207 142;
-    --dm-amber: 245 166 35;
-    --dm-red: 255 90 90;
+    --dm-bg: 12 11 10;
+    --dm-surface: 20 18 16;
+    --dm-raised: 29 26 23;
+    --dm-border: 54 47 40;
+    --dm-hover: 33 29 26;
+    --dm-text: 241 236 228;
+    --dm-muted: 176 166 153;
+    --dm-dim: 133 122 108;
+    --dm-blue: 205 164 97;
+    --dm-green: 122 199 125;
+    --dm-amber: 232 160 58;
+    --dm-red: 224 96 84;
   }
   html {
     color-scheme: dark;
@@ -39,13 +39,13 @@
 
 @layer components {
   .field {
-    @apply w-full rounded-md border border-dm-border bg-dm-bg px-2.5 py-1.5 text-sm text-dm-text outline-none transition-all duration-200 ease-luxury placeholder:text-dm-dim focus:border-dm-blue/60 focus:shadow-[0_0_0_3px_rgb(var(--dm-blue)/0.12)];
+    @apply w-full rounded-md border border-dm-border bg-dm-bg px-2.5 py-1.5 text-sm text-dm-text outline-none transition-all duration-150 ease-luxury placeholder:text-dm-dim focus:border-dm-blue/60 focus:shadow-[0_0_0_3px_rgb(var(--dm-blue)/0.14)];
   }
   .btn {
-    @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-label font-medium text-dm-muted transition-all duration-200 ease-luxury hover:-translate-y-px hover:border-dm-muted/60 hover:bg-dm-hover hover:text-dm-text hover:shadow-sm hover:shadow-black/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none active:scale-[0.97] active:duration-100;
+    @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-label font-medium text-dm-muted transition-all duration-150 ease-luxury hover:-translate-y-px hover:border-dm-muted/60 hover:bg-dm-hover hover:text-dm-text hover:shadow-sm hover:shadow-black/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none active:scale-[0.97] active:duration-75;
   }
   .btn-primary {
-    @apply border-dm-text bg-dm-text text-dm-bg hover:bg-dm-text/85 hover:text-dm-bg;
+    @apply border-dm-blue bg-dm-blue text-dm-bg hover:bg-dm-blue/85 hover:text-dm-bg hover:shadow-[0_0_16px_-4px_rgb(var(--dm-blue)/0.7)];
   }
   .label {
     @apply text-label font-medium text-dm-dim;
@@ -54,30 +54,30 @@
   .eyebrow {
     @apply text-[11px] font-medium uppercase tracking-[0.08em] text-dm-dim;
   }
-  /* text filter tab with a blue underline when active */
+  /* text filter tab with an accent underline when active */
   .tab-chip {
-    @apply whitespace-nowrap text-label text-dm-dim transition-colors duration-200 ease-luxury hover:text-dm-muted;
+    @apply whitespace-nowrap text-label text-dm-dim transition-colors duration-150 ease-luxury hover:text-dm-muted;
   }
   .tab-chip[aria-pressed='true'] {
-    @apply text-dm-text underline decoration-dm-text decoration-2 underline-offset-[6px];
+    @apply text-dm-text underline decoration-dm-blue decoration-2 underline-offset-[6px];
   }
   /* a card that lifts gently on hover — rows, entity/glossary cards, queue items */
   .lift {
-    @apply transition-all duration-200 ease-luxury hover:-translate-y-0.5 hover:border-dm-muted/50 hover:shadow-lg hover:shadow-black/40;
+    @apply transition-all duration-150 ease-luxury hover:-translate-y-0.5 hover:border-dm-muted/50 hover:shadow-lg hover:shadow-black/40;
   }
 }
 
 @layer utilities {
   /* children rise in one after another */
   .stagger > * {
-    animation: rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: rise 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
-  .stagger > *:nth-child(2) { animation-delay: 40ms; }
-  .stagger > *:nth-child(3) { animation-delay: 80ms; }
-  .stagger > *:nth-child(4) { animation-delay: 120ms; }
-  .stagger > *:nth-child(5) { animation-delay: 160ms; }
-  .stagger > *:nth-child(6) { animation-delay: 200ms; }
-  .stagger > *:nth-child(n + 7) { animation-delay: 240ms; }
+  .stagger > *:nth-child(2) { animation-delay: 25ms; }
+  .stagger > *:nth-child(3) { animation-delay: 50ms; }
+  .stagger > *:nth-child(4) { animation-delay: 75ms; }
+  .stagger > *:nth-child(5) { animation-delay: 100ms; }
+  .stagger > *:nth-child(6) { animation-delay: 125ms; }
+  .stagger > *:nth-child(n + 7) { animation-delay: 150ms; }
 
   .tnum {
     font-variant-numeric: tabular-nums;

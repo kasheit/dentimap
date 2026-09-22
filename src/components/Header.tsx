@@ -105,7 +105,7 @@ export function Header() {
   return (
     <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <button onClick={() => setTab('home')} aria-label="Go to home" className="transition-transform duration-200 ease-luxury hover:scale-[1.03] active:scale-[0.97]">
+        <button onClick={() => setTab('home')} aria-label="Go to home" className="transition-transform duration-150 ease-luxury hover:scale-[1.03] active:scale-[0.97]">
           <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-0 invert" draggable={false} />
         </button>
 
@@ -115,7 +115,7 @@ export function Header() {
           className="relative order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto"
         >
           <span
-            className="pointer-events-none absolute rounded-md bg-dm-hover transition-all duration-200 ease-luxury"
+            className="pointer-events-none absolute rounded-md bg-dm-hover transition-all duration-150 ease-luxury"
             style={{
               left: hoverBox.left,
               width: hoverBox.width,
@@ -132,7 +132,7 @@ export function Header() {
               }}
               onClick={() => setTab(id)}
               onMouseEnter={() => setHovered(id)}
-              className={`relative flex items-center gap-2 whitespace-nowrap px-3 py-2.5 text-label font-medium transition-colors duration-200 ease-luxury lg:py-2 ${
+              className={`relative flex items-center gap-2 whitespace-nowrap px-3 py-2.5 text-label font-medium transition-colors duration-150 ease-luxury lg:py-2 ${
                 tab === id ? 'text-dm-text' : 'text-dm-dim hover:text-dm-muted'
               }`}
             >
@@ -141,7 +141,7 @@ export function Header() {
             </button>
           ))}
           <span
-            className="pointer-events-none absolute bottom-0 h-px bg-dm-text transition-all duration-300 ease-luxury"
+            className="pointer-events-none absolute bottom-0 h-0.5 bg-dm-blue transition-all duration-200 ease-luxury"
             style={{ left: indicator.left + 8, width: Math.max(indicator.width - 16, 0), opacity: indicator.ready ? 1 : 0 }}
           />
         </nav>

@@ -12,7 +12,7 @@ import { HomeView } from '@/views/HomeView';
 import { PeopleView } from '@/views/PeopleView';
 import { PropertiesView } from '@/views/PropertiesView';
 
-const OUT_MS = 130;
+const OUT_MS = 90;
 
 /** Fades the outgoing tab down-and-out, then eases the new one up-and-in, instead of a hard cut. */
 function TabViewport({ tab }: { tab: TabId }) {

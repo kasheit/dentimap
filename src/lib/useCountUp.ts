@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
 /** Animates a displayed integer toward `target` with a decelerating ease, honoring reduced-motion. */
-export function useCountUp(target: number, duration = 700) {
+export function useCountUp(target: number, duration = 420) {
   const [value, setValue] = useState(target);
   const fromRef = useRef(target);
 
