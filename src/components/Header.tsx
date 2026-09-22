@@ -17,7 +17,14 @@ const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
 function SyncBadge() {
   const sync = useDentimap((s) => s.sync);
   const message = useDentimap((s) => s.syncMessage);
-  if (sync === 'off' || sync === 'synced' || sync === 'connecting' || sync === 'saving') return null;
+  if (sync === 'off' || sync === 'synced' || sync === 'connecting') return null;
+  if (sync === 'saving') {
+    return (
+      <span className="hidden items-center gap-1.5 tnum text-label text-dm-dim md:flex">
+        <i className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-dm-blue" /> Saving…
+      </span>
+    );
+  }
   if (sync === 'conflict') {
     return (
       <span className="hidden items-center gap-1.5 tnum text-label text-dm-red md:flex" title={message}>
@@ -141,8 +148,13 @@ export function Header() {
             </button>
           ))}
           <span
-            className="pointer-events-none absolute bottom-0 h-0.5 bg-dm-blue transition-all duration-200 ease-luxury"
-            style={{ left: indicator.left + 8, width: Math.max(indicator.width - 16, 0), opacity: indicator.ready ? 1 : 0 }}
+            className="pointer-events-none absolute bottom-0 h-0.5 rounded-full bg-dm-blue transition-all duration-200 ease-luxury"
+            style={{
+              left: indicator.left + 8,
+              width: Math.max(indicator.width - 16, 0),
+              opacity: indicator.ready ? 1 : 0,
+              boxShadow: '0 0 8px 0 rgb(var(--dm-blue) / 0.65)',
+            }}
           />
         </nav>
 

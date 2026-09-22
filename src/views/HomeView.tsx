@@ -39,7 +39,7 @@ export function HomeView() {
     <main className="mx-auto flex max-w-2xl flex-col items-center gap-8 px-4 pt-16 sm:pt-24">
       <div className="text-center">
         <div className="text-label text-dm-dim">{dateLine}</div>
-        <h1 className="mt-2.5 text-display font-semibold tracking-tight">
+        <h1 className="mt-2.5 bg-gradient-to-r from-dm-text to-dm-blue bg-clip-text text-display font-semibold tracking-tight text-transparent">
           {greeting(now.getHours())}, {OWNER_NAME}.
         </h1>
         <p className="mt-1.5 text-body text-dm-muted">
@@ -55,9 +55,10 @@ export function HomeView() {
             <button
               key={item.id}
               onClick={() => (item.goToEntities ? setTab('entities') : item.propertyId && openProperty(item.propertyId))}
-              className="lift group flex animate-rise items-center gap-4 rounded-lg border border-dm-border bg-dm-surface px-5 py-4 text-left hover:border-dm-blue/40"
+              className="lift group relative flex animate-rise items-center gap-4 rounded-lg border border-dm-border bg-dm-surface px-5 py-4 text-left hover:border-dm-blue/40"
               style={{ animationDelay: `${i * 40}ms` }}
             >
+              {i === 0 && <span aria-hidden className="pointer-events-none absolute inset-0 animate-pulse-soft rounded-lg" />}
               <span className={`w-6 shrink-0 text-label font-semibold tnum ${item.severity === 'red' ? 'text-dm-red' : item.severity === 'amber' ? 'text-dm-amber' : 'text-dm-dim'}`}>
                 {String(i + 1).padStart(2, '0')}
               </span>

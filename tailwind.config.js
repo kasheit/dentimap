@@ -36,6 +36,8 @@ export default {
         'sheet-in': 'sheetIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both',
         'view-out': 'viewOut 0.09s cubic-bezier(0.4, 0, 1, 1) both',
         'pulse-ring': 'pulseRing 2.4s ease-out infinite',
+        'pulse-soft': 'pulseSoft 2.6s ease-in-out infinite',
+        'pulse-dot': 'pulseDot 1.5s ease-in-out infinite',
       },
       keyframes: {
         rise: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
@@ -47,6 +49,14 @@ export default {
         pulseRing: {
           '0%': { boxShadow: '0 0 0 0 rgb(var(--dm-green) / 0.55)' },
           '70%, 100%': { boxShadow: '0 0 0 6px rgb(var(--dm-green) / 0)' },
+        },
+        pulseSoft: {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgb(var(--dm-blue) / 0)' },
+          '50%': { boxShadow: '0 0 0 5px rgb(var(--dm-blue) / 0.06)' },
+        },
+        pulseDot: {
+          '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+          '50%': { opacity: '0.45', transform: 'scale(0.82)' },
         },
       },
       fontFamily: {

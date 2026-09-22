@@ -5,35 +5,44 @@
 @tailwind utilities;
 
 @layer base {
-  /* "Equifinal Command" theme: deep bedrock-green canvas, polished-stone surfaces, convergence teal accent. */
+  /* "Love Train" theme: near-black indigo-charcoal canvas, dusty-rose accent — authoritative base, relaxed accent. */
   :root {
-    --dm-bg: 19 28 26;
-    --dm-surface: 27 38 36;
-    --dm-raised: 33 48 45;
-    --dm-border: 42 56 53;
-    --dm-hover: 36 51 48;
-    --dm-text: 228 239 235;
-    --dm-muted: 141 163 156;
-    --dm-dim: 90 112 106;
-    --dm-blue: 31 184 181;
-    --dm-green: 91 201 160;
-    --dm-amber: 232 184 75;
-    --dm-red: 224 96 96;
+    --dm-bg: 12 13 20;
+    --dm-surface: 21 22 31;
+    --dm-raised: 28 29 41;
+    --dm-border: 44 42 56;
+    --dm-hover: 33 31 44;
+    --dm-text: 241 238 242;
+    --dm-muted: 167 159 176;
+    --dm-dim: 115 108 126;
+    --dm-blue: 217 124 160;
+    --dm-green: 95 184 138;
+    --dm-amber: 214 162 78;
+    --dm-red: 221 110 110;
   }
   html {
     color-scheme: dark;
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-dm-bg font-sans text-body leading-relaxed text-dm-text antialiased;
+    @apply relative bg-dm-bg font-sans text-body leading-relaxed text-dm-text antialiased;
     font-feature-settings: 'cv11', 'ss03', 'tnum';
     text-rendering: optimizeLegibility;
+  }
+  /* a single restrained ambient glow, not a full-page wash — the one gradient allowed to breathe */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 900px 600px at 82% -8%, rgb(var(--dm-blue) / 0.07), transparent 60%);
   }
   h1, h2, h3 {
     letter-spacing: -0.015em;
   }
   ::selection {
-    background: rgb(var(--dm-blue) / 0.18);
+    background: rgb(var(--dm-blue) / 0.22);
   }
 }
 
@@ -45,7 +54,12 @@
     @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-label font-medium text-dm-muted transition-all duration-150 ease-luxury hover:-translate-y-px hover:border-dm-muted/60 hover:bg-dm-hover hover:text-dm-text hover:shadow-sm hover:shadow-black/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none active:scale-[0.97] active:duration-75;
   }
   .btn-primary {
-    @apply border-dm-blue bg-dm-blue text-dm-bg hover:bg-dm-blue/85 hover:text-dm-bg hover:shadow-[0_0_16px_-4px_rgb(var(--dm-blue)/0.7)];
+    @apply border-dm-blue text-dm-bg hover:text-dm-bg;
+    background: linear-gradient(135deg, rgb(var(--dm-blue)) 0%, color-mix(in srgb, rgb(var(--dm-blue)) 72%, black) 100%);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, rgb(var(--dm-blue)) 0%, color-mix(in srgb, rgb(var(--dm-blue)) 84%, black) 100%);
+    box-shadow: 0 0 18px -3px rgb(var(--dm-blue) / 0.65);
   }
   .label {
     @apply text-label font-medium text-dm-dim;
@@ -63,7 +77,7 @@
   }
   /* a card that lifts gently on hover — rows, entity/glossary cards, queue items */
   .lift {
-    @apply transition-all duration-150 ease-luxury hover:-translate-y-0.5 hover:border-dm-muted/50 hover:shadow-lg hover:shadow-black/40;
+    @apply transition-all duration-150 ease-luxury hover:-translate-y-0.5 hover:border-dm-blue/25 hover:shadow-lg hover:shadow-black/40;
   }
 }
 
