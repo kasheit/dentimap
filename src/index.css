@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -26,7 +26,7 @@
   }
   body {
     @apply relative bg-dm-bg font-sans text-body leading-relaxed text-dm-text antialiased;
-    font-feature-settings: 'cv11', 'ss03', 'tnum';
+    font-feature-settings: 'tnum';
     text-rendering: optimizeLegibility;
   }
   /* a single restrained ambient glow, not a full-page wash — the one gradient allowed to breathe */
