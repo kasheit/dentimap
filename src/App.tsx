@@ -9,6 +9,7 @@ import { DeedsView } from '@/views/DeedsView';
 import { EntitiesView } from '@/views/EntitiesView';
 import { GlossaryView } from '@/views/GlossaryView';
 import { HomeView } from '@/views/HomeView';
+import { NetworkView } from '@/views/NetworkView';
 import { PeopleView } from '@/views/PeopleView';
 import { PropertiesView } from '@/views/PropertiesView';
 
@@ -35,6 +36,7 @@ function TabViewport({ tab }: { tab: TabId }) {
       {renderedTab === 'properties' && <PropertiesView />}
       {renderedTab === 'entities' && <EntitiesView />}
       {renderedTab === 'people' && <PeopleView />}
+      {renderedTab === 'network' && <NetworkView />}
       {renderedTab === 'deeds' && <DeedsView />}
       {renderedTab === 'glossary' && <GlossaryView />}
     </div>
