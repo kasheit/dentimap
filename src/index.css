@@ -5,23 +5,23 @@
 @tailwind utilities;
 
 @layer base {
-  /* Black theme: pure black canvas, near-black panels, hairline borders, white as the emphasis colour, blue only for links and focus. */
+  /* Light theme: white canvas, hairline borders, near-black text, indigo for the one accent. Contrast: dim 4.9:1, muted 7:1, text 16:1 on white. */
   :root {
-    --dm-bg: 0 0 0;
-    --dm-surface: 10 10 10;
-    --dm-raised: 20 20 20;
-    --dm-border: 38 38 38;
-    --dm-hover: 26 26 26;
-    --dm-text: 237 237 237;
-    --dm-muted: 161 161 161;
-    --dm-dim: 128 128 128;
-    --dm-blue: 50 145 255;
-    --dm-green: 62 207 142;
-    --dm-amber: 245 166 35;
-    --dm-red: 255 90 90;
+    --dm-bg: 255 255 255;
+    --dm-surface: 255 255 255;
+    --dm-raised: 247 247 248;
+    --dm-border: 230 230 235;
+    --dm-hover: 243 243 246;
+    --dm-text: 27 28 32;
+    --dm-muted: 84 88 96;
+    --dm-dim: 108 112 120;
+    --dm-blue: 84 96 200;
+    --dm-green: 22 128 76;
+    --dm-amber: 168 96 0;
+    --dm-red: 196 44 36;
   }
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
   body {
     @apply bg-dm-bg font-sans text-body leading-relaxed text-dm-text antialiased;
@@ -34,17 +34,26 @@
   ::selection {
     background: rgb(var(--dm-blue) / 0.18);
   }
+  :focus-visible {
+    outline: 2px solid rgb(var(--dm-blue));
+    outline-offset: 2px;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+  }
 }
 
 @layer components {
   .field {
-    @apply w-full rounded-md border border-dm-border bg-dm-bg px-2.5 py-1.5 text-sm text-dm-text outline-none transition-colors placeholder:text-dm-dim focus:border-dm-blue/60;
+    @apply w-full rounded-md border border-dm-border bg-dm-bg px-2.5 py-1.5 text-sm text-dm-text outline-none transition-colors placeholder:text-dm-dim focus-visible:border-dm-blue focus-visible:ring-2 focus-visible:ring-dm-blue/25;
   }
   .btn {
     @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-label font-medium text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.97];
   }
   .btn-primary {
-    @apply border-dm-text bg-dm-text text-dm-bg hover:bg-dm-text/85 hover:text-dm-bg;
+    @apply border-dm-blue bg-dm-blue text-white hover:bg-dm-blue/90 hover:text-white;
   }
   .label {
     @apply text-label font-medium text-dm-dim;

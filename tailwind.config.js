@@ -25,6 +25,10 @@ export default {
         title: ['16px', '24px'],
         display: ['28px', '34px'],
       },
+      boxShadow: {
+        card: '0 1px 2px rgb(20 22 30 / 0.05)',
+        pop: '0 8px 24px rgb(20 22 30 / 0.12), 0 2px 6px rgb(20 22 30 / 0.06)',
+      },
       animation: {
         rise: 'rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both',
         'pulse-ring': 'pulseRing 2.4s ease-out infinite',

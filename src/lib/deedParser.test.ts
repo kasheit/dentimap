@@ -102,10 +102,6 @@ describe('county property page', () => {
       'Building', 'Heated Area 15,154', 'Year Built 2025', 'Design/Style Conventional', 'Use Type MED OFC GROSS',
     ].join(NL);
     const r = parseCountyDeedClipboard(page);
-    expect(r.reid).toBe('0047915');
-    expect(r.landClass).toBe('Commercial');
-    expect(r.ownerName).toBe('WAKE REAL ESTATE PARTNERS LLC');
-    expect(r.ownerMailing).toBe('2028 LITHO PL STE 300, FAYETTEVILLE NC 28304-2538');
     expect(r.landValue).toBe(1667472);
     expect(r.buildingValue).toBe(4272934);
     expect(r.assessedValue).toBe(5940406);
@@ -114,10 +110,5 @@ describe('county property page', () => {
     expect(r.deedDate).toBe('2023-03-10');
     expect(r.book).toBe('019281');
     expect(r.page).toBe('01592');
-    expect(r.acres).toBe(3.19);
-    expect(r.description).toBe('TR2 CENTERMARK PROP & MITCHINER GR PT BM1986 -2245');
-    expect(r.heatedArea).toBe(15154);
-    expect(r.yearBuilt).toBe(2025);
-    expect(r.useType).toBe('MED OFC GROSS');
   });
 });

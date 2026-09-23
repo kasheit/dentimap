@@ -17,7 +17,7 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <section id={id} className={`scroll-mt-20 min-w-0 rounded-lg border border-dm-border bg-dm-surface p-5 ${className}`}>
+    <section id={id} className={`scroll-mt-20 min-w-0 rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card ${className}`}>
       <header className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-body font-semibold text-dm-text">{title}</h2>
         {action}
@@ -35,7 +35,7 @@ const statusDot: Record<FacilityStatus, string> = {
 export function StatusPill({ status }: { status: FacilityStatus }) {
   return (
     <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-label text-dm-muted">
-      <i className={`h-1.5 w-1.5 rounded-full ${statusDot[status]} ${status === 'active' ? 'animate-pulse-ring' : ''}`} />
+      <i className={`h-1.5 w-1.5 rounded-full ${statusDot[status]}`} />
       {statusLabel[status]}
     </span>
   );
@@ -84,9 +84,9 @@ export function Empty({ children }: { children: ReactNode }) {
 }
 
 const levelStyle = {
-  confirmed: { dot: 'bg-dm-green', text: 'text-dm-green', label: 'Confirmed' },
-  partial: { dot: 'bg-dm-amber', text: 'text-dm-amber', label: 'Unconfirmed' },
-  missing: { dot: 'bg-dm-red', text: 'text-dm-red', label: 'Missing' },
+  confirmed: { dot: 'bg-dm-green', text: 'text-dm-green', label: 'Verified' },
+  partial: { dot: 'bg-dm-amber', text: 'text-dm-amber', label: 'Unverified' },
+  missing: { dot: 'bg-dm-red', text: 'text-dm-muted', label: 'Not found' },
 } as const;
 
 export function LevelLabel({
@@ -94,11 +94,13 @@ export function LevelLabel({
   detail,
   stale,
   onClick,
+  expanded,
 }: {
   level: 'confirmed' | 'partial' | 'missing';
   detail?: ReactNode;
   stale?: boolean;
   onClick?: () => void;
+  expanded?: boolean;
 }) {
   const s = levelStyle[level];
   const text = stale ? 'Recheck' : s.label;
@@ -111,7 +113,7 @@ export function LevelLabel({
   );
   const cls = 'inline-flex flex-wrap items-center justify-end gap-x-1.5 text-label';
   return onClick ? (
-    <button type="button" onClick={onClick} className={`${cls} rounded px-1 py-0.5 text-left transition-colors hover:bg-dm-hover`} title={level === 'missing' ? 'Fill this in' : 'Click to confirm'}>
+    <button type="button" onClick={onClick} aria-expanded={expanded} className={`${cls} rounded px-1.5 py-1 text-left transition-colors hover:bg-dm-hover`} title={level === 'missing' ? 'Fill this in' : 'Click to confirm'}>
       {body}
     </button>
   ) : (

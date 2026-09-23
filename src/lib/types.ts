@@ -61,6 +61,7 @@ export type SourcedField =
   | 'parcelPin'
   | 'assessedValue'
   | 'projectInvestment'
+  | 'lastSale'
   | 'landlord'
   | 'operator';
 
@@ -85,15 +86,13 @@ export interface Property {
     county: string;
     parcelPin: string;
   };
+  /** Legacy single county link; superseded by `sources`. */
   parcelUrl?: string;
+  /** Where the details on this location were found (county record, register of deeds, ...). */
+  sources?: SourceLink[];
   /** County parcel identifiers and classification. */
-  reid?: string;
-  landClass?: string;
-  /** Owner as listed by the county tax record (may differ from the deed holder). */
-  countyOwner?: { name?: string; mailing?: string };
   lastSale?: { date?: string; price?: number };
-  countyDeed?: { book?: string; page?: string; date?: string; acres?: number; description?: string };
-  building?: { heatedAreaSqFt?: number; yearBuilt?: number; useType?: string };
+  countyDeed?: { book?: string; page?: string; date?: string };
   metrics?: {
     projectInvestment?: number;
     footprintSqFt?: number;
@@ -103,13 +102,6 @@ export interface Property {
     targetOpening?: string;
   };
   meta?: Partial<Record<SourcedField, FieldMeta>>;
-  clinicalSpecs?: {
-    operatingRooms?: number;
-    pacuBays?: number;
-    outpatientSharePercent?: number;
-    specialties?: string[];
-    licensure?: string;
-  };
   landlordEntityId?: string;
   operatingEntityId?: string;
   notes?: string; // legacy single-field notes, superseded by noteLog
@@ -163,4 +155,9 @@ export interface DentimapData {
   entities: LegalEntity[];
   activity?: ActivityEntry[];
   people?: Person[];
+}
+
+export interface SourceLink {
+  label: string;
+  url: string;
 }

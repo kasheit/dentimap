@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { completionFor } from '@/lib/completion';
-import { facilityTypeLabel } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
-import type { Property } from '@/lib/types';
-import { DetailRow, Panel, StatusPill } from './Chips';
-import { OwnershipChain } from './CorporateEntities';
+import type { Property, SourcedField } from '@/lib/types';
+import { Panel, StatusPill } from './Chips';
+import { EDIT_RECORD_EVENT } from './ConfirmLabel';
+import { FinancialsCard } from './FinancialsCard';
+import { OwnershipCard } from './OwnershipCard';
 import { DeedIngestionBuffer } from './DeedIngestionBuffer';
 import { HistoryLog } from './HistoryLog';
 import { KeyPeople } from './KeyPeople';
@@ -13,73 +14,118 @@ import { RecordCard } from './RecordCard';
 import { TitleChainTimeline } from './TitleChainTimeline';
 
 
+type Tab = 'property' | 'title' | 'people' | 'activity';
+
 export function FacilityDossier({ property: p }: { property: Property }) {
   const { deeds } = useDentimap();
   const completion = completionFor(p, deeds);
   const propDeeds = useMemo(() => deeds.filter((d) => d.propertyId === p.id), [deeds, p.id]);
-  const cs = p.clinicalSpecs;
-  const hasSpecs = !!cs && (cs.operatingRooms !== undefined || cs.pacuBays !== undefined || cs.outpatientSharePercent !== undefined || !!cs.specialties?.length || !!cs.licensure);
   const activityCount = useDentimap((s) => s.activity.filter((a) => a.propertyId === p.id).length);
   const openNotes = (p.noteLog ?? []).filter((n) => n.tag !== 'note' && !n.resolved).length;
 
 
+  const [tab, setTab] = useState<Tab>('property');
+  const [editSignal, setEditSignal] = useState(0);
+  const [focusField, setFocusField] = useState<SourcedField | undefined>();
+
+  // "Missing" labels anywhere on the page open the property editor.
+  useEffect(() => {
+    const open = (e: Event) => {
+      setTab('property');
+      setFocusField((e as CustomEvent<{ field?: SourcedField }>).detail?.field);
+      setEditSignal((n) => n + 1);
+    };
+    window.addEventListener(EDIT_RECORD_EVENT, open);
+    return () => window.removeEventListener(EDIT_RECORD_EVENT, open);
+  }, []);
+
+  const tabs: [Tab, string, string | undefined][] = [
+    ['property', 'Property', undefined],
+    ['title', 'Title chain', propDeeds.length ? String(propDeeds.length) : undefined],
+    ['people', 'People and notes', openNotes > 0 ? `${openNotes} open` : undefined],
+    ['activity', 'Activity', activityCount ? String(activityCount) : undefined],
+  ];
+
   return (
-    <div className="mx-auto w-full max-w-[1500px] space-y-5">
+    <div className="mx-auto w-full max-w-[1280px] space-y-5">
       <header className="min-w-0">
-        <div className="flex items-center gap-3 text-label text-dm-muted">
-          <span>{facilityTypeLabel[p.facilityType]}</span>
-          <span className="text-dm-dim">·</span>
+        <h1 className="text-display font-semibold leading-tight">{p.name}</h1>
+        <div className="mt-1.5 flex items-center gap-3 text-label text-dm-muted">
           <StatusPill status={p.status} />
+          <span className="text-dm-dim">·</span>
+          <span className="tnum">{completion.counts.confirmed} of {completion.items.length} verified</span>
         </div>
-        <h1 className="mt-1.5 text-display font-semibold leading-tight">{p.name}</h1>
-        <p className="tnum mt-2 text-label text-dm-muted">{completion.percent}% complete</p>
       </header>
 
+      <div className="stagger grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
+        <FinancialsCard p={p} />
+        <OwnershipCard p={p} deeds={propDeeds} onViewChain={() => setTab('title')} />
+      </div>
 
-      <div className="stagger grid items-start gap-5 lg:grid-cols-2 2xl:grid-cols-3">
-        <RecordCard p={p} />
+      <div
+        role="tablist"
+        aria-label="Location sections"
+        className="scroll-thin flex gap-1 overflow-x-auto border-b border-dm-border"
+        onKeyDown={(e) => {
+          if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+          const i = tabs.findIndex(([id]) => id === tab);
+          const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length][0];
+          setTab(next);
+          requestAnimationFrame(() => document.getElementById(`tab-${next}`)?.focus());
+        }}
+      >
+        {tabs.map(([id, label, badge]) => (
+          <button
+            key={id}
+            id={`tab-${id}`}
+            role="tab"
+            aria-selected={tab === id}
+            aria-controls="tab-panel"
+            tabIndex={tab === id ? 0 : -1}
+            onClick={() => setTab(id)}
+            className={`-mb-px whitespace-nowrap border-b-2 px-3 py-2 text-body transition-colors ${
+              tab === id ? 'border-dm-blue text-dm-text' : 'border-transparent text-dm-muted hover:text-dm-text'
+            }`}
+          >
+            {label}
+            {badge && <span className={`ml-1.5 text-label ${id === 'people' ? 'text-dm-amber' : 'text-dm-dim'}`}>{badge}</span>}
+          </button>
+        ))}
+      </div>
 
-        <div className="min-w-0 space-y-5">
-          <Panel id="ownership" title="Ownership">
-            <OwnershipChain property={p} deeds={propDeeds} />
-          </Panel>
-          <Panel id="people" title="Key people">
-            <KeyPeople property={p} />
-          </Panel>
+      <div id="tab-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="space-y-5">
+      {tab === 'property' && (
+        <div className="space-y-5">
+          <RecordCard p={p} editSignal={editSignal} focusField={focusField} />
         </div>
+      )}
 
-        <Panel id="notes" title="Notes" className="lg:col-span-2 2xl:col-span-1" action={openNotes > 0 ? <span className="text-label text-dm-amber">{openNotes} open</span> : undefined}>
-          <NotesLog property={p} />
-        </Panel>
-
-        <Panel id="title" title="Title chain" className="lg:col-span-2 2xl:col-span-3" action={<span className="text-label text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>
+      {tab === 'title' && (
+        <Panel id="title" title="Title chain" action={<span className="text-label text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>
           <div className="space-y-6">
             <DeedIngestionBuffer property={p} />
             <TitleChainTimeline deeds={propDeeds} />
           </div>
         </Panel>
-      </div>
-
-      {hasSpecs && cs && (
-        <Panel id="specs" title="Specifications">
-          <div className="grid gap-x-10 sm:grid-cols-2">
-            {cs.operatingRooms !== undefined && <DetailRow label="Operating rooms" value={String(cs.operatingRooms)} />}
-            {cs.pacuBays !== undefined && <DetailRow label="PACU bays" value={String(cs.pacuBays)} />}
-            {cs.outpatientSharePercent !== undefined && <DetailRow label="Outpatient share" value={`${cs.outpatientSharePercent}%`} />}
-            {cs.licensure && <DetailRow label="Licensure" value={cs.licensure} />}
-            {cs.specialties && cs.specialties.length > 0 && <DetailRow label="Services" value={cs.specialties.join(' · ')} />}
-          </div>
-        </Panel>
       )}
 
-      <details id="history" className="rounded-lg border border-dm-border/70 bg-dm-surface p-5">
-        <summary className="cursor-pointer list-none text-body font-semibold text-dm-text [&::-webkit-details-marker]:hidden">
-          Activity <span className="ml-1 text-label font-normal text-dm-dim">{activityCount}</span>
-        </summary>
-        <div className="mt-4">
-          <HistoryLog propertyId={p.id} />
+      {tab === 'people' && (
+        <div className="grid items-start gap-5 lg:grid-cols-2">
+          <Panel id="people" title="Key people">
+            <KeyPeople property={p} />
+          </Panel>
+          <Panel id="notes" title="Notes" action={openNotes > 0 ? <span className="text-label text-dm-amber">{openNotes} open</span> : undefined}>
+            <NotesLog property={p} />
+          </Panel>
         </div>
-      </details>
+      )}
+
+      {tab === 'activity' && (
+        <Panel id="history" title="Activity">
+          <HistoryLog propertyId={p.id} />
+        </Panel>
+      )}
+      </div>
     </div>
   );
 }

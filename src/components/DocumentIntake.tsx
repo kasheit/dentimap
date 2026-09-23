@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
-import { Upload } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { isSupportedDocument, readDocumentText } from '@/lib/documents';
 import { ingestText } from '@/lib/intake';
 import type { IntakeItem, Outcome } from '@/lib/intake';
 import { useDentimap } from '@/lib/store';
+
+export const UPLOAD_EVENT = 'dentimap:upload';
 
 const dot: Record<Outcome, string> = {
   added: 'bg-dm-green',
@@ -17,7 +18,7 @@ const label: Record<Outcome, string> = {
   added: 'Added',
   filled: 'Updated',
   duplicate: 'Duplicate',
-  review: 'Needs a location',
+  review: 'Pick a location',
   failed: 'Not read',
 };
 
@@ -28,6 +29,7 @@ export function DocumentIntake() {
   const [items, setItems] = useState<IntakeItem[]>([]);
   const [reading, setReading] = useState<{ name: string; fraction: number } | null>(null);
   const [over, setOver] = useState(false);
+  const handleRef = useRef<(files: File[]) => Promise<void>>(async () => {});
 
   const handle = async (files: File[]) => {
     for (const file of files) {
@@ -48,6 +50,44 @@ export function DocumentIntake() {
     setReading(null);
   };
 
+  // page-wide drop target, plus a trigger the header buttons can fire
+  useEffect(() => {
+    let depth = 0;
+    const hasFiles = (e: DragEvent) => !!e.dataTransfer?.types.includes('Files');
+    const enter = (e: DragEvent) => {
+      if (!hasFiles(e)) return;
+      depth++;
+      setOver(true);
+    };
+    const leave = () => {
+      depth = Math.max(0, depth - 1);
+      if (!depth) setOver(false);
+    };
+    const overIt = (e: DragEvent) => hasFiles(e) && e.preventDefault();
+    const drop = (e: DragEvent) => {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      depth = 0;
+      setOver(false);
+      void handleRef.current([...(e.dataTransfer?.files ?? [])]);
+    };
+    const open = () => inputRef.current?.click();
+    window.addEventListener('dragenter', enter);
+    window.addEventListener('dragleave', leave);
+    window.addEventListener('dragover', overIt);
+    window.addEventListener('drop', drop);
+    window.addEventListener(UPLOAD_EVENT, open);
+    return () => {
+      window.removeEventListener('dragenter', enter);
+      window.removeEventListener('dragleave', leave);
+      window.removeEventListener('dragover', overIt);
+      window.removeEventListener('drop', drop);
+      window.removeEventListener(UPLOAD_EVENT, open);
+    };
+  }, []);
+
+  handleRef.current = handle;
+
   const assign = (item: IntakeItem, propertyId: string) => {
     if (!item.text || !propertyId) return;
     const next = ingestText(item.text, item.file, propertyId);
@@ -56,30 +96,30 @@ export function DocumentIntake() {
 
   return (
     <section className="mb-4" aria-label="Upload documents">
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setOver(true);
-        }}
-        onDragLeave={() => setOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setOver(false);
-          void handle([...e.dataTransfer.files]);
-        }}
-        className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed px-4 py-3 transition-colors ${over ? 'border-dm-text bg-dm-hover' : 'border-dm-border'}`}
-      >
-        <span className="text-label text-dm-muted">
-          {reading ? `Reading ${reading.name}… ${Math.round(reading.fraction * 100)}%` : 'Drop deeds, county records or scans here. Matching locations update automatically.'}
-        </span>
-        <input ref={inputRef} type="file" multiple accept="application/pdf,image/*,text/plain,.txt,.pdf" hidden onChange={(e) => {
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        accept="application/pdf,image/*,text/plain,.txt,.pdf"
+        hidden
+        onChange={(e) => {
           void handle([...(e.target.files ?? [])]);
           if (inputRef.current) inputRef.current.value = '';
-        }} />
-        <button className="btn" disabled={!!reading} onClick={() => inputRef.current?.click()}>
-          <Upload className="h-3.5 w-3.5" /> Upload documents
-        </button>
-      </div>
+        }}
+      />
+      {reading && (
+        <p role="status" className="tnum mb-2 text-label text-dm-muted">
+          Reading {reading.name}… {Math.round(reading.fraction * 100)}%
+        </p>
+      )}
+      {over && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-dm-bg/85 p-6">
+          <div className="rounded-lg border-2 border-dashed border-dm-blue bg-dm-surface px-10 py-8 text-center shadow-pop">
+            <p className="text-title font-semibold">Drop deeds, county pages or scans</p>
+            <p className="mt-1 text-label text-dm-muted">Matches fill blank fields only; nothing already saved is overwritten.</p>
+          </div>
+        </div>
+      )}
 
       {items.length > 0 && (
         <div className="mt-2 overflow-hidden rounded-lg border border-dm-border bg-dm-surface">

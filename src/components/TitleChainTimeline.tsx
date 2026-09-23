@@ -58,7 +58,7 @@ export function TitleChainTimeline({ deeds }: { deeds: DeedRecord[] }) {
                     <span className="tnum text-sm font-medium">{fmtDate(d.recordingDate)}</span>
                     <span className="text-label text-dm-muted">{deedTypeLabel[d.deedType]}</span>
                     {current && (
-                      <span className="text-label font-medium text-dm-text">Current holder</span>
+                      <span className="text-label font-medium text-dm-text">Owner of record</span>
                     )}
                   </div>
                   <div className="mt-1 font-mono text-label text-dm-dim">

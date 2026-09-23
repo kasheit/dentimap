@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-23T00:00:00Z",
+  "title": "Design System: Dentimap",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Ledger Indigo", "canonical": "rgb(84 96 200)", "tonalRamp": ["#1D2260", "#2A3290", "#3844AE", "#5460C8", "#7580D6", "#979FE0", "#BFC4EC", "#E6E8F7"] },
+      "canvas": { "role": "neutral", "displayName": "Paper White", "canonical": "rgb(255 255 255)", "tonalRamp": ["#1B1C20", "#545860", "#6C7078", "#A5A8AE", "#D0D1D6", "#E6E6EB", "#F3F3F6", "#FFFFFF"] },
+      "raised": { "role": "neutral", "displayName": "Raised Wash", "canonical": "rgb(247 247 248)", "tonalRamp": ["#1B1C20", "#545860", "#6C7078", "#A5A8AE", "#D0D1D6", "#E6E6EB", "#F3F3F6", "#F7F7F8"] },
+      "hover": { "role": "neutral", "displayName": "Hover Wash", "canonical": "rgb(243 243 246)", "tonalRamp": ["#1B1C20", "#545860", "#6C7078", "#A5A8AE", "#D0D1D6", "#E6E6EB", "#EDEDF1", "#F3F3F6"] },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "rgb(230 230 235)", "tonalRamp": ["#1B1C20", "#545860", "#6C7078", "#A5A8AE", "#C3C4CA", "#D6D7DC", "#E6E6EB", "#F3F3F6"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "rgb(27 28 32)", "tonalRamp": ["#0B0B0D", "#1B1C20", "#33353B", "#545860", "#6C7078", "#A5A8AE", "#D0D1D6", "#F3F3F6"] },
+      "ink-muted": { "role": "neutral", "displayName": "Ink Muted", "canonical": "rgb(84 88 96)", "tonalRamp": ["#1B1C20", "#33353B", "#545860", "#6C7078", "#8A8D94", "#A5A8AE", "#D0D1D6", "#F3F3F6"] },
+      "ink-dim": { "role": "neutral", "displayName": "Ink Dim", "canonical": "rgb(108 112 120)", "tonalRamp": ["#1B1C20", "#33353B", "#545860", "#6C7078", "#8A8D94", "#A5A8AE", "#D0D1D6", "#F3F3F6"] },
+      "state-verified": { "role": "state", "displayName": "Verified Green", "canonical": "rgb(22 128 76)", "tonalRamp": ["#08301D", "#0E5030", "#136B40", "#16804C", "#3F9D6C", "#76BB98", "#B2D9C6", "#E4F2EB"] },
+      "state-unverified": { "role": "state", "displayName": "Unverified Amber", "canonical": "rgb(168 96 0)", "tonalRamp": ["#3D2300", "#6A3D00", "#8C5100", "#A86000", "#C58225", "#D9A65F", "#EBCC9F", "#F8EBD5"] },
+      "state-error": { "role": "state", "displayName": "Error Red", "canonical": "rgb(196 44 36)", "tonalRamp": ["#4A0F0B", "#7E1A15", "#A32620", "#C42C24", "#D65A53", "#E58F8A", "#F1BFBC", "#FAE6E5"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Location name at the top of a dossier." },
+      "hero-figure": { "displayName": "Hero figure", "purpose": "The assessed value on the Financials card; one per screen, indigo only when verified." },
+      "headline": { "displayName": "Headline", "purpose": "Page title and owner-of-record name." },
+      "title": { "displayName": "Title", "purpose": "Secondary figures in the dossier strip." },
+      "body": { "displayName": "Body", "purpose": "Card titles, tab labels, detail values." },
+      "label": { "displayName": "Label", "purpose": "Buttons, table cells, chips, provenance lines." },
+      "caption": { "displayName": "Caption", "purpose": "Column heads, detail-row labels, group headings." },
+      "identifier": { "displayName": "Identifier", "purpose": "Parcel PIN, SOS ID, deed book/page in JetBrains Mono." }
+    },
+    "shadows": [
+      { "name": "card", "value": "0 1px 2px rgb(20 22 30 / 0.05)", "purpose": "Cards, panels, the locations table." },
+      { "name": "pop", "value": "0 8px 24px rgb(20 22 30 / 0.12), 0 2px 6px rgb(20 22 30 / 0.06)", "purpose": "Data menu, confirm popover, drop overlay." }
+    ],
+    "motion": [
+      { "name": "rise", "value": "400ms cubic-bezier(0.16, 1, 0.3, 1), 8px translateY, 40ms stagger", "purpose": "Dossier hero cards enter in sequence; disabled under reduced motion." },
+      { "name": "pulse-ring", "value": "2.4s ease-out infinite, 0 to 6px green ring", "purpose": "Defined for a live-status dot; no reviewed component uses it." },
+      { "name": "press", "value": "scale(0.97) on buttons, color transitions", "purpose": "Button press feedback." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single primary action in a view.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Add location</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid #E6E6EB;background:#fff;color:#545860;border-radius:6px;padding:6px 12px;font:500 13px/18px Inter,system-ui,sans-serif;cursor:pointer;transition:background .15s,color .15s}.ds-btn:hover{background:#F3F3F6;color:#1B1C20}.ds-btn:active{transform:scale(.97)}.ds-btn:focus-visible{outline:2px solid #5460C8;outline-offset:2px}.ds-btn-primary{background:#5460C8;border-color:#5460C8;color:#fff}.ds-btn-primary:hover{background:rgb(84 96 200 / .9);color:#fff}"
+    },
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "Secondary actions: Edit, Cancel, Search, Data.",
+      "html": "<button class=\"ds-btn\">Edit</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid #E6E6EB;background:#fff;color:#545860;border-radius:6px;padding:6px 12px;font:500 13px/18px Inter,system-ui,sans-serif;cursor:pointer;transition:background .15s,color .15s}.ds-btn:hover{background:#F3F3F6;color:#1B1C20}.ds-btn:focus-visible{outline:2px solid #5460C8;outline-offset:2px}"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Text input; focus shifts border to indigo with a soft ring.",
+      "html": "<input class=\"ds-field\" placeholder=\"Search name, owner, city, PIN\">",
+      "css": ".ds-field{width:260px;border:1px solid #E6E6EB;background:#fff;color:#1B1C20;border-radius:6px;padding:6px 10px;font:400 14px/20px Inter,system-ui,sans-serif;outline:none;transition:border-color .15s}.ds-field::placeholder{color:#6C7078}.ds-field:focus-visible{border-color:#5460C8;box-shadow:0 0 0 2px rgb(84 96 200 / .25)}"
+    },
+    {
+      "name": "Top Navigation",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Text tabs with a 2px indigo underline on the active page.",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-nav-item ds-active\">Locations</button><button class=\"ds-nav-item\">Entities</button><button class=\"ds-nav-item\">People</button></nav>",
+      "css": ".ds-nav{display:flex;gap:4px;border-bottom:1px solid #E6E6EB}.ds-nav-item{position:relative;background:none;border:0;padding:8px 12px;font:500 13px/18px Inter,system-ui,sans-serif;color:#6C7078;cursor:pointer;transition:color .15s}.ds-nav-item:hover{color:#545860}.ds-nav-item:focus-visible{outline:2px solid #5460C8;outline-offset:2px}.ds-nav-item.ds-active{color:#1B1C20}.ds-nav-item.ds-active::after{content:'';position:absolute;left:8px;right:8px;bottom:0;height:2px;background:#5460C8}"
+    },
+    {
+      "name": "Verification Label",
+      "kind": "chip",
+      "refersTo": "status",
+      "description": "Dot plus text state for a fact: verified, unverified, not found.",
+      "html": "<span class=\"ds-level\"><i class=\"ds-dot\"></i><span>Unverified</span><span class=\"ds-dim\">· County tax card · Mar 2026</span></span>",
+      "css": ".ds-level{display:inline-flex;align-items:center;gap:6px;font:400 13px/18px Inter,system-ui,sans-serif;color:#A86000}.ds-dot{width:6px;height:6px;border-radius:9999px;background:#A86000;display:inline-block}.ds-dim{color:#6C7078}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "White container with hairline border and a whisper shadow.",
+      "html": "<section class=\"ds-card\"><h2>Ownership</h2><p>Body</p></section>",
+      "css": ".ds-card{background:#fff;border:1px solid #E6E6EB;border-radius:8px;padding:20px;box-shadow:0 1px 2px rgb(20 22 30 / .05);font-family:Inter,system-ui,sans-serif;color:#1B1C20}.ds-card h2{margin:0 0 12px;font:600 14px/22px Inter,system-ui,sans-serif}.ds-card p{margin:0;font:400 14px/22px Inter,system-ui,sans-serif}"
+    },
+    {
+      "name": "Dossier Hero Figure",
+      "kind": "custom",
+      "refersTo": "hero-figure",
+      "description": "Assessed value with a source line; indigo when verified.",
+      "html": "<div class=\"ds-hero\"><div class=\"ds-hero-label\">Assessed value</div><div class=\"ds-hero-fig\">$2.4M</div><div class=\"ds-hero-src\">County tax card · Mar 2026</div></div>",
+      "css": ".ds-hero{font-family:Inter,system-ui,sans-serif}.ds-hero-label{font:400 13px/18px Inter,system-ui,sans-serif;color:#6C7078}.ds-hero-fig{font:600 44px/50px Inter,system-ui,sans-serif;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:#5460C8}.ds-hero-src{font:400 13px/18px Inter,system-ui,sans-serif;color:#545860}"
+    },
+    {
+      "name": "Locations Row",
+      "kind": "custom",
+      "refersTo": "table-row",
+      "description": "36px dense list row: state icon, name, owner, assessed value.",
+      "html": "<table class=\"ds-table\"><tbody><tr><td class=\"ds-ic\">&#10003;</td><td class=\"ds-name\">Cary Practice</td><td>Wake Holdings LLC</td><td class=\"ds-num\">$2.4M</td></tr></tbody></table>",
+      "css": ".ds-table{width:100%;border-collapse:collapse;font:400 13px/18px Inter,system-ui,sans-serif;color:#1B1C20}.ds-table tr{height:36px;border-bottom:1px solid rgb(230 230 235 / .7);cursor:pointer;transition:background .15s}.ds-table tr:hover{background:rgb(243 243 246 / .7)}.ds-table td{padding:0 12px}.ds-ic{color:#16804C;width:40px;padding-left:16px}.ds-name{font-weight:500}.ds-num{text-align:right;font-variant-numeric:tabular-nums}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Sourced Ledger",
+    "overview": "Dentimap is a quiet, light operator tool for one person doing research at a desk. Owner of record and assessed value are the two loudest things on any screen, and every figure prints where it came from beside it. The category standard is played straight: a Linear-style dense grouped list for browsing locations, and a Stripe-style dossier hero (one large figure, soft cards) for a single location.\n\nChrome recedes so data can lead. The canvas is white, structure is hairline borders, text is near-black, and one indigo carries the interface's only voice. Color otherwise appears only as state (green, amber, red), never as decoration.",
+    "keyCharacteristics": [
+      "White canvas, hairline borders, one soft card shadow.",
+      "One indigo accent, spent on primary action, active nav/tab underline, and the verified hero figure.",
+      "Provenance printed inline; an unsourced value says \"No source\" instead of looking authoritative.",
+      "Dense 36px list rows; detail on demand, not on screen by default.",
+      "Missing data stays visibly missing (an em dash in dim ink)."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Indigo is the only non-state hue. If a new element wants color and is not an action, an active location marker, or a verified hero figure, it stays ink.", "section": "colors" },
+      { "name": "The State-Only Rule", "body": "Green, amber and red mean verification or system state. They are never used for category, decoration, or emphasis.", "section": "colors" },
+      { "name": "The Earned Figure Rule", "body": "The hero assessed value turns indigo only when verified; unverified it renders in Ink Muted, missing it is a dim dash. Color is evidence, not styling.", "section": "colors" },
+      { "name": "The Tabular Rule", "body": "Every number, amount, date and count is tabular (tnum). Money is compact ($1.2M) with the exact figure in the title attribute.", "section": "typography" },
+      { "name": "The Mono-For-Identifiers Rule", "body": "Monospace marks an identifier the operator might copy into a county site. It is not a general accent face.", "section": "typography" },
+      { "name": "The Border-First Rule", "body": "Separation comes from a 1px hairline; shadow only softens it. No stacked or offset shadows.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do lead every screen with owner of record and assessed value, and show each fact's source and as-of date beside it.",
+      "Do use indigo only for primary action, active nav/tab underline, links, focus, and the verified hero figure.",
+      "Do use tnum for all figures and compact USD with the exact value on hover.",
+      "Do separate with 1px hairlines and the Card shadow; use Pop only for floating layers.",
+      "Do show missing data as a dim em dash or \"No owner on file\"; never fabricate or fill.",
+      "Do keep lists dense (36px rows) and put extra fields behind a toggle."
+    ],
+    "donts": [
+      "Don't add KPI tile strips or hero-metric clutter; one hero figure per dossier.",
+      "Don't reintroduce building details, the county-owner block, a preview pane, a separate Matrix view, REID, land class, acres, description or a specifications panel; the user removed these deliberately.",
+      "Don't use green, amber or red as decoration or category color.",
+      "Don't go dark-SaaS: no dark canvas, glow, or gradient chrome.",
+      "Don't use monospace for anything but identifiers.",
+      "Don't let an unverified value present in the verified color or weight."
+    ]
+  }
+}

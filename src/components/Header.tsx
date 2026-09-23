@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Users, Building2, Table2, CloudOff, FileText, Landmark } from 'lucide-react';
+import { AlertTriangle, Users, Building2, CloudOff, FileText, Landmark } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { OPEN_SEARCH_EVENT } from './SearchPalette';
 import { isValidData, useDentimap } from '@/lib/store';
@@ -8,7 +8,6 @@ import { supabase } from '@/lib/supabase';
 
 const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
   { id: 'properties', label: 'Locations', icon: Building2 },
-  { id: 'matrix', label: 'Matrix', icon: Table2 },
   { id: 'entities', label: 'Entities', icon: Landmark },
   { id: 'people', label: 'People', icon: Users },
   { id: 'deeds', label: 'Deeds', icon: FileText },
@@ -17,17 +16,24 @@ const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
 function SyncBadge() {
   const sync = useDentimap((s) => s.sync);
   const message = useDentimap((s) => s.syncMessage);
-  if (sync === 'off' || sync === 'synced' || sync === 'connecting' || sync === 'saving') return null;
+  if (sync === 'off' || sync === 'connecting') return null;
+  if (sync === 'saving' || sync === 'synced') {
+    return (
+      <span role="status" className="tnum text-label text-dm-dim">
+        {sync === 'saving' ? 'Saving…' : 'Saved'}
+      </span>
+    );
+  }
   if (sync === 'conflict') {
     return (
-      <span className="hidden items-center gap-1.5 tnum text-label text-dm-red md:flex" title={message}>
+      <span className="flex items-center gap-1.5 tnum text-label text-dm-red" title={message}>
         <AlertTriangle className="h-3.5 w-3.5" /> Conflict
       </span>
     );
   }
   if (sync === 'error') {
     return (
-      <span className="hidden items-center gap-1.5 tnum text-label text-dm-amber md:flex" title={message}>
+      <span className="flex items-center gap-1.5 tnum text-label text-dm-amber" title={message}>
         <CloudOff className="h-3.5 w-3.5" /> Not syncing
       </span>
     );
@@ -80,20 +86,21 @@ export function Header() {
   return (
     <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-0 invert" draggable={false} />
+        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-0" draggable={false} />
 
         <nav className="order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setTab(id)}
+              aria-current={tab === id ? 'page' : undefined}
               className={`relative flex items-center gap-2 whitespace-nowrap px-3 py-2.5 text-label font-medium transition-colors lg:py-2 ${
                 tab === id ? 'text-dm-text' : 'text-dm-dim hover:text-dm-muted'
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
               {label}
-              {tab === id && <span className="absolute inset-x-2 bottom-0 h-px bg-dm-text" />}
+              {tab === id && <span className="absolute inset-x-2 bottom-0 h-0.5 bg-dm-blue" />}
             </button>
           ))}
         </nav>
@@ -105,17 +112,17 @@ export function Header() {
             Search
           </button>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
-          <button className="btn" onClick={() => fileRef.current?.click()}>
-            Import
-          </button>
           <div className="relative" ref={menuRef}>
             <button className="btn" onClick={() => setMenu((m) => !m)}>
-              Export
+              Data
             </button>
             {menu && (
-              <div className="absolute right-0 mt-1.5 w-52 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-lg shadow-black/60">
+              <div className="absolute right-0 mt-1.5 w-52 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-pop">
                 <button className={menuItem} onClick={() => { exportJson(snapshot()); setMenu(false); }}>
                   Full backup (JSON)
+                </button>
+                <button className={menuItem} onClick={() => { fileRef.current?.click(); setMenu(false); }}>
+                  Restore from backup
                 </button>
                 {(['properties', 'deeds', 'entities'] as const).map((w) => (
                   <button key={w} className={menuItem} onClick={() => { exportCsv(snapshot(), w); setMenu(false); }}>

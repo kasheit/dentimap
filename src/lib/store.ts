@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { supabase } from './supabase';
 import type { ActivityEntry, DeedRecord, DentimapData, LegalEntity, Person, Property } from './types';
 
-export type TabId = 'properties' | 'matrix' | 'entities' | 'people' | 'deeds';
+export type TabId = 'properties' | 'entities' | 'people' | 'deeds';
 export type SyncStatus = 'off' | 'connecting' | 'synced' | 'saving' | 'error' | 'conflict';
 
 interface State {

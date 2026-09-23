@@ -99,7 +99,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
   return (
     <div className="rounded-lg border border-dm-border bg-dm-bg">
       <div className="flex items-center justify-between gap-3 border-b border-dm-border px-4 py-2.5">
-        <span className="text-label font-medium text-dm-muted">Paste county record</span>
+        <span className="text-label font-medium text-dm-muted">Paste a deed or county page</span>
       </div>
       <div className="space-y-3 p-4">
         <textarea
@@ -134,7 +134,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
         />
         <div className="flex flex-wrap items-center gap-2">
           <button className="btn" disabled={!raw.trim() || reading !== null} onClick={() => parse(raw)}>
-            Parse
+            Read fields
           </button>
           <input ref={fileRef} type="file" accept="image/*,application/pdf,text/plain,.pdf,.txt" hidden onChange={(e) => {
             const f = e.target.files?.[0];
@@ -165,7 +165,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
             )}
             {!applied && foundLabels.length > 0 && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-dm-border px-3 py-2.5 text-label">
-                <span className="text-dm-muted">Also found: {foundLabels.join(' · ')}</span>
+                <span className="text-dm-muted">Also found on this page: {foundLabels.join(' · ')}</span>
                 <button
                   className="btn"
                   onClick={() => {
@@ -173,7 +173,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
                     setApplied(true);
                   }}
                 >
-                  Apply to this location
+                  Update location details
                 </button>
               </div>
             )}
@@ -210,7 +210,7 @@ export function DeedIngestionBuffer({ property }: { property: Property }) {
 
             <div className="flex justify-end">
               <button className="btn btn-primary" disabled={!canSaveDraft(draft)} onClick={commit} title={canSaveDraft(draft) ? '' : 'Needs a recording date, grantor and grantee'}>
-                Add to title chain
+                Save deed to title chain
               </button>
             </div>
           </div>

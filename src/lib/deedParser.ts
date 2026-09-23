@@ -14,15 +14,6 @@ export interface ParsedDeedResult {
   saleDate?: string;
   salePrice?: number;
   deedDate?: string;
-  reid?: string;
-  landClass?: string;
-  ownerName?: string;
-  ownerMailing?: string;
-  acres?: number;
-  description?: string;
-  heatedArea?: number;
-  yearBuilt?: number;
-  useType?: string;
   landValue?: number;
   buildingValue?: number;
   assessedValue?: number;
@@ -118,37 +109,6 @@ export function parseCountyDeedClipboard(rawText: string): ParsedDeedResult {
   const dd = text.match(new RegExp(String.raw`DEED\s*DATE[:\s]*` + DATE_VALUE, 'i'));
   if (dd) result.deedDate = normalizeDate(dd[1]);
   result.salePrice = money(text, 'SALE\\s*PRICE');
-
-  // Tax assessor page details
-  const line = (re: RegExp) => {
-    const m = text.match(re);
-    return m ? m[1].trim() : undefined;
-  };
-  result.reid = line(/\bREID\b[:\s]*([0-9]{5,})/i);
-  result.landClass = line(/LAND\s*CLASS[:\t ]*([^\n\r]+)/i);
-  result.description = line(/PROPERTY\s*DESCRIPTION[:\t ]*([^\n\r]+)/i);
-  result.useType = line(/USE\s*TYPE[:\t ]*([^\n\r]+)/i);
-  const acres = line(/ACRES[:\t ]*([0-9]+(?:\.[0-9]+)?)/i);
-  if (acres) result.acres = parseFloat(acres);
-  const heated = line(/HEATED\s*AREA[:\t ]*([0-9][0-9,]*)/i);
-  if (heated) result.heatedArea = parseInt(heated.replace(/,/g, ''), 10);
-  const built = line(/YEAR\s*BUILT[:\t ]*([0-9]{4})/i);
-  if (built) result.yearBuilt = parseInt(built, 10);
-  // The county owner is the block of lines between an "Owner" heading and the next heading.
-  const lines = text.split(/\r?\n/).map((l) => l.trim());
-  const oi = lines.findIndex((l) => /^owner$/i.test(l));
-  if (oi >= 0) {
-    const block: string[] = [];
-    for (let i = oi + 1; i < lines.length; i++) {
-      if (!lines[i]) continue;
-      if (/^(VALUATION|LAST SALE|DEEDS?|BUILDING|GENERAL|LAND|SALE)\b/i.test(lines[i])) break;
-      block.push(lines[i]);
-    }
-    if (block.length) {
-      result.ownerName = block[0];
-      if (block.length > 1) result.ownerMailing = block.slice(1).join(', ');
-    }
-  }
 
   // Tax assessor pages list land, building and total assessed value.
   result.landValue = money(text, 'LAND\\s*(?:VALUE|VAL)');

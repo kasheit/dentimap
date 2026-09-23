@@ -42,7 +42,7 @@ type Bag = Record<string, unknown>;
 
 /** Fills only what the location has no value for. Values that already exist are never overwritten. */
 function fillBlanks(r: ParsedDeedResult, p: Property): { patch: Partial<Property>; conflicts: string[] } {
-  const blank = { ...p, metrics: undefined, lastSale: undefined, countyDeed: undefined, building: undefined, reid: undefined, landClass: undefined, countyOwner: undefined };
+  const blank = { ...p, metrics: undefined, lastSale: undefined, countyDeed: undefined };
   const found = propertyPatch(r, blank) as Bag;
   const have = p as unknown as Bag;
   const patch: Bag = {};

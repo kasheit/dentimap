@@ -7,12 +7,8 @@ export function describeFound(p: ParsedDeedResult): string[] {
   if (p.landValue !== undefined) out.push(`land ${compactUsd(p.landValue)}`);
   if (p.buildingValue !== undefined) out.push(`building ${compactUsd(p.buildingValue)}`);
   if (p.assessedValue !== undefined) out.push(`assessed ${compactUsd(p.assessedValue)}`);
-  if (p.reid) out.push('REID');
-  if (p.landClass) out.push('land class');
-  if (p.ownerName) out.push('owner');
   if (p.saleDate || p.salePrice !== undefined) out.push('last sale');
-  if (p.deedDate || p.acres !== undefined || p.description) out.push('deed details');
-  if (p.heatedArea !== undefined || p.yearBuilt !== undefined || p.useType) out.push('building');
+  if (p.deedDate || p.book) out.push('deed details');
   return out;
 }
 
@@ -27,26 +23,13 @@ export function propertyPatch(r: ParsedDeedResult, p: Property): Partial<Propert
       ...(r.assessedValue !== undefined && { currentAssessedValue: r.assessedValue }),
     };
   }
-  if (r.reid) patch.reid = r.reid;
-  if (r.landClass) patch.landClass = r.landClass;
-  if (r.ownerName) patch.countyOwner = { name: r.ownerName, mailing: r.ownerMailing };
   if (r.saleDate || r.salePrice !== undefined) patch.lastSale = { ...p.lastSale, ...(r.saleDate && { date: r.saleDate }), ...(r.salePrice !== undefined && { price: r.salePrice }) };
-  if (r.deedDate || r.acres !== undefined || r.description || r.book) {
+  if (r.deedDate || r.book) {
     patch.countyDeed = {
       ...p.countyDeed,
       ...(r.book && { book: r.book }),
       ...(r.page && { page: r.page }),
       ...(r.deedDate && { date: r.deedDate }),
-      ...(r.acres !== undefined && { acres: r.acres }),
-      ...(r.description && { description: r.description }),
-    };
-  }
-  if (r.heatedArea !== undefined || r.yearBuilt !== undefined || r.useType) {
-    patch.building = {
-      ...p.building,
-      ...(r.heatedArea !== undefined && { heatedAreaSqFt: r.heatedArea }),
-      ...(r.yearBuilt !== undefined && { yearBuilt: r.yearBuilt }),
-      ...(r.useType && { useType: r.useType }),
     };
   }
   return patch;

@@ -37,7 +37,7 @@ export function DeedsView() {
           <input className="field pl-9" placeholder="Filter by party, instrument, location…" value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
         <button className={`btn ${onlyFlagged ? 'text-dm-text' : ''}`} onClick={() => setOnlyFlagged((f) => !f)}>
-          <AlertTriangle className="h-3.5 w-3.5" /> Mismatches only
+          <AlertTriangle className="h-3.5 w-3.5" /> Excise mismatches
         </button>
         <span className="ml-auto tnum text-label text-dm-dim">{rows.length} shown</span>
       </div>

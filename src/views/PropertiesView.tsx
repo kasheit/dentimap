@@ -18,7 +18,7 @@ export function PropertiesView() {
   const selected = ordered[index];
 
   return (
-    <main className="mx-auto max-w-[1500px] p-4 sm:p-6 lg:p-8">
+    <main className="mx-auto max-w-[1280px] p-4 sm:p-6 lg:px-8 lg:py-7">
       <nav className="mb-5">
         <button className="btn" onClick={() => select('')}>
           <ArrowLeft className="h-3.5 w-3.5" /> All locations
