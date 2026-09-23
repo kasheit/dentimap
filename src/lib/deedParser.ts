@@ -56,18 +56,38 @@ export function normalizeDate(raw: string): string | undefined {
 
 const DATE_VALUE = String.raw`(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|[A-Za-z]{3,9}\.?\s+\d{1,2},?\s+\d{4})`;
 
+// OCR of a table/grid layout often lands a label and its value on separate lines instead of
+// side by side — this catches that by finding a line that is *only* the label, and reading
+// whatever's on the next non-empty line as the value.
+function nextLineValue(text: string, label: string): string | undefined {
+  const lines = text.split(/\r?\n/);
+  const labelOnly = new RegExp(`^\\s*(?:${label})\\s*[:#]?\\s*$`, 'i');
+  for (let i = 0; i < lines.length; i++) {
+    if (!labelOnly.test(lines[i])) continue;
+    for (let j = i + 1; j < lines.length; j++) {
+      const v = lines[j].trim();
+      if (v) return v;
+    }
+  }
+  return undefined;
+}
+
 function textField(text: string, label: string): string | undefined {
   const re = new RegExp(
     `(?:${label})S?\\s*[:#]?[ \\t]*([^\\n\\r\\t|]+?)(?=\\s*(?:\\b(?:${LABELS})\\b\\s*[:#]|\\||\\t|\\r|\\n|$))`,
     'i',
   );
   const m = text.match(re);
-  return m ? m[1].trim().replace(/\s{2,}/g, ' ') : undefined;
+  if (m) return m[1].trim().replace(/\s{2,}/g, ' ');
+  return nextLineValue(text, label);
 }
 
 function money(text: string, label: string): number | undefined {
   const m = text.match(new RegExp(`(?:${label})[^\\d$\\n]{0,12}\\$?\\s*([0-9][0-9,]*(?:\\.[0-9]{1,2})?)`, 'i'));
-  return m ? parseFloat(m[1].replace(/,/g, '')) : undefined;
+  if (m) return parseFloat(m[1].replace(/,/g, ''));
+  const nv = nextLineValue(text, label);
+  const nm = nv?.match(/\$?\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)/);
+  return nm ? parseFloat(nm[1].replace(/,/g, '')) : undefined;
 }
 
 // NC G.S. 105-228.30: $1 per $500 of consideration, or fraction thereof.
@@ -119,20 +139,21 @@ export function parseCountyDeedClipboard(rawText: string): ParsedDeedResult {
   if (dd) result.deedDate = normalizeDate(dd[1]);
   result.salePrice = money(text, 'SALE\\s*PRICE');
 
-  // Tax assessor page details
-  const line = (re: RegExp) => {
+  // Tax assessor page details — same-line match first, then the label-on-its-own-line fallback.
+  const line = (re: RegExp, label: string) => {
     const m = text.match(re);
-    return m ? m[1].trim() : undefined;
+    if (m) return m[1].trim();
+    return nextLineValue(text, label);
   };
-  result.reid = line(/\bREID\b[:\s]*([0-9]{5,})/i);
-  result.landClass = line(/LAND\s*CLASS[:\t ]*([^\n\r]+)/i);
-  result.description = line(/PROPERTY\s*DESCRIPTION[:\t ]*([^\n\r]+)/i);
-  result.useType = line(/USE\s*TYPE[:\t ]*([^\n\r]+)/i);
-  const acres = line(/ACRES[:\t ]*([0-9]+(?:\.[0-9]+)?)/i);
+  result.reid = line(/\bREID\b[:\s]*([0-9]{5,})/i, 'REID');
+  result.landClass = line(/LAND\s*CLASS[:\t ]*([^\n\r]+)/i, 'LAND\\s*CLASS');
+  result.description = line(/PROPERTY\s*DESCRIPTION[:\t ]*([^\n\r]+)/i, 'PROPERTY\\s*DESCRIPTION');
+  result.useType = line(/USE\s*TYPE[:\t ]*([^\n\r]+)/i, 'USE\\s*TYPE');
+  const acres = line(/ACRES[:\t ]*([0-9]+(?:\.[0-9]+)?)/i, 'ACRES');
   if (acres) result.acres = parseFloat(acres);
-  const heated = line(/HEATED\s*AREA[:\t ]*([0-9][0-9,]*)/i);
+  const heated = line(/HEATED\s*AREA[:\t ]*([0-9][0-9,]*)/i, 'HEATED\\s*AREA');
   if (heated) result.heatedArea = parseInt(heated.replace(/,/g, ''), 10);
-  const built = line(/YEAR\s*BUILT[:\t ]*([0-9]{4})/i);
+  const built = line(/YEAR\s*BUILT[:\t ]*([0-9]{4})/i, 'YEAR\\s*BUILT');
   if (built) result.yearBuilt = parseInt(built, 10);
   // The county owner is the block of lines between an "Owner" heading and the next heading.
   const lines = text.split(/\r?\n/).map((l) => l.trim());
