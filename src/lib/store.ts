@@ -25,6 +25,8 @@ interface State {
   selectPerson: (id: string) => void;
   addPerson: (p: Person) => void;
   addPeople: (p: Person[]) => void;
+  /** Same as addPerson, but stays on the current tab — for creating a person inline from another form. */
+  addPersonQuiet: (p: Person) => void;
   updatePerson: (id: string, patch: Partial<Person>) => void;
   deletePerson: (id: string) => void;
   openProperty: (id: string) => void;
@@ -100,6 +102,7 @@ export const useDentimap = create<State>()(
       openPerson: (selectedPersonId) => set({ selectedPersonId, tab: 'people' }),
       selectPerson: (selectedPersonId) => set({ selectedPersonId }),
       addPerson: (p) => set((s) => ({ people: [...s.people, p], selectedPersonId: p.id, tab: 'people', activity: logged(s.activity, `Person added: ${p.name}`) })),
+      addPersonQuiet: (p) => set((s) => ({ people: [...s.people, p], activity: logged(s.activity, `Person added: ${p.name}`) })),
       addPeople: (list) =>
         set((s) => ({
           people: [...s.people, ...list],
@@ -112,6 +115,11 @@ export const useDentimap = create<State>()(
           const rest = s.people.filter((x) => x.id !== id);
           return {
             people: rest,
+            deeds: s.deeds.map((d) => ({
+              ...d,
+              grantorPersonId: d.grantorPersonId === id ? undefined : d.grantorPersonId,
+              granteePersonId: d.granteePersonId === id ? undefined : d.granteePersonId,
+            })),
             selectedPersonId: s.selectedPersonId === id ? (rest[0]?.id ?? '') : s.selectedPersonId,
             activity: logged(s.activity, `Person deleted: ${s.people.find((x) => x.id === id)?.name ?? id}`),
           };
@@ -165,6 +173,11 @@ export const useDentimap = create<State>()(
         set((s) => ({
           entities: s.entities.filter((e) => e.id !== id),
           people: s.people.map((x) => ({ ...x, entityIds: x.entityIds.filter((y) => y !== id) })),
+          deeds: s.deeds.map((d) => ({
+            ...d,
+            grantorEntityId: d.grantorEntityId === id ? undefined : d.grantorEntityId,
+            granteeEntityId: d.granteeEntityId === id ? undefined : d.granteeEntityId,
+          })),
           activity: logged(s.activity, `Entity deleted: ${s.entities.find((e) => e.id === id)?.name ?? id}`),
         })),
       linkProperty: (entityId, propertyId) =>
@@ -353,8 +366,14 @@ export function chainBreaks(chain: DeedRecord[]): ChainBreak[] {
   const conv = chain.filter((d) => d.deedType !== 'subdivision_plat');
   const out: ChainBreak[] = [];
   for (let i = 1; i < conv.length; i++) {
-    if (norm(conv[i - 1].grantee) !== norm(conv[i].grantor)) {
-      out.push({ deedId: conv[i].id, expected: conv[i - 1].grantee, found: conv[i].grantor });
+    const prev = conv[i - 1];
+    const cur = conv[i];
+    // Linked records are compared by id (typo-proof); unlinked parties fall back to normalized text.
+    const prevId = prev.granteeEntityId ?? prev.granteePersonId;
+    const curId = cur.grantorEntityId ?? cur.grantorPersonId;
+    const same = prevId && curId ? prevId === curId : norm(prev.grantee) === norm(cur.grantor);
+    if (!same) {
+      out.push({ deedId: cur.id, expected: prev.grantee, found: cur.grantor });
     }
   }
   return out;

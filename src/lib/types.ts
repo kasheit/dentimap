@@ -127,6 +127,11 @@ export interface DeedRecord {
   deedType: DeedType;
   grantor: string;
   grantee: string;
+  /** Set when the grantor/grantee text has been matched to a real Entity or Person record. */
+  grantorEntityId?: string;
+  grantorPersonId?: string;
+  granteeEntityId?: string;
+  granteePersonId?: string;
   consideration: number;
   exciseTaxStamps: number;
   isFormulaVerified: boolean;

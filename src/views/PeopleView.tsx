@@ -136,13 +136,20 @@ function LinkList({
 }
 
 function Profile({ person }: { person: Person }) {
-  const { entities, properties, updatePerson, deletePerson, openProperty, setTab } = useDentimap();
+  const { entities, properties, deeds, updatePerson, deletePerson, openProperty, setTab } = useDentimap();
   const [editing, setEditing] = useState(person.name === 'New person');
   const [d, setD] = useState({ name: person.name, title: person.title ?? '', relevance: person.relevance ?? '', status: person.status, roles: person.roles });
   const [notes, setNotes] = useState(person.notes ?? '');
 
   const actions = useMemo(() => [...person.actions].sort((a, b) => b.date.localeCompare(a.date)), [person.actions]);
   const propName = (id?: string) => properties.find((p) => p.id === id)?.name;
+  const personDeeds = useMemo(
+    () =>
+      deeds
+        .filter((x) => x.grantorPersonId === person.id || x.granteePersonId === person.id)
+        .sort((a, b) => b.recordingDate.localeCompare(a.recordingDate)),
+    [deeds, person.id],
+  );
 
   const toggleRole = (r: PersonRole) => setD((x) => ({ ...x, roles: x.roles.includes(r) ? x.roles.filter((y) => y !== r) : [...x.roles, r] }));
 
@@ -257,6 +264,24 @@ function Profile({ person }: { person: Person }) {
         )}
         <ActionForm person={person} />
       </section>
+
+      {personDeeds.length > 0 && (
+        <section className="border-t border-dm-border pt-5">
+          <h2 className="mb-3 text-title font-semibold">Deeds</h2>
+          <ul className="divide-y divide-dm-border/70">
+            {personDeeds.map((x) => (
+              <li key={x.id} className="flex items-center justify-between gap-3 py-2 text-label">
+                <span className="text-dm-muted">
+                  {x.granteePersonId === person.id ? 'Grantee' : 'Grantor'} · {propName(x.propertyId) ?? 'Unknown location'}
+                </span>
+                <button className="tnum shrink-0 text-dm-dim hover:text-dm-blue hover:underline" onClick={() => openProperty(x.propertyId)}>
+                  {fmtDate(x.recordingDate)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="grid gap-8 border-t border-dm-border pt-5 sm:grid-cols-2">
         <LinkList

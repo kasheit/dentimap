@@ -3,12 +3,18 @@ import type { ParsedDeedResult } from '@/lib/deedParser';
 import { deedTypeLabel } from '@/lib/format';
 import type { DeedRecord, DeedType, VerificationState } from '@/lib/types';
 import { FormulaChip } from './Chips';
+import { PartyPicker } from './PartyPicker';
+import type { PartyValue } from './PartyPicker';
 
 export interface Draft {
   recordingDate: string;
   deedType: DeedType;
   grantor: string;
+  grantorEntityId?: string;
+  grantorPersonId?: string;
   grantee: string;
+  granteeEntityId?: string;
+  granteePersonId?: string;
   consideration: string;
   exciseTaxStamps: string;
   instrumentNumber: string;
@@ -38,7 +44,11 @@ export const draftFromDeed = (d: DeedRecord): Draft => ({
   recordingDate: d.recordingDate,
   deedType: d.deedType,
   grantor: d.grantor,
+  grantorEntityId: d.grantorEntityId,
+  grantorPersonId: d.grantorPersonId,
   grantee: d.grantee,
+  granteeEntityId: d.granteeEntityId,
+  granteePersonId: d.granteePersonId,
   consideration: String(d.consideration),
   exciseTaxStamps: String(d.exciseTaxStamps),
   instrumentNumber: d.instrumentNumber ?? '',
@@ -65,7 +75,11 @@ export function draftToDeed(d: Draft, base: Pick<DeedRecord, 'id' | 'propertyId'
     page: d.page.trim() || undefined,
     deedType: d.deedType,
     grantor: d.grantor.trim(),
+    grantorEntityId: d.grantorEntityId,
+    grantorPersonId: d.grantorPersonId,
     grantee: d.grantee.trim(),
+    granteeEntityId: d.granteeEntityId,
+    granteePersonId: d.granteePersonId,
     consideration: c,
     exciseTaxStamps: s,
     isFormulaVerified: checkExcise(c, s),
@@ -108,14 +122,18 @@ export function DeedForm({ draft, onChange, withConfidence }: { draft: Draft; on
         ) : (
           <span />
         )}
-        <label className="space-y-1">
-          <span className="label">Grantor</span>
-          <input className="field" value={draft.grantor} onChange={(e) => set('grantor', e.target.value)} />
-        </label>
-        <label className="space-y-1 lg:col-span-2">
-          <span className="label">Grantee</span>
-          <input className="field" value={draft.grantee} onChange={(e) => set('grantee', e.target.value)} />
-        </label>
+        <PartyPicker
+          label="Grantor"
+          value={{ name: draft.grantor, entityId: draft.grantorEntityId, personId: draft.grantorPersonId }}
+          onChange={(v: PartyValue) => onChange({ ...draft, grantor: v.name, grantorEntityId: v.entityId, grantorPersonId: v.personId })}
+        />
+        <div className="lg:col-span-2">
+          <PartyPicker
+            label="Grantee"
+            value={{ name: draft.grantee, entityId: draft.granteeEntityId, personId: draft.granteePersonId }}
+            onChange={(v: PartyValue) => onChange({ ...draft, grantee: v.name, granteeEntityId: v.entityId, granteePersonId: v.personId })}
+          />
+        </div>
         <label className="space-y-1">
           <span className="label">Consideration</span>
           <input inputMode="decimal" className="field tnum" value={draft.consideration} onChange={(e) => set('consideration', e.target.value)} />
