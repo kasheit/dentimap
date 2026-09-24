@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Users, Building2, CloudOff, FileText, Landmark } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { AlertTriangle, Users, Building2, CloudOff, FileText, Landmark, BookOpen, Network } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { OPEN_SEARCH_EVENT } from './SearchPalette';
 import { isValidData, useDentimap } from '@/lib/store';
@@ -10,7 +10,9 @@ const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
   { id: 'properties', label: 'Locations', icon: Building2 },
   { id: 'entities', label: 'Entities', icon: Landmark },
   { id: 'people', label: 'People', icon: Users },
+  { id: 'network', label: 'Network', icon: Network },
   { id: 'deeds', label: 'Deeds', icon: FileText },
+  { id: 'glossary', label: 'Glossary', icon: BookOpen },
 ];
 
 function SyncBadge() {
@@ -47,6 +49,31 @@ export function Header() {
   const [notice, setNotice] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const tabRefs = useRef<Partial<Record<TabId, HTMLButtonElement>>>({});
+  const [indicator, setIndicator] = useState<{ left: number; width: number; ready: boolean }>({ left: 0, width: 0, ready: false });
+  const [hovered, setHovered] = useState<TabId | null>(null);
+  const [hoverBox, setHoverBox] = useState<{ left: number; width: number; top: number; height: number }>({ left: 0, width: 0, top: 0, height: 0 });
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = tabRefs.current[tab];
+      if (!el) {
+        setIndicator((i) => ({ ...i, ready: false }));
+        return;
+      }
+      setIndicator({ left: el.offsetLeft, width: el.offsetWidth, ready: true });
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [tab]);
+
+  useLayoutEffect(() => {
+    if (!hovered) return;
+    const el = tabRefs.current[hovered];
+    if (el) setHoverBox({ left: el.offsetLeft, width: el.offsetWidth, top: el.offsetTop, height: el.offsetHeight });
+  }, [hovered]);
 
   useEffect(() => {
     const close = (e: MouseEvent) => {
@@ -63,8 +90,8 @@ export function Header() {
   }, [notice]);
 
   const snapshot = () => {
-    const { properties, deeds, entities, people, activity } = useDentimap.getState();
-    return { properties, deeds, entities, people, activity };
+    const { properties, deeds, entities, people, activity, glossary } = useDentimap.getState();
+    return { properties, deeds, entities, people, activity, glossary };
   };
 
   const onImport = async (file?: File) => {
@@ -86,23 +113,50 @@ export function Header() {
   return (
     <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
       <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
-        <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-0" draggable={false} />
+        <button onClick={() => setTab('home')} aria-label="Go to home" className="transition-transform duration-150 ease-luxury hover:scale-[1.03] active:scale-[0.97]">
+          <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-0" draggable={false} />
+        </button>
 
-        <nav className="order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto">
+        <nav
+          ref={navRef}
+          onMouseLeave={() => setHovered(null)}
+          className="relative order-3 -mb-2.5 flex w-full gap-1 overflow-x-auto scroll-thin lg:order-none lg:mb-0 lg:w-auto"
+        >
+          <span
+            className="pointer-events-none absolute rounded-md bg-dm-hover transition-all duration-150 ease-luxury"
+            style={{
+              left: hoverBox.left,
+              width: hoverBox.width,
+              top: hoverBox.top,
+              height: hoverBox.height,
+              opacity: hovered ? 1 : 0,
+            }}
+          />
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
+              ref={(el) => {
+                if (el) tabRefs.current[id] = el;
+              }}
               onClick={() => setTab(id)}
               aria-current={tab === id ? 'page' : undefined}
-              className={`relative flex items-center gap-2 whitespace-nowrap px-3 py-2.5 text-label font-medium transition-colors lg:py-2 ${
+              onMouseEnter={() => setHovered(id)}
+              className={`relative flex items-center gap-2 whitespace-nowrap px-3 py-2.5 text-label font-medium transition-colors duration-150 ease-luxury lg:py-2 ${
                 tab === id ? 'text-dm-text' : 'text-dm-dim hover:text-dm-muted'
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
               {label}
-              {tab === id && <span className="absolute inset-x-2 bottom-0 h-0.5 bg-dm-blue" />}
             </button>
           ))}
+          <span
+            className="pointer-events-none absolute bottom-0 h-0.5 rounded-full bg-dm-blue transition-all duration-200 ease-luxury"
+            style={{
+              left: indicator.left + 8,
+              width: Math.max(indicator.width - 16, 0),
+              opacity: indicator.ready ? 1 : 0,
+            }}
+          />
         </nav>
 
         <div className="ml-auto flex items-center gap-3">
@@ -117,7 +171,7 @@ export function Header() {
               Data
             </button>
             {menu && (
-              <div className="absolute right-0 mt-1.5 w-52 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-pop">
+              <div className="animate-scale-in absolute right-0 mt-1.5 w-52 origin-top-right overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-pop">
                 <button className={menuItem} onClick={() => { exportJson(snapshot()); setMenu(false); }}>
                   Full backup (JSON)
                 </button>

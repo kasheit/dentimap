@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from './supabase';
-import type { ActivityEntry, DeedRecord, DentimapData, LegalEntity, Person, Property } from './types';
+import type { ActivityEntry, DeedRecord, DentimapData, GlossaryTerm, LegalEntity, Person, Property } from './types';
 
-export type TabId = 'properties' | 'entities' | 'people' | 'deeds';
+export type TabId = 'home' | 'properties' | 'entities' | 'people' | 'deeds' | 'glossary' | 'network';
 export type SyncStatus = 'off' | 'connecting' | 'synced' | 'saving' | 'error' | 'conflict';
 
 interface State {
@@ -12,6 +12,7 @@ interface State {
   entities: LegalEntity[];
   activity: ActivityEntry[];
   people: Person[];
+  glossary: GlossaryTerm[];
   selectedPersonId: string;
   selectedPropertyId: string;
   lastDeleted: DeedRecord | null;
@@ -24,6 +25,8 @@ interface State {
   selectPerson: (id: string) => void;
   addPerson: (p: Person) => void;
   addPeople: (p: Person[]) => void;
+  /** Same as addPerson, but stays on the current tab — for creating a person inline from another form. */
+  addPersonQuiet: (p: Person) => void;
   updatePerson: (id: string, patch: Partial<Person>) => void;
   deletePerson: (id: string) => void;
   openProperty: (id: string) => void;
@@ -40,6 +43,9 @@ interface State {
   deleteEntity: (id: string) => void;
   linkProperty: (entityId: string, propertyId: string) => void;
   unlinkProperty: (entityId: string, propertyId: string) => void;
+  addTerm: (t: GlossaryTerm) => void;
+  updateTerm: (id: string, patch: Partial<GlossaryTerm>) => void;
+  deleteTerm: (id: string) => void;
   importData: (d: DentimapData) => { added: number; updated: number };
   resolveConflict: (choice: 'remote' | 'mine') => Promise<void>;
 }
@@ -54,7 +60,8 @@ export function isValidData(d: unknown): d is DentimapData {
     x.properties.every((p) => p && typeof p.id === 'string' && typeof p.name === 'string' && p.address) &&
     x.deeds.every((e) => e && typeof e.id === 'string' && typeof e.propertyId === 'string') &&
     x.entities.every((e) => e && typeof e.id === 'string' && typeof e.name === 'string') &&
-    (x.people === undefined || (Array.isArray(x.people) && x.people.every((e) => e && typeof e.id === 'string' && typeof e.name === 'string')))
+    (x.people === undefined || (Array.isArray(x.people) && x.people.every((e) => e && typeof e.id === 'string' && typeof e.name === 'string'))) &&
+    (x.glossary === undefined || (Array.isArray(x.glossary) && x.glossary.every((e) => e && typeof e.id === 'string' && typeof e.term === 'string' && typeof e.definition === 'string')))
   );
 }
 
@@ -66,6 +73,7 @@ const pick = (s: State): DentimapData => ({
   entities: s.entities,
   activity: s.activity,
   people: s.people,
+  glossary: s.glossary,
 });
 
 const uid = (p: string) => `${p}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
@@ -83,9 +91,10 @@ export const useDentimap = create<State>()(
       entities: [],
       activity: [],
       people: [],
+      glossary: [],
       selectedPersonId: '',
       selectedPropertyId: '',
-      tab: 'properties',
+      tab: 'home',
       lastDeleted: null,
       sync: 'off',
       setTab: (tab) => set({ tab }),
@@ -93,6 +102,7 @@ export const useDentimap = create<State>()(
       openPerson: (selectedPersonId) => set({ selectedPersonId, tab: 'people' }),
       selectPerson: (selectedPersonId) => set({ selectedPersonId }),
       addPerson: (p) => set((s) => ({ people: [...s.people, p], selectedPersonId: p.id, tab: 'people', activity: logged(s.activity, `Person added: ${p.name}`) })),
+      addPersonQuiet: (p) => set((s) => ({ people: [...s.people, p], activity: logged(s.activity, `Person added: ${p.name}`) })),
       addPeople: (list) =>
         set((s) => ({
           people: [...s.people, ...list],
@@ -105,6 +115,11 @@ export const useDentimap = create<State>()(
           const rest = s.people.filter((x) => x.id !== id);
           return {
             people: rest,
+            deeds: s.deeds.map((d) => ({
+              ...d,
+              grantorPersonId: d.grantorPersonId === id ? undefined : d.grantorPersonId,
+              granteePersonId: d.granteePersonId === id ? undefined : d.granteePersonId,
+            })),
             selectedPersonId: s.selectedPersonId === id ? (rest[0]?.id ?? '') : s.selectedPersonId,
             activity: logged(s.activity, `Person deleted: ${s.people.find((x) => x.id === id)?.name ?? id}`),
           };
@@ -158,6 +173,11 @@ export const useDentimap = create<State>()(
         set((s) => ({
           entities: s.entities.filter((e) => e.id !== id),
           people: s.people.map((x) => ({ ...x, entityIds: x.entityIds.filter((y) => y !== id) })),
+          deeds: s.deeds.map((d) => ({
+            ...d,
+            grantorEntityId: d.grantorEntityId === id ? undefined : d.grantorEntityId,
+            granteeEntityId: d.granteeEntityId === id ? undefined : d.granteeEntityId,
+          })),
           activity: logged(s.activity, `Entity deleted: ${s.entities.find((e) => e.id === id)?.name ?? id}`),
         })),
       linkProperty: (entityId, propertyId) =>
@@ -173,6 +193,15 @@ export const useDentimap = create<State>()(
         set((s) => ({
           entities: s.entities.map((e) => (e.id === entityId ? { ...e, associatedPropertyIds: e.associatedPropertyIds.filter((x) => x !== propertyId) } : e)),
           activity: logged(s.activity, `Unlinked from ${s.entities.find((e) => e.id === entityId)?.name ?? entityId}`, propertyId),
+        })),
+
+      addTerm: (t) => set((s) => ({ glossary: [...s.glossary, t], activity: logged(s.activity, `Glossary term added: ${t.term}`) })),
+      updateTerm: (id, patch) =>
+        set((s) => ({ glossary: s.glossary.map((t) => (t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t)) })),
+      deleteTerm: (id) =>
+        set((s) => ({
+          glossary: s.glossary.filter((t) => t.id !== id),
+          activity: logged(s.activity, `Glossary term deleted: ${s.glossary.find((t) => t.id === id)?.term ?? id}`),
         })),
 
       // Merge by id: records in the file win over matching records here; nothing else is removed.
@@ -195,6 +224,7 @@ export const useDentimap = create<State>()(
             deeds: merge(s.deeds, d.deeds),
             entities: merge(s.entities, d.entities),
             people: merge(s.people, d.people ?? []),
+            glossary: merge(s.glossary, d.glossary ?? []),
             selectedPropertyId: properties.some((p) => p.id === s.selectedPropertyId) ? s.selectedPropertyId : '',
             activity: logged(s.activity, `Imported file: ${added} new, ${updated} updated`),
           };
@@ -268,6 +298,7 @@ async function pull(): Promise<string | null> {
       entities: d.entities,
       activity: d.activity ?? [],
       people: d.people ?? [],
+      glossary: d.glossary ?? [],
       selectedPropertyId: d.properties.some((p) => p.id === sel) ? sel : '',
     });
     applyingRemote = false;
@@ -307,7 +338,7 @@ export async function startSync() {
   let timer: ReturnType<typeof setTimeout> | undefined;
   useDentimap.subscribe((s, prev) => {
     if (applyingRemote || s.sync === 'conflict') return;
-    if (s.properties === prev.properties && s.deeds === prev.deeds && s.entities === prev.entities && s.activity === prev.activity && s.people === prev.people) return;
+    if (s.properties === prev.properties && s.deeds === prev.deeds && s.entities === prev.entities && s.activity === prev.activity && s.people === prev.people && s.glossary === prev.glossary) return;
     set({ sync: 'saving' });
     clearTimeout(timer);
     timer = setTimeout(async () => {
@@ -335,8 +366,14 @@ export function chainBreaks(chain: DeedRecord[]): ChainBreak[] {
   const conv = chain.filter((d) => d.deedType !== 'subdivision_plat');
   const out: ChainBreak[] = [];
   for (let i = 1; i < conv.length; i++) {
-    if (norm(conv[i - 1].grantee) !== norm(conv[i].grantor)) {
-      out.push({ deedId: conv[i].id, expected: conv[i - 1].grantee, found: conv[i].grantor });
+    const prev = conv[i - 1];
+    const cur = conv[i];
+    // Linked records are compared by id (typo-proof); unlinked parties fall back to normalized text.
+    const prevId = prev.granteeEntityId ?? prev.granteePersonId;
+    const curId = cur.grantorEntityId ?? cur.grantorPersonId;
+    const same = prevId && curId ? prevId === curId : norm(prev.grantee) === norm(cur.grantor);
+    if (!same) {
+      out.push({ deedId: cur.id, expected: prev.grantee, found: cur.grantor });
     }
   }
   return out;

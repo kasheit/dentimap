@@ -26,10 +26,14 @@ function matchProperty(r: ParsedDeedResult, properties: Property[]): Property | 
     if (hit) return hit;
   }
   const hay = words(r.rawText);
-  return properties.find((p) => {
+  const hit = properties.find((p) => {
     const street = words(p.address.street);
     return street.length >= 8 && hay.includes(street);
   });
+  // The page names a PIN that doesn't belong to the street-matched property — don't trust a
+  // coincidental address substring over a PIN that actively disagrees with it.
+  if (hit && pin && alnum(hit.address.parcelPin) && alnum(hit.address.parcelPin) !== pin) return undefined;
+  return hit;
 }
 
 const sameDeed = (a: DeedRecord, b: DeedRecord) =>

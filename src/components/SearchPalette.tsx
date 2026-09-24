@@ -5,7 +5,7 @@ import { useDentimap } from '@/lib/store';
 
 interface Result {
   key: string;
-  kind: 'Location' | 'Person' | 'Entity' | 'Deed';
+  kind: 'Location' | 'Person' | 'Entity' | 'Deed' | 'Term';
   title: string;
   sub: string;
   go: () => void;
@@ -14,7 +14,7 @@ interface Result {
 export const OPEN_SEARCH_EVENT = 'dentimap:open-search';
 
 export function SearchPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { properties, people, entities, deeds, openProperty, openPerson, setTab } = useDentimap();
+  const { properties, people, entities, deeds, glossary, openProperty, openPerson, setTab } = useDentimap();
   const [q, setQ] = useState('');
   const [idx, setIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -54,8 +54,13 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
         out.push({ key: d.id, kind: 'Deed', title: `${d.grantor} → ${d.grantee}`, sub: `${fmtDate(d.recordingDate)} · ${propName(d.propertyId)}`, go: () => openProperty(d.propertyId) });
       }
     }
+    for (const t of glossary) {
+      if (hit([t.term, t.expansion, t.definition].filter(Boolean).join(' '))) {
+        out.push({ key: t.id, kind: 'Term', title: t.term, sub: t.expansion ?? t.definition, go: () => setTab('glossary') });
+      }
+    }
     return out.slice(0, 30);
-  }, [q, properties, people, entities, deeds, openProperty, openPerson, setTab]);
+  }, [q, properties, people, entities, deeds, glossary, openProperty, openPerson, setTab]);
 
   useEffect(() => setIdx(0), [q]);
 
@@ -79,8 +84,8 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center bg-black/30 px-4 pt-[12vh]" onMouseDown={onClose} role="dialog" aria-label="Search">
-      <div className="w-full max-w-xl overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-pop" onMouseDown={(e) => e.stopPropagation()} onKeyDown={onKeyDown}>
+    <div className="animate-fade-in fixed inset-0 z-[60] flex items-start justify-center bg-black/30 px-4 pt-[12vh]" onMouseDown={onClose} role="dialog" aria-label="Search">
+      <div className="animate-scale-in w-full max-w-xl origin-top overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-pop" onMouseDown={(e) => e.stopPropagation()} onKeyDown={onKeyDown}>
         <div className="relative border-b border-dm-border">
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-dm-dim" />
           <input
@@ -97,7 +102,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
               <button
                 onMouseEnter={() => setIdx(i)}
                 onClick={() => choose(r)}
-                className={`flex w-full items-baseline gap-3 rounded-md px-3 py-2 text-left ${i === idx ? 'bg-dm-hover' : ''}`}
+                className={`flex w-full items-baseline gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150 ${i === idx ? 'bg-dm-hover' : ''}`}
               >
                 <span className="w-16 shrink-0 text-label text-dm-dim">{r.kind}</span>
                 <span className="min-w-0 flex-1">

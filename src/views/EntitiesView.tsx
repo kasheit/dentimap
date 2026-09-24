@@ -105,11 +105,17 @@ function EntityCard({ e }: { e: LegalEntity }) {
   const linkedPeople = people.filter((p) => p.entityIds.includes(e.id));
   const otherPeople = people.filter((p) => !p.entityIds.includes(e.id));
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-  const acquired = deeds.filter((d) => norm(d.grantee) === norm(e.name)).length;
-  const sold = deeds.filter((d) => norm(d.grantor) === norm(e.name)).length;
+  // Prefer the linked id (exact) when a deed's party is linked; unlinked parties fall back to a name guess.
+  const isGrantee = (d: (typeof deeds)[number]) => (d.granteeEntityId ? d.granteeEntityId === e.id : norm(d.grantee) === norm(e.name));
+  const isGrantor = (d: (typeof deeds)[number]) => (d.grantorEntityId ? d.grantorEntityId === e.id : norm(d.grantor) === norm(e.name));
+  const entityDeeds = deeds
+    .filter((d) => isGrantee(d) || isGrantor(d))
+    .sort((a, b) => b.recordingDate.localeCompare(a.recordingDate));
+  const acquired = entityDeeds.filter(isGrantee).length;
+  const sold = entityDeeds.filter(isGrantor).length;
 
   return (
-    <article className="rounded-lg border border-dm-border bg-dm-surface">
+    <article className="lift rounded-lg border border-dm-border bg-dm-surface">
       <EntityHeader e={e} />
 
       <dl className="grid grid-cols-3 gap-4 border-b border-dm-border p-5">
@@ -126,6 +132,25 @@ function EntityCard({ e }: { e: LegalEntity }) {
           <dd className="mt-1 tnum text-sm">{acquired} / {sold}</dd>
         </div>
       </dl>
+
+      {entityDeeds.length > 0 && (
+        <div className="border-b border-dm-border px-5 py-4">
+          <div className="mb-2 text-sm font-semibold text-dm-text">Deeds</div>
+          <ul className="space-y-0.5">
+            {entityDeeds.slice(0, 4).map((d) => (
+              <li key={d.id} className="flex items-center justify-between gap-3 rounded-md px-3 py-1.5 text-label hover:bg-dm-hover">
+                <span className="text-dm-muted">
+                  {isGrantee(d) ? 'Acquired' : 'Sold'} · {properties.find((p) => p.id === d.propertyId)?.name ?? 'Unknown location'}
+                </span>
+                <button className="tnum shrink-0 text-dm-dim hover:text-dm-blue hover:underline" onClick={() => openProperty(d.propertyId)}>
+                  {fmtDate(d.recordingDate)}
+                </button>
+              </li>
+            ))}
+          </ul>
+          {entityDeeds.length > 4 && <div className="mt-1 px-3 text-label text-dm-dim">+{entityDeeds.length - 4} more</div>}
+        </div>
+      )}
 
       <div className="border-b border-dm-border px-5 py-4">
         <div className="mb-2 text-sm font-semibold text-dm-text">People</div>
@@ -224,7 +249,7 @@ export function EntitiesView() {
           Add entity
         </button>
       </div>
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="stagger grid gap-6 md:grid-cols-2">
         {entities.map((e) => <EntityCard key={e.id} e={e} />)}
       </div>
     </main>

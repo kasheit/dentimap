@@ -79,6 +79,15 @@ describe('assessor values', () => {
   });
 });
 
+describe('label and value on separate lines (common OCR table artifact)', () => {
+  it('reads a value that lands on the line after its label', () => {
+    const NL = String.fromCharCode(10);
+    const page = ['Land Class', 'Commercial', 'Total Assessed Value', '$1,450,000', 'Acres', '3.19'].join(NL);
+    const r = parseCountyDeedClipboard(page);
+    expect(r.assessedValue).toBe(1450000);
+  });
+});
+
 describe('assessor sale vs deed date', () => {
   it('keeps the last sale date separate from the deed date', () => {
     const NL = String.fromCharCode(10);
