@@ -3,6 +3,7 @@ import { Plus, Search, X } from 'lucide-react';
 import { LevelLabel } from '@/components/Chips';
 import { buildAgentDirectory, agentKey } from '@/lib/agents';
 import { fmtDate, personRoleLabel } from '@/lib/format';
+import { EmptyState } from '@/components/Page';
 import { newId, useDentimap } from '@/lib/store';
 import type { Person, PersonAction, PersonRole, VerificationState } from '@/lib/types';
 
@@ -389,7 +390,7 @@ export function PeopleView() {
               </button>
             </li>
           ))}
-          {!visible.length && <li className="px-3 py-6 text-center text-sm text-dm-dim">{people.length ? 'No matches.' : 'No people yet.'}</li>}
+          {!visible.length && people.length > 0 && <li className="px-3 py-6 text-center text-sm text-dm-dim">No matches.</li>}
         </ul>
         {missingAgents.length > 0 && (
           <div className="border-t border-dm-border p-4">
@@ -403,10 +404,7 @@ export function PeopleView() {
         {selected ? (
           <Profile person={selected} />
         ) : (
-          <div className="mx-auto max-w-md py-24 text-center">
-            <h1 className="text-lg font-semibold">No people yet</h1>
-            <p className="mt-2 text-sm text-dm-muted">Add a person with the + button.</p>
-          </div>
+          <EmptyState title="No people yet" hint="Add a person with the + button in the sidebar." />
         )}
       </main>
     </div>

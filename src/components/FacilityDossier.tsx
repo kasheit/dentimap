@@ -25,7 +25,12 @@ export function FacilityDossier({ property: p }: { property: Property }) {
   const openNotes = (p.noteLog ?? []).filter((n) => n.tag !== 'note' && !n.resolved).length;
 
 
-  const [tab, setTab] = useState<Tab>('property');
+  const requested = useDentimap((s) => s.dossierTab);
+  const clearRequested = useDentimap((s) => s.clearDossierTab);
+  const [tab, setTab] = useState<Tab>(requested ?? 'property');
+  useEffect(() => {
+    if (requested) clearRequested();
+  }, [requested, clearRequested]);
   const [editSignal, setEditSignal] = useState(0);
   const [focusField, setFocusField] = useState<SourcedField | undefined>();
 

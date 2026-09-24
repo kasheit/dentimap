@@ -3,7 +3,7 @@ import { Pencil, X } from 'lucide-react';
 import { entityTypeLabel, fmtDate, personRoleLabel } from '@/lib/format';
 import { newId, useDentimap } from '@/lib/store';
 import type { EntityType, LegalEntity } from '@/lib/types';
-import { PageHeader, PageShell } from '@/components/Page';
+import { EmptyState, PageHeader, PageShell } from '@/components/Page';
 
 function EntityHeader({ e }: { e: LegalEntity }) {
   const { updateEntity, deleteEntity } = useDentimap();
@@ -116,7 +116,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
   const sold = entityDeeds.filter(isGrantor).length;
 
   return (
-    <article className="lift rounded-lg border border-dm-border bg-dm-surface">
+    <article className="rounded-lg border border-dm-border bg-dm-surface">
       <EntityHeader e={e} />
 
       <dl className="grid grid-cols-3 gap-4 border-b border-dm-border p-5">
@@ -165,7 +165,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
                 </button>
                 <button
                   onClick={() => updatePerson(p.id, { entityIds: p.entityIds.filter((x) => x !== e.id) })}
-                  className="rounded p-1.5 text-dm-muted transition hover:bg-dm-raised hover:text-dm-red group-hover:opacity-100"
+                  className="rounded p-1.5 text-dm-muted opacity-0 transition hover:bg-dm-raised hover:text-dm-red focus-visible:opacity-100 group-hover:opacity-100"
                   aria-label={`Unlink ${p.name} from ${e.name}`}
                 >
                   <X className="h-3.5 w-3.5" />
@@ -186,7 +186,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
             }}
             aria-label="Link a person"
           >
-            <option value="">+ Link a person…</option>
+            <option value="">Link a person</option>
             {otherPeople.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -206,7 +206,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
                 </button>
                 <button
                   onClick={() => unlinkProperty(e.id, p.id)}
-                  className="rounded p-1.5 text-dm-muted transition hover:bg-dm-raised hover:text-dm-red group-hover:opacity-100"
+                  className="rounded p-1.5 text-dm-muted opacity-0 transition hover:bg-dm-raised hover:text-dm-red focus-visible:opacity-100 group-hover:opacity-100"
                   title="Remove from this entity (the location itself is kept)"
                   aria-label={`Remove ${p.name} from ${e.name}`}
                 >
@@ -225,7 +225,7 @@ function EntityCard({ e }: { e: LegalEntity }) {
             onChange={(ev) => ev.target.value && linkProperty(e.id, ev.target.value)}
             aria-label="Add a location"
           >
-            <option value="">+ Add a location…</option>
+            <option value="">Add a location</option>
             {available.map((p) => (
               <option key={p.id} value={p.id}>{p.name} — {p.address.city}, {p.address.state}</option>
             ))}
@@ -236,26 +236,120 @@ function EntityCard({ e }: { e: LegalEntity }) {
   );
 }
 
+const ROW = 34;
+const NODE_W = 200;
+const GAP = 96;
+const PAD = 12;
+
+/** People on the left, the entity in the middle, locations on the right, joined by hairlines. Nodes are real buttons. */
+function EntityDiagram({ e }: { e: LegalEntity }) {
+  const { properties, people, openProperty, openPerson } = useDentimap();
+  const locs = e.associatedPropertyIds.map((id) => properties.find((p) => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p);
+  const ppl = people.filter((p) => p.entityIds.includes(e.id));
+  const rows = Math.max(ppl.length, locs.length, 1);
+  const height = rows * ROW + PAD * 2;
+  const width = PAD * 2 + NODE_W * 3 + GAP * 2;
+  const cy = height / 2;
+  const colY = (i: number, n: number) => cy - (n * ROW) / 2 + i * ROW + ROW / 2;
+  const x2 = PAD + NODE_W + GAP;
+  const x3 = PAD + (NODE_W + GAP) * 2;
+  const link = (x1: number, y1: number, xb: number, y2: number) => `M ${x1} ${y1} C ${(x1 + xb) / 2} ${y1}, ${(x1 + xb) / 2} ${y2}, ${xb} ${y2}`;
+  const node = 'absolute flex h-7 items-center rounded-md border border-dm-border bg-dm-surface px-2.5 text-left text-label transition-colors hover:border-dm-dim hover:bg-dm-hover';
+
+  return (
+    <div className="scroll-thin overflow-x-auto">
+      <div className="relative" style={{ width, height }}>
+        <svg width={width} height={height} className="absolute inset-0" aria-hidden>
+          {ppl.map((_, i) => (
+            <path key={`p${i}`} d={link(PAD + NODE_W, colY(i, ppl.length), x2, cy)} className="fill-none stroke-dm-dim" strokeOpacity={0.65} strokeWidth={1.25} />
+          ))}
+          {locs.map((_, i) => (
+            <path key={`l${i}`} d={link(x2 + NODE_W, cy, x3, colY(i, locs.length))} className="fill-none stroke-dm-dim" strokeOpacity={0.65} strokeWidth={1.25} />
+          ))}
+        </svg>
+        {ppl.length === 0 && (
+          <span className="absolute text-label text-dm-dim" style={{ left: PAD, top: cy - 9 }}>
+            No people linked
+          </span>
+        )}
+        {ppl.map((p, i) => (
+          <button key={p.id} className={node} style={{ left: PAD, top: colY(i, ppl.length) - 14, width: NODE_W }} onClick={() => openPerson(p.id)} title={p.name}>
+            <span className="truncate">{p.name}</span>
+          </button>
+        ))}
+        <span className="absolute flex h-7 items-center rounded-md border border-dm-blue bg-dm-surface px-2.5 text-label font-medium" style={{ left: x2, top: cy - 14, width: NODE_W }} title={e.name}>
+          <span className="truncate">{e.name}</span>
+        </span>
+        {locs.length === 0 && (
+          <span className="absolute text-label text-dm-dim" style={{ left: x3, top: cy - 9 }}>
+            No locations linked
+          </span>
+        )}
+        {locs.map((p, i) => (
+          <button key={p.id} className={node} style={{ left: x3, top: colY(i, locs.length) - 14, width: NODE_W }} onClick={() => openProperty(p.id)} title={p.name}>
+            <span className="truncate">{p.name}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function EntitiesView() {
   const entities = useDentimap((s) => s.entities);
   const addEntity = useDentimap((s) => s.addEntity);
+  const [selectedId, setSelectedId] = useState('');
+  const selected = entities.find((x) => x.id === selectedId) ?? entities[0];
+
+  const add = () => {
+    const id = newId('entity');
+    addEntity({ id, name: 'New entity', entityType: 'landlord_holding', jurisdiction: 'North Carolina', associatedPropertyIds: [] });
+    setSelectedId(id);
+  };
+
   return (
     <PageShell>
       <PageHeader
         title="Entities"
         count={entities.length}
+        subtitle="Who holds what, and who is behind each entity."
         actions={
-          <button
-            className="btn btn-primary"
-            onClick={() => addEntity({ id: newId('entity'), name: 'New entity', entityType: 'landlord_holding', jurisdiction: 'North Carolina', associatedPropertyIds: [] })}
-          >
+          <button className="btn btn-primary" onClick={add}>
             Add entity
           </button>
         }
       />
-      <div className="stagger grid gap-4 md:grid-cols-2">
-        {entities.map((e) => <EntityCard key={e.id} e={e} />)}
-      </div>
+      {!selected ? (
+        <EmptyState title="No entities yet" hint="Add the LLCs and companies that hold title." action={<button className="btn" onClick={add}>Add entity</button>} />
+      ) : (
+        <div className="grid items-start gap-5 lg:grid-cols-[17rem_minmax(0,1fr)]">
+          <nav aria-label="Entities" className="overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-card">
+            <ul className="divide-y divide-dm-border/70">
+              {entities.map((x) => (
+                <li key={x.id}>
+                  <button
+                    onClick={() => setSelectedId(x.id)}
+                    aria-current={x.id === selected.id ? 'true' : undefined}
+                    className={`block w-full px-4 py-2.5 text-left transition-colors ${x.id === selected.id ? 'bg-dm-hover' : 'hover:bg-dm-hover/60'}`}
+                  >
+                    <span className="block truncate text-body font-medium">{x.name}</span>
+                    <span className="tnum block truncate text-label text-dm-muted">
+                      {entityTypeLabel[x.entityType]} &middot; {x.associatedPropertyIds.length} location{x.associatedPropertyIds.length === 1 ? '' : 's'}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div key={selected.id} className="min-w-0 space-y-5">
+            <section className="rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card">
+              <h2 className="mb-3 text-body font-semibold">Connections</h2>
+              <EntityDiagram e={selected} />
+            </section>
+            <EntityCard e={selected} />
+          </div>
+        </div>
+      )}
     </PageShell>
   );
 }

@@ -3,7 +3,8 @@ import { persist } from 'zustand/middleware';
 import { supabase } from './supabase';
 import type { ActivityEntry, DeedRecord, DentimapData, GlossaryTerm, LegalEntity, Person, Property } from './types';
 
-export type TabId = 'home' | 'properties' | 'entities' | 'people' | 'deeds' | 'glossary' | 'network';
+export type TabId = 'home' | 'properties' | 'entities' | 'people' | 'deeds' | 'glossary';
+export type DossierTab = 'property' | 'title' | 'people' | 'activity';
 export type SyncStatus = 'off' | 'connecting' | 'synced' | 'saving' | 'error' | 'conflict';
 
 interface State {
@@ -29,7 +30,9 @@ interface State {
   addPersonQuiet: (p: Person) => void;
   updatePerson: (id: string, patch: Partial<Person>) => void;
   deletePerson: (id: string) => void;
-  openProperty: (id: string) => void;
+  openProperty: (id: string, tab?: DossierTab) => void;
+  dossierTab?: DossierTab;
+  clearDossierTab: () => void;
   addProperty: (p: Property) => void;
   updateProperty: (id: string, patch: Partial<Property>, logText?: string) => void;
   deleteProperty: (id: string) => void;
@@ -124,7 +127,8 @@ export const useDentimap = create<State>()(
             activity: logged(s.activity, `Person deleted: ${s.people.find((x) => x.id === id)?.name ?? id}`),
           };
         }),
-      openProperty: (selectedPropertyId) => set({ selectedPropertyId, tab: 'properties' }),
+      openProperty: (selectedPropertyId, dossierTab) => set({ selectedPropertyId, tab: 'properties', dossierTab }),
+      clearDossierTab: () => set({ dossierTab: undefined }),
 
       addProperty: (p) =>
         set((s) => ({ properties: [...s.properties, p], selectedPropertyId: p.id, tab: 'properties', activity: logged(s.activity, 'Location created', p.id) })),

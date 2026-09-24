@@ -1,28 +1,18 @@
 import { useEffect, useState } from 'react';
-import { PageShell } from '@/components/Page';
+import { ArrowRight, Circle, CircleAlert, TriangleAlert } from 'lucide-react';
+import { EmptyState, PageHeader, PageShell } from '@/components/Page';
 import { attentionQueue } from '@/lib/attention';
+import type { Severity } from '@/lib/attention';
+import { compactUsd } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
-import { useCountUp } from '@/lib/useCountUp';
 
-/** Single-owner app: this is who "Home" greets, not an account field. */
-const OWNER_NAME = 'Eshan';
+const severity: Record<Severity, { Icon: typeof Circle; cls: string; label: string }> = {
+  red: { Icon: CircleAlert, cls: 'text-dm-red', label: 'Needs attention' },
+  amber: { Icon: TriangleAlert, cls: 'text-dm-amber', label: 'Worth a look' },
+  gray: { Icon: Circle, cls: 'text-dm-dim', label: 'When you have a minute' },
+};
 
-function greeting(hour: number) {
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
-}
-
-function Stat({ label, n }: { label: string; n: number }) {
-  const v = useCountUp(n);
-  return (
-    <div>
-      <div className="tnum text-lg font-semibold">{v}</div>
-      <div className="text-label text-dm-dim">{label}</div>
-    </div>
-  );
-}
-
+/** A work queue: the next things worth doing, worst first. */
 export function HomeView() {
   const { properties, deeds, entities, openProperty, setTab } = useDentimap();
   const [now, setNow] = useState(() => new Date());
@@ -34,49 +24,49 @@ export function HomeView() {
 
   const queue = attentionQueue(properties, deeds, entities);
   const dateLine = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const activeCount = properties.filter((p) => p.status === 'active').length;
+  const withValue = properties.filter((p) => p.metrics?.currentAssessedValue !== undefined);
+  const total = withValue.reduce((t, p) => t + (p.metrics?.currentAssessedValue ?? 0), 0);
+  const subtitle = withValue.length ? `${dateLine} · ${compactUsd(total)} assessed across ${withValue.length} of ${properties.length} locations` : dateLine;
+
+  const go = (item: (typeof queue)[number]) => {
+    if (item.goToEntities) setTab('entities');
+    else if (item.goToLocations) setTab('properties');
+    else if (item.propertyId) openProperty(item.propertyId, item.tab);
+  };
 
   return (
     <PageShell>
-      <div className="mb-6">
-        <div className="text-label text-dm-dim">{dateLine}</div>
-        <h1 className="mt-1.5 text-[22px] font-semibold leading-8 tracking-tight">
-          {greeting(now.getHours())}, {OWNER_NAME}.
-        </h1>
-        <p className="mt-1.5 text-body text-dm-muted">
-          {queue.length
-            ? `${queue.length} thing${queue.length === 1 ? '' : 's'} need${queue.length === 1 ? 's' : ''} you across ${activeCount} location${activeCount === 1 ? '' : 's'}.`
-            : `Nothing needs you right now, across ${activeCount} location${activeCount === 1 ? '' : 's'}.`}
-        </p>
-      </div>
-
-      {queue.length > 0 && (
-        <div className="flex w-full max-w-2xl flex-col gap-2.5">
-          {queue.map((item, i) => (
-            <button
-              key={item.id}
-              onClick={() => (item.goToEntities ? setTab('entities') : item.propertyId && openProperty(item.propertyId))}
-              className="lift group relative flex animate-rise items-center gap-4 rounded-lg border border-dm-border bg-dm-surface px-5 py-4 text-left hover:border-dm-blue/40"
-              style={{ animationDelay: `${i * 40}ms` }}
-            >
-              <span className={`w-6 shrink-0 text-label font-semibold tnum ${item.severity === 'red' ? 'text-dm-red' : item.severity === 'amber' ? 'text-dm-amber' : 'text-dm-dim'}`}>
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium">{item.title}</span>
-                <span className="mt-0.5 block truncate text-label text-dm-dim">{item.sub}</span>
-              </span>
-              <span className="shrink-0 text-dm-dim transition-all duration-200 ease-luxury group-hover:translate-x-0.5 group-hover:text-dm-muted">→</span>
+      <PageHeader title="Next up" count={queue.length} subtitle={subtitle} />
+      {queue.length ? (
+        <ul className="divide-y divide-dm-border/70 overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-card">
+          {queue.map((item) => {
+            const { Icon, cls, label } = severity[item.severity];
+            return (
+              <li key={item.id}>
+                <button onClick={() => go(item)} className="group flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-dm-hover/70 focus-visible:bg-dm-hover">
+                  <Icon className={`h-4 w-4 shrink-0 ${cls}`} aria-hidden />
+                  <span className="sr-only">{label}: </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-body font-medium">{item.title}</span>
+                    <span className="block truncate text-label text-dm-muted">{item.sub}</span>
+                  </span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-dm-dim transition-transform duration-150 ease-luxury group-hover:translate-x-0.5 group-hover:text-dm-muted" aria-hidden />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <EmptyState
+          title="Nothing needs you right now"
+          hint="Every location with a deed has a verified owner and value."
+          action={
+            <button className="btn" onClick={() => setTab('properties')}>
+              View locations
             </button>
-          ))}
-        </div>
+          }
+        />
       )}
-
-      <div className="flex gap-8 pt-6">
-        <Stat label="Locations" n={properties.length} />
-        <Stat label="Deeds" n={deeds.length} />
-        <Stat label="Entities" n={entities.length} />
-      </div>
     </PageShell>
   );
 }

@@ -32,6 +32,31 @@
   h1, h2, h3 {
     letter-spacing: -0.015em;
   }
+  /* one chevron and one checkbox for the whole app instead of the OS defaults */
+  select {
+    appearance: none;
+    padding-right: 1.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236c7078' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+  }
+  input[type='checkbox'] {
+    appearance: none;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    border: 1px solid rgb(var(--dm-dim));
+    border-radius: 4px;
+    background: rgb(var(--dm-bg));
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-color 120ms, border-color 120ms;
+  }
+  input[type='checkbox']:checked {
+    border-color: rgb(var(--dm-blue));
+    background-color: rgb(var(--dm-blue));
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  }
   ::selection {
     background: rgb(var(--dm-blue) / 0.22);
   }

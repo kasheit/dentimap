@@ -6,7 +6,7 @@ import { compactUsd, facilityTypeLabel, fmtDate } from '@/lib/format';
 import { newId, sortedDeeds, useDentimap } from '@/lib/store';
 import type { FacilityType, Property } from '@/lib/types';
 import { DocumentIntake, UPLOAD_EVENT } from './DocumentIntake';
-import { PageHeader, PageShell } from './Page';
+import { EmptyState, PageHeader, PageShell } from './Page';
 
 type SortKey = 'type' | 'name' | 'owner' | 'assessed' | 'sale' | 'verified';
 type LocState = 'confirmed' | 'unconfirmed' | 'missing';
@@ -57,7 +57,9 @@ export function LocationsTable() {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [wide, setWide] = useState(false);
-  const span = wide ? 9 : 6;
+  const span = wide ? 9 : 5;
+  const [groupBy, setGroupBy] = useState<'type' | 'owner'>('type');
+  const [unfolded, setUnfolded] = useState<Set<string>>(new Set());
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: 'type', dir: 1 });
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLTableSectionElement>(null);
@@ -137,9 +139,22 @@ export function LocationsTable() {
   }, [rows, q, filter, sort]);
 
   const grouped = sort.key === 'type';
+  const foldable = filter === 'all' && !q.trim();
   const groups = useMemo(() => {
     if (!grouped) return [{ key: 'all', label: '', rows: visible }];
     const out: { key: string; label: string; rows: Row[] }[] = [];
+    if (groupBy === 'owner') {
+      const byOwner = new Map<string, Row[]>();
+      for (const r of visible) {
+        const k = r.owner ?? '';
+        byOwner.set(k, [...(byOwner.get(k) ?? []), r]);
+      }
+      const named = [...byOwner.entries()].filter(([k]) => k).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+      for (const [k, rs] of named) out.push({ key: `o:${k}`, label: k, rows: rs });
+      const none = byOwner.get('');
+      if (none?.length) out.push({ key: 'o:none', label: 'No owner on file', rows: none });
+      return out;
+    }
     for (const type of ['valleygate_asc', 'vfd_practice', 'affiliate'] as FacilityType[]) {
       const inType = visible.filter((r) => r.p.facilityType === type && r.p.status === 'active');
       if (inType.length) out.push({ key: type, label: facilityTypeLabel[type], rows: inType });
@@ -147,7 +162,7 @@ export function LocationsTable() {
     const closed = visible.filter((r) => r.p.status === 'closed');
     if (closed.length) out.push({ key: 'closed', label: 'Closed', rows: closed });
     return out;
-  }, [visible, grouped]);
+  }, [visible, grouped, groupBy]);
 
   const onSort = (key: SortKey) =>
     setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: key === 'assessed' || key === 'sale' || key === 'verified' ? -1 : 1 }));
@@ -214,6 +229,21 @@ export function LocationsTable() {
             {label} <span className="text-dm-dim">{counts[id]}</span>
           </button>
         ))}
+        {grouped && (
+          <div className="ml-3 flex items-center gap-1 border-l border-dm-border pl-3" role="group" aria-label="Group by">
+            <span className="text-label text-dm-dim">Group</span>
+            {(['type', 'owner'] as const).map((g) => (
+              <button
+                key={g}
+                aria-pressed={groupBy === g}
+                onClick={() => setGroupBy(g)}
+                className={`rounded-md px-2 py-1 text-label capitalize transition-colors ${groupBy === g ? 'bg-dm-hover font-medium text-dm-text' : 'text-dm-muted hover:bg-dm-hover/60 hover:text-dm-text'}`}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        )}
         <button aria-pressed={wide} onClick={() => setWide((w) => !w)} className="ml-auto rounded-md px-2.5 py-1 text-label text-dm-muted transition-colors hover:bg-dm-hover/60 hover:text-dm-text">
           {wide ? 'Fewer columns' : 'More columns'}
         </button>
@@ -226,10 +256,10 @@ export function LocationsTable() {
             <col className="w-[52%] sm:w-[27%]" />
             <col className="hidden sm:table-column" />
             <col className="w-28" />
-            <col className="hidden w-28 sm:table-column" />
-            <col className="hidden w-24 sm:table-column" />
+            <col className="hidden w-32 sm:table-column" />
             {wide && (
               <>
+                <col className="w-28" />
                 <col className="w-28" />
                 <col className="w-28" />
                 <col className="w-28" />
@@ -244,10 +274,10 @@ export function LocationsTable() {
               <Head label="Location" k="name" sort={sort} onSort={onSort} />
               <Head label="Owner of record" k="owner" sort={sort} onSort={onSort} hideSmall />
               <Head label="Assessed" k="assessed" sort={sort} onSort={onSort} right />
-              <Head label="Last sale" k="sale" sort={sort} onSort={onSort} right hideSmall />
               <Head label="Facts" k="verified" sort={sort} onSort={onSort} right hideSmall />
               {wide && (
                 <>
+                  <Head label="Last sale" k="sale" sort={sort} onSort={onSort} right />
                   <th className="px-3 py-2 text-left text-[12px] font-medium text-dm-dim">County</th>
                   <th className="px-3 py-2 text-right text-[12px] font-medium text-dm-dim">Investment</th>
                   <th className="px-3 py-2 pr-4 text-right text-[12px] font-medium text-dm-dim">Last deed</th>
@@ -257,12 +287,32 @@ export function LocationsTable() {
           </thead>
           <tbody ref={bodyRef}>
             {groups.map((g) => (
-              <GroupRows key={g.key} label={g.label} rows={g.rows} select={select} wide={wide} span={span} />
+              <GroupRows
+                key={g.key}
+                label={g.label}
+                rows={g.rows}
+                select={select}
+                wide={wide}
+                span={span}
+                foldable={foldable}
+                unfolded={unfolded.has(g.key)}
+                onToggle={() =>
+                  setUnfolded((u) => {
+                    const n = new Set(u);
+                    if (n.has(g.key)) n.delete(g.key);
+                    else n.add(g.key);
+                    return n;
+                  })
+                }
+              />
             ))}
             {visible.length === 0 && (
               <tr>
-                <td colSpan={span} className="px-4 py-14 text-center text-body text-dm-dim">
-                  {properties.length ? 'No locations match. Clear the search or pick All.' : 'No locations yet. Add one, or drop a deed above.'}
+                <td colSpan={span}>
+                  <EmptyState
+                    title={properties.length ? 'No locations match' : 'No locations yet'}
+                    hint={properties.length ? 'Clear the search or pick All.' : 'Add one, or use Upload documents to read a deed.'}
+                  />
                 </td>
               </tr>
             )}
@@ -273,7 +323,45 @@ export function LocationsTable() {
   );
 }
 
-function GroupRows({ label, rows, select, wide, span }: { label: string; rows: Row[]; select: (id: string) => void; wide: boolean; span: number }) {
+const isEmptyRow = (r: Row) => !r.owner && r.assessed === undefined && r.verified === 0;
+
+function FactsBar({ v, t }: { v: number; t: number }) {
+  return (
+    <span className="inline-flex items-center justify-end gap-2" title={`${v} of ${t} facts verified`}>
+      <span aria-hidden className="inline-flex gap-[2px]">
+        {Array.from({ length: t }, (_, i) => (
+          <i key={i} className={`h-2.5 w-[3px] rounded-[1px] ${i < v ? 'bg-dm-green' : 'bg-dm-border'}`} />
+        ))}
+      </span>
+      <span className="tnum w-7 text-right">
+        {v}/{t}
+      </span>
+    </span>
+  );
+}
+
+function GroupRows({
+  label,
+  rows,
+  select,
+  wide,
+  span,
+  foldable,
+  unfolded,
+  onToggle,
+}: {
+  label: string;
+  rows: Row[];
+  select: (id: string) => void;
+  wide: boolean;
+  span: number;
+  foldable: boolean;
+  unfolded: boolean;
+  onToggle: () => void;
+}) {
+  const empties = rows.filter(isEmptyRow);
+  const fold = foldable && empties.length >= 3;
+  const shown = fold && !unfolded ? rows.filter((r) => !isEmptyRow(r)) : rows;
   return (
     <>
       {label && (
@@ -283,7 +371,7 @@ function GroupRows({ label, rows, select, wide, span }: { label: string; rows: R
           </th>
         </tr>
       )}
-      {rows.map((r) => {
+      {shown.map((r) => {
         const { Icon, cls, label: stateLabel } = stateMeta[r.state];
         const reason = r.issues.length ? `${stateLabel}: ${r.issues.join(', ')}` : stateLabel;
         return (
@@ -314,24 +402,32 @@ function GroupRows({ label, rows, select, wide, span }: { label: string; rows: R
               className={`tnum px-3 text-right ${r.assessed === undefined ? 'text-dm-dim' : r.assessedSure ? 'text-dm-text' : 'text-dm-muted'}`}
               title={r.assessed !== undefined && !r.assessedSure ? 'Assessed value is unverified' : undefined}
             >
-              {r.assessed !== undefined ? compactUsd(r.assessed) : '—'}
+              {r.assessed !== undefined ? compactUsd(r.assessed) : '\u2014'}
             </td>
-            <td className={`tnum hidden px-3 text-right sm:table-cell ${r.p.lastSale?.price !== undefined ? 'text-dm-muted' : 'text-dm-dim'}`}>
-              {r.p.lastSale?.price !== undefined ? compactUsd(r.p.lastSale.price) : '—'}
-            </td>
-            <td className="tnum hidden px-3 pr-4 text-right text-dm-muted sm:table-cell" title={`${r.verified} of ${r.total} facts verified`}>
-              {r.verified}/{r.total}
+            <td className="hidden px-3 pr-4 text-right text-dm-muted sm:table-cell">
+              <FactsBar v={r.verified} t={r.total} />
             </td>
             {wide && (
               <>
-                <td className="truncate px-3 text-dm-muted">{r.county || '—'}</td>
-                <td className="tnum px-3 text-right text-dm-muted">{r.investment !== undefined ? compactUsd(r.investment) : '—'}</td>
-                <td className="tnum px-3 pr-4 text-right text-dm-muted">{r.lastDeed ? fmtDate(r.lastDeed) : '—'}</td>
+                <td className={`tnum px-3 text-right ${r.p.lastSale?.price !== undefined ? 'text-dm-muted' : 'text-dm-dim'}`}>{r.p.lastSale?.price !== undefined ? compactUsd(r.p.lastSale.price) : '\u2014'}</td>
+                <td className="truncate px-3 text-dm-muted">{r.county || '\u2014'}</td>
+                <td className="tnum px-3 text-right text-dm-muted">{r.investment !== undefined ? compactUsd(r.investment) : '\u2014'}</td>
+                <td className="tnum px-3 pr-4 text-right text-dm-muted">{r.lastDeed ? fmtDate(r.lastDeed) : '\u2014'}</td>
               </>
             )}
           </tr>
         );
       })}
+      {fold && (
+        <tr className="border-b border-dm-border/70 last:border-0">
+          <td colSpan={span} className="px-4 py-2 text-label text-dm-muted">
+            {unfolded ? 'Showing every row.' : `${empties.length} locations with nothing on file.`}{' '}
+            <button className="rounded text-dm-blue hover:underline" onClick={onToggle}>
+              {unfolded ? 'Hide empty' : 'Show'}
+            </button>
+          </td>
+        </tr>
+      )}
     </>
   );
 }

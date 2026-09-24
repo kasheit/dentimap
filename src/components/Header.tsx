@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { AlertTriangle, Users, Building2, CloudOff, FileText, Landmark, BookOpen, Network } from 'lucide-react';
+import { AlertTriangle, Users, Building2, CloudOff, FileText, Landmark, BookOpen } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { OPEN_SEARCH_EVENT } from './SearchPalette';
 import { isValidData, useDentimap } from '@/lib/store';
@@ -10,7 +10,6 @@ const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
   { id: 'properties', label: 'Locations', icon: Building2 },
   { id: 'entities', label: 'Entities', icon: Landmark },
   { id: 'people', label: 'People', icon: Users },
-  { id: 'network', label: 'Network', icon: Network },
   { id: 'deeds', label: 'Deeds', icon: FileText },
   { id: 'glossary', label: 'Glossary', icon: BookOpen },
 ];

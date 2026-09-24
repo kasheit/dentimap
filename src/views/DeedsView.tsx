@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, Search } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ArrowDown, ArrowRight, ArrowUp, Search } from 'lucide-react';
 import { VerifyChip } from '@/components/Chips';
 import { expectedExcise } from '@/lib/deedParser';
 import { PageHeader, PageShell } from '@/components/Page';
@@ -85,16 +85,28 @@ export function DeedsView() {
                   </div>
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 tnum text-label" title={usd(d.consideration)}>{compactUsd(d.consideration)}</td>
-                <td className="whitespace-nowrap px-4 py-3 tnum text-label">
-                  {d.isFormulaVerified ? (
-                    <span>{usd(d.exciseTaxStamps, 2)}</span>
+                <td className="whitespace-nowrap px-4 py-3 text-label">
+                  {d.consideration <= 0 ? (
+                    <span className="text-dm-dim">n/a</span>
+                  ) : d.isFormulaVerified ? (
+                    <span className="tnum inline-flex items-center gap-1.5 text-dm-green" title={`Stamps ${usd(d.exciseTaxStamps, 2)} match the price`}>
+                      <CheckCircle2 className="h-3.5 w-3.5" aria-hidden /> {usd(d.exciseTaxStamps, 2)}
+                    </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 text-dm-red" title={`Expected ${usd(expectedExcise(d.consideration), 2)}`}>
-                      <AlertTriangle className="h-3.5 w-3.5" /> {usd(d.exciseTaxStamps, 2)} ≠ {usd(expectedExcise(d.consideration), 2)}
+                    <span className="tnum inline-flex items-center gap-1.5 text-dm-red" title={`Expected ${usd(expectedExcise(d.consideration), 2)}`}>
+                      <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> {usd(d.exciseTaxStamps, 2)} ≠ {usd(expectedExcise(d.consideration), 2)}
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3"><VerifyChip state={d.confidence} /></td>
+                <td className="px-4 py-3 text-label">
+                  {d.confidence === 'verified' ? (
+                    <span className="inline-flex items-center gap-1.5 text-dm-green">
+                      <i className="h-1.5 w-1.5 rounded-full bg-current" /> Verified
+                    </span>
+                  ) : (
+                    <VerifyChip state={d.confidence} />
+                  )}
+                </td>
               </tr>
             ))}
             {!rows.length && (

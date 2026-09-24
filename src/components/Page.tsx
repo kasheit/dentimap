@@ -20,3 +20,14 @@ export function PageHeader({ title, count, subtitle, actions }: { title: string;
     </div>
   );
 }
+
+/** One empty state everywhere: a short title, one muted line, and at most one action. */
+export function EmptyState({ title, hint, action }: { title: string; hint?: string; action?: ReactNode }) {
+  return (
+    <div className="mx-auto max-w-sm py-16 text-center">
+      <h2 className="text-body font-semibold">{title}</h2>
+      {hint && <p className="mt-1 text-label text-dm-muted">{hint}</p>}
+      {action && <div className="mt-4">{action}</div>}
+    </div>
+  );
+}

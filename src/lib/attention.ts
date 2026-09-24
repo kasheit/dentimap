@@ -1,4 +1,5 @@
 import { chainBreaks, sortedDeeds } from './store';
+import type { DossierTab } from './store';
 import type { DeedRecord, LegalEntity, Property } from './types';
 
 export interface Attention {
@@ -24,6 +25,8 @@ export interface QueueItem {
   sub: string;
   propertyId?: string;
   goToEntities?: boolean;
+  goToLocations?: boolean;
+  tab?: DossierTab;
 }
 
 const severityRank: Record<Severity, number> = { red: 0, amber: 1, gray: 2 };
@@ -43,6 +46,28 @@ export function attentionQueue(properties: Property[], deeds: DeedRecord[], enti
 
     const open = (p.noteLog ?? []).filter((n) => n.tag !== 'note' && !n.resolved);
     if (open.length) items.push({ id: `notes-${p.id}`, severity: 'amber', title: `${p.name} — ${open.length} open note${open.length === 1 ? '' : 's'}`, sub: open[0].text, propertyId: p.id });
+  }
+
+  // Locations with no owner on file: one line each when there are a few, one grouped line when there are many.
+  const noOwner = properties.filter((p) => p.status === 'active' && !deeds.some((d) => d.propertyId === p.id && d.deedType !== 'subdivision_plat'));
+  if (noOwner.length > 3) {
+    items.push({
+      id: 'no-owner',
+      severity: 'amber',
+      title: `${noOwner.length} locations have no owner on file`,
+      sub: `${noOwner.slice(0, 3).map((p) => p.name).join(', ')} and ${noOwner.length - 3} more`,
+      goToLocations: true,
+    });
+  } else {
+    for (const p of noOwner) items.push({ id: `no-owner-${p.id}`, severity: 'amber', title: `${p.name} — no owner on file`, sub: 'Add the deed that put title in the current owner’s name', propertyId: p.id, tab: 'title' });
+  }
+
+  for (const p of properties) {
+    if (p.status === 'closed') continue;
+    const hasDeed = deeds.some((d) => d.propertyId === p.id && d.deedType !== 'subdivision_plat');
+    const assessed = p.metrics?.currentAssessedValue;
+    if (hasDeed && assessed === undefined) items.push({ id: `assessed-${p.id}`, severity: 'gray', title: `${p.name} — no assessed value`, sub: 'Paste the county page to fill it in', propertyId: p.id });
+    else if (hasDeed && assessed !== undefined && p.meta?.assessedValue?.state !== 'verified') items.push({ id: `assessed-src-${p.id}`, severity: 'gray', title: `${p.name} — assessed value has no source`, sub: 'Confirm where the figure came from', propertyId: p.id });
   }
 
   for (const e of entities) {

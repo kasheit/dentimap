@@ -3,7 +3,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { fmtDate } from '@/lib/format';
 import { newId, useDentimap } from '@/lib/store';
 import type { GlossaryTerm } from '@/lib/types';
-import { PageHeader, PageShell } from '@/components/Page';
+import { EmptyState, PageHeader, PageShell } from '@/components/Page';
 
 function TermForm({
   initial,
@@ -148,7 +148,7 @@ export function GlossaryView() {
           {filtered.map((t) => <TermCard key={t.id} t={t} />)}
         </div>
       ) : (
-        <p className="py-12 text-center text-sm text-dm-dim">{glossary.length ? 'No terms match your search.' : 'No terms yet. Add the first one above.'}</p>
+        <EmptyState title={glossary.length ? 'No terms match' : 'No terms yet'} hint={glossary.length ? 'Try a different search.' : 'Define an acronym or term the way you use it.'} />
       )}
     </PageShell>
   );
