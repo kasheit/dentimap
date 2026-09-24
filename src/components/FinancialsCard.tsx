@@ -52,12 +52,28 @@ export function FinancialsCard({ p }: { p: Property }) {
         </div>
       )}
 
-      <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-dm-border pt-4 sm:grid-cols-4">
-        <Figure label="Land" value={land} p={p} field="assessedValue" />
-        <Figure label="Building" value={building} p={p} field="assessedValue" />
-        <Figure label="Last sale" value={p.lastSale?.price} sub={p.lastSale?.date ? fmtDate(p.lastSale.date) : undefined} p={p} field="lastSale" />
-        <Figure label="Investment" value={m?.projectInvestment} p={p} field="projectInvestment" />
-      </div>
+      {(() => {
+        const figures = [
+          { label: 'Land', value: land, field: 'assessedValue' as const },
+          { label: 'Building', value: building, field: 'assessedValue' as const },
+          { label: 'Last sale', value: p.lastSale?.price, sub: p.lastSale?.date ? fmtDate(p.lastSale.date) : undefined, field: 'lastSale' as const },
+          { label: 'Investment', value: m?.projectInvestment, field: 'projectInvestment' as const },
+        ];
+        const have = figures.filter((f) => f.value !== undefined);
+        const missing = figures.filter((f) => f.value === undefined).map((f) => f.label);
+        return (
+          <div className="mt-5 border-t border-dm-border pt-4">
+            {have.length > 0 && (
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+                {have.map((f) => (
+                  <Figure key={f.label} label={f.label} value={f.value} sub={f.sub} p={p} field={f.field} />
+                ))}
+              </div>
+            )}
+            {missing.length > 0 && <p className={`text-label text-dm-dim ${have.length ? 'mt-3' : ''}`}>Not on file: {missing.join(', ')}</p>}
+          </div>
+        );
+      })()}
     </section>
   );
 }

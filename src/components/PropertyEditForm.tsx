@@ -22,7 +22,6 @@ type Draft = {
   projectInvestment: string;
   landValue: string;
   buildingValue: string;
-  footprintSqFt: string;
   targetOpening: string;
   saleDate: string;
   salePrice: string;
@@ -62,7 +61,6 @@ function toDraft(p: Property): Draft {
     projectInvestment: str(p.metrics?.projectInvestment),
     landValue: str(p.metrics?.landValue),
     buildingValue: str(p.metrics?.buildingValue),
-    footprintSqFt: str(p.metrics?.footprintSqFt),
     targetOpening: p.metrics?.targetOpening ?? '',
     saleDate: p.lastSale?.date ?? '',
     salePrice: str(p.lastSale?.price),
@@ -84,7 +82,6 @@ function toPatch(d: Draft, meta: MetaDraft, sources: SourceLink[], p: Property):
     projectInvestment: num(d.projectInvestment),
     landValue: num(d.landValue),
     buildingValue: num(d.buildingValue),
-    footprintSqFt: num(d.footprintSqFt),
     targetOpening: text(d.targetOpening),
   };
   const keep = (k: SourcedField): FieldMeta | undefined => {
@@ -278,7 +275,6 @@ export function PropertyEditForm({
               </span>{' '}
               (land + building)
             </div>
-            <Field label="Footprint, sq ft">{input('footprintSqFt', 'tnum')}</Field>
             <Field label="Target opening">{input('targetOpening')}</Field>
           </div>
         </div>

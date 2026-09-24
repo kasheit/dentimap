@@ -330,7 +330,7 @@ function FactsBar({ v, t }: { v: number; t: number }) {
     <span className="inline-flex items-center justify-end gap-2" title={`${v} of ${t} facts verified`}>
       <span aria-hidden className="inline-flex gap-[2px]">
         {Array.from({ length: t }, (_, i) => (
-          <i key={i} className={`h-2.5 w-[3px] rounded-[1px] ${i < v ? 'bg-dm-green' : 'bg-dm-border'}`} />
+          <i key={i} className={`h-2.5 w-[3px] rounded-[1px] ${i < v ? 'bg-dm-green' : 'bg-dm-dim/35'}`} />
         ))}
       </span>
       <span className="tnum w-7 text-right">

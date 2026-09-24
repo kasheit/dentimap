@@ -16,7 +16,6 @@ export function RecordCard({ p, editSignal = 0, focusField }: { p: Property; edi
   useEffect(() => {
     if (editSignal > 0) setEditing(true);
   }, [editSignal]);
-  const m = p.metrics;
 
   if (editing) {
     return (
@@ -67,12 +66,11 @@ export function RecordCard({ p, editSignal = 0, focusField }: { p: Property; edi
               ) : undefined
             }
           />
-          <DetailRow label="Footprint" value={m?.footprintSqFt ? `${m.footprintSqFt.toLocaleString()} sq ft` : undefined} />
-          <DetailRow label="Target opening" value={m?.targetOpening} />
         </div>
 
+        {(p.countyDeed?.book || p.countyDeed?.page || p.countyDeed?.date) && (
         <div>
-          <div className="mb-1 border-b border-dm-border/70 pb-1.5 text-label font-medium text-dm-muted">Deed details</div>
+          <div className="mb-1 border-b border-dm-border/70 pb-1.5 text-label font-medium text-dm-muted">County deed reference</div>
           <DetailRow
             label="Deed book / page"
             mono
@@ -80,6 +78,7 @@ export function RecordCard({ p, editSignal = 0, focusField }: { p: Property; edi
           />
           <DetailRow label="Deed date" value={p.countyDeed?.date ? fmtDate(p.countyDeed.date) : undefined} />
         </div>
+        )}
       </div>
     </Panel>
   );

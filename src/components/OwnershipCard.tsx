@@ -4,7 +4,7 @@ import type { DeedRecord, Property, SourcedField } from '@/lib/types';
 import { ConfirmLabel, EDIT_RECORD_EVENT } from './ConfirmLabel';
 import { DetailRow, LevelLabel } from './Chips';
 
-export function OwnershipCard({ p, deeds, onViewChain }: { p: Property; deeds: DeedRecord[]; onViewChain: () => void }) {
+export function OwnershipCard({ p, deeds }: { p: Property; deeds: DeedRecord[] }) {
   const conveyances = sortedDeeds(deeds.filter((d) => d.deedType !== 'subdivision_plat'));
   const holder = conveyances[conveyances.length - 1];
   const breaks = chainBreaks(conveyances).length;
@@ -36,11 +36,6 @@ export function OwnershipCard({ p, deeds, onViewChain }: { p: Property; deeds: D
             since {fmtDate(holder.recordingDate)}
             {holder.source ? ` · ${holder.source}` : ' · no source'}
           </div>
-        )}
-        {holder && doubt && (
-          <button type="button" onClick={onViewChain} className="mt-1 text-label text-dm-amber underline underline-offset-2 hover:text-dm-text">
-            {doubt.charAt(0).toUpperCase() + doubt.slice(1)}, view title chain
-          </button>
         )}
       </div>
 

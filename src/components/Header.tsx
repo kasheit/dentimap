@@ -161,8 +161,9 @@ export function Header() {
         <div className="ml-auto flex items-center gap-3">
           <SyncBadge />
           {notice && <span className="hidden tnum text-label text-dm-dim md:inline">{notice}</span>}
-          <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))}>
+          <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))} aria-keyshortcuts="Control+K Meta+K">
             Search
+            <kbd className="hidden rounded border border-dm-border px-1 font-sans text-[12px] text-dm-dim sm:inline">Ctrl K</kbd>
           </button>
           <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={(e) => onImport(e.target.files?.[0])} />
           <div className="relative" ref={menuRef}>

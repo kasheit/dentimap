@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { completionFor } from '@/lib/completion';
-import { useDentimap } from '@/lib/store';
-import type { Property, SourcedField } from '@/lib/types';
+import { newId, useDentimap } from '@/lib/store';
+import { fmtDate } from '@/lib/format';
+import type { DeedRecord, Property, SourcedField } from '@/lib/types';
 import { Panel, StatusPill } from './Chips';
 import { ChainStrip } from './ChainStrip';
+import type { MissingDeed } from './ChainStrip';
+import { DeedSheet } from './DeedSheet';
 import { EDIT_RECORD_EVENT } from './ConfirmLabel';
 import { FinancialsCard } from './FinancialsCard';
 import { OwnershipCard } from './OwnershipCard';
@@ -32,6 +35,21 @@ export function FacilityDossier({ property: p }: { property: Property }) {
     if (requested) clearRequested();
   }, [requested, clearRequested]);
   const [editSignal, setEditSignal] = useState(0);
+  const addDeed = useDentimap((s) => s.addDeed);
+  const updateDeed = useDentimap((s) => s.updateDeed);
+  const [sheet, setSheet] = useState<{ deed: DeedRecord; isNew: boolean; hint?: string } | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  const editDeed = (id: string) => {
+    const deed = propDeeds.find((d) => d.id === id);
+    if (deed) setSheet({ deed, isNew: false });
+  };
+  const addMissing = (m: MissingDeed) =>
+    setSheet({
+      isNew: true,
+      hint: `Between ${fmtDate(m.after)} and ${fmtDate(m.before)}`,
+      deed: { id: newId('deed'), propertyId: p.id, recordingDate: '', deedType: 'warranty_deed', grantor: m.from, grantee: m.to, consideration: 0, exciseTaxStamps: 0, isFormulaVerified: false, confidence: 'unverified', source: '' },
+    });
   const [focusField, setFocusField] = useState<SourcedField | undefined>();
 
   // "Missing" labels anywhere on the page open the property editor.
@@ -58,6 +76,12 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         <h1 className="text-display font-semibold leading-tight">{p.name}</h1>
         <div className="mt-1.5 flex items-center gap-3 text-label text-dm-muted">
           <StatusPill status={p.status} />
+          {p.metrics?.targetOpening && (
+            <>
+              <span className="text-dm-dim">·</span>
+              <span>Target opening {p.metrics.targetOpening}</span>
+            </>
+          )}
           <span className="text-dm-dim">·</span>
           <span className="tnum">{completion.counts.confirmed} of {completion.items.length} verified</span>
         </div>
@@ -65,10 +89,10 @@ export function FacilityDossier({ property: p }: { property: Property }) {
 
       <div className="stagger grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
         <FinancialsCard p={p} />
-        <OwnershipCard p={p} deeds={propDeeds} onViewChain={() => setTab('title')} />
+        <OwnershipCard p={p} deeds={propDeeds} />
       </div>
 
-      {tab !== 'title' && propDeeds.some((d) => d.deedType !== 'subdivision_plat') && (
+      {propDeeds.some((d) => d.deedType !== 'subdivision_plat') && (
         <section id="chain" className="min-w-0 rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card">
           <header className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-body font-semibold text-dm-text">Ownership chain</h2>
@@ -76,7 +100,7 @@ export function FacilityDossier({ property: p }: { property: Property }) {
               All deeds
             </button>
           </header>
-          <ChainStrip deeds={propDeeds} max={3} onSelect={() => setTab('title')} />
+          <ChainStrip deeds={propDeeds} max={4} onSelect={editDeed} onAddMissing={addMissing} />
         </section>
       )}
 
@@ -119,10 +143,23 @@ export function FacilityDossier({ property: p }: { property: Property }) {
       )}
 
       {tab === 'title' && (
-        <Panel id="title" title="Title chain" action={<span className="text-label text-dm-dim">{propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}</span>}>
-          <div className="space-y-6">
-            <DeedIngestionBuffer property={p} />
-            <TitleChainTimeline deeds={propDeeds} />
+        <Panel
+          id="title"
+          title="Deeds"
+          action={
+            <span className="flex items-center gap-3">
+              <span className="text-label text-dm-dim">
+                {propDeeds.length} recorded instrument{propDeeds.length === 1 ? '' : 's'}
+              </span>
+              <button className="btn" aria-expanded={adding || !propDeeds.length} onClick={() => setAdding((v) => !v)}>
+                {adding || !propDeeds.length ? 'Hide' : 'Add deed'}
+              </button>
+            </span>
+          }
+        >
+          <div className="space-y-5">
+            {(adding || !propDeeds.length) && <DeedIngestionBuffer property={p} />}
+            <TitleChainTimeline deeds={propDeeds} onEdit={editDeed} />
           </div>
         </Panel>
       )}
@@ -144,6 +181,21 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         </Panel>
       )}
       </div>
+
+      {sheet && (
+        <DeedSheet
+          key={sheet.deed.id}
+          deed={sheet.deed}
+          isNew={sheet.isNew}
+          hint={sheet.hint}
+          onClose={() => setSheet(null)}
+          onSave={(next) => {
+            if (sheet.isNew) addDeed(next);
+            else updateDeed(sheet.deed.id, next);
+            setSheet(null);
+          }}
+        />
+      )}
     </div>
   );
 }

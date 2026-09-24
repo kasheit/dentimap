@@ -22,12 +22,17 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
   const [q, setQ] = useState('');
   const [idx, setIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (open) {
+      openerRef.current = document.activeElement as HTMLElement | null;
       setQ('');
       setIdx(0);
       setTimeout(() => inputRef.current?.focus(), 0);
+    } else if (openerRef.current) {
+      openerRef.current.focus?.();
+      openerRef.current = null;
     }
   }, [open]);
 
@@ -129,6 +134,9 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
   }, [q, actions, properties, people, entities, deeds, glossary, openProperty, openPerson, setTab]);
 
   useEffect(() => setIdx(0), [q]);
+  useEffect(() => {
+    document.getElementById(`palette-opt-${idx}`)?.scrollIntoView({ block: 'nearest' });
+  }, [idx]);
 
   if (!open) return null;
 
@@ -146,7 +154,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setIdx((i) => Math.max(0, i - 1));
-    } else if (e.key === 'Enter') choose(results[idx]);
+    } else if (e.key === 'Enter' && !e.nativeEvent.isComposing) choose(results[idx]);
   };
 
   return (
@@ -158,23 +166,33 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
+            role="combobox"
+            aria-expanded={results.length > 0}
+            aria-controls="palette-list"
+            aria-autocomplete="list"
+            aria-activedescendant={results[idx] ? `palette-opt-${idx}` : undefined}
             aria-label="Search or run a command"
             placeholder="Search, or type > for commands"
             className="w-full bg-transparent py-3.5 pl-11 pr-4 text-body outline-none placeholder:text-dm-dim"
           />
         </div>
-        <ul role="listbox" className="scroll-thin max-h-[50vh] overflow-y-auto p-2">
+        <p role="status" className="sr-only">
+          {results.length} {results.length === 1 ? 'result' : 'results'}
+        </p>
+        <ul id="palette-list" role="listbox" aria-label="Results" className="scroll-thin max-h-[50vh] overflow-y-auto p-2">
           {!q.trim() && <li className="px-3 pb-1 pt-1 text-[12px] font-medium text-dm-dim">Commands</li>}
           {results.map((r, i) => (
-            <li key={`${r.kind}-${r.key}`}>
+            <li key={`${r.kind}-${r.key}`} role="presentation">
               <button
+                id={`palette-opt-${i}`}
+                tabIndex={-1}
                 role="option"
                 aria-selected={i === idx}
                 onMouseEnter={() => setIdx(i)}
                 onClick={() => choose(r)}
                 className={`flex w-full items-baseline gap-3 rounded-md px-3 py-2 text-left transition-colors duration-150 ${i === idx ? 'bg-dm-hover' : ''}`}
               >
-                <span className="w-16 shrink-0 text-label text-dm-dim">{r.kind === 'Action' ? 'Command' : r.kind}</span>
+                <span className="w-16 shrink-0 text-label text-dm-dim">{r.kind === 'Action' ? (q.trim() ? 'Command' : '') : r.kind}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-body">{r.title}</span>
                   {r.sub && <span className="block truncate text-label text-dm-muted">{r.sub}</span>}
