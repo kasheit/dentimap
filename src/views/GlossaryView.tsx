@@ -3,6 +3,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { fmtDate } from '@/lib/format';
 import { newId, useDentimap } from '@/lib/store';
 import type { GlossaryTerm } from '@/lib/types';
+import { PageHeader, PageShell } from '@/components/Page';
 
 function TermForm({
   initial,
@@ -115,19 +116,20 @@ export function GlossaryView() {
   }, [glossary, q]);
 
   return (
-    <main className="mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Glossary</h1>
-          <p className="mt-1 text-label text-dm-dim">Terms and acronyms, defined in your own words.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <input className="field w-56" placeholder="Search terms…" value={q} onChange={(e) => setQ(e.target.value)} />
-          <button className="btn btn-primary" onClick={() => setAdding((a) => !a)}>
-            {adding ? 'Close' : 'Add term'}
-          </button>
-        </div>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Glossary"
+        count={glossary.length}
+        subtitle="Terms and acronyms, defined in your own words."
+        actions={
+          <>
+            <input className="field w-56" placeholder="Search terms" aria-label="Search terms" value={q} onChange={(e) => setQ(e.target.value)} />
+            <button className="btn btn-primary" onClick={() => setAdding((a) => !a)}>
+              {adding ? 'Close' : 'Add term'}
+            </button>
+          </>
+        }
+      />
 
       {adding && (
         <div className="mb-6 rounded-lg border border-dm-border bg-dm-surface p-5">
@@ -148,6 +150,6 @@ export function GlossaryView() {
       ) : (
         <p className="py-12 text-center text-sm text-dm-dim">{glossary.length ? 'No terms match your search.' : 'No terms yet. Add the first one above.'}</p>
       )}
-    </main>
+    </PageShell>
   );
 }

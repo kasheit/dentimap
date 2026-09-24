@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { PageShell } from '@/components/Page';
 import { attentionQueue } from '@/lib/attention';
 import { useDentimap } from '@/lib/store';
 import { useCountUp } from '@/lib/useCountUp';
@@ -15,7 +16,7 @@ function greeting(hour: number) {
 function Stat({ label, n }: { label: string; n: number }) {
   const v = useCountUp(n);
   return (
-    <div className="text-center">
+    <div>
       <div className="tnum text-lg font-semibold">{v}</div>
       <div className="text-label text-dm-dim">{label}</div>
     </div>
@@ -36,10 +37,10 @@ export function HomeView() {
   const activeCount = properties.filter((p) => p.status === 'active').length;
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col items-center gap-8 px-4 pt-16 sm:pt-24">
-      <div className="text-center">
+    <PageShell>
+      <div className="mb-6">
         <div className="text-label text-dm-dim">{dateLine}</div>
-        <h1 className="mt-2.5 text-display font-semibold tracking-tight">
+        <h1 className="mt-1.5 text-[22px] font-semibold leading-8 tracking-tight">
           {greeting(now.getHours())}, {OWNER_NAME}.
         </h1>
         <p className="mt-1.5 text-body text-dm-muted">
@@ -50,7 +51,7 @@ export function HomeView() {
       </div>
 
       {queue.length > 0 && (
-        <div className="flex w-full flex-col gap-2.5">
+        <div className="flex w-full max-w-2xl flex-col gap-2.5">
           {queue.map((item, i) => (
             <button
               key={item.id}
@@ -71,11 +72,11 @@ export function HomeView() {
         </div>
       )}
 
-      <div className="flex justify-center gap-8 pt-2">
+      <div className="flex gap-8 pt-6">
         <Stat label="Locations" n={properties.length} />
         <Stat label="Deeds" n={deeds.length} />
         <Stat label="Entities" n={entities.length} />
       </div>
-    </main>
+    </PageShell>
   );
 }

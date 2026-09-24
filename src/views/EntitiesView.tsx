@@ -3,6 +3,7 @@ import { Pencil, X } from 'lucide-react';
 import { entityTypeLabel, fmtDate, personRoleLabel } from '@/lib/format';
 import { newId, useDentimap } from '@/lib/store';
 import type { EntityType, LegalEntity } from '@/lib/types';
+import { PageHeader, PageShell } from '@/components/Page';
 
 function EntityHeader({ e }: { e: LegalEntity }) {
   const { updateEntity, deleteEntity } = useDentimap();
@@ -239,19 +240,22 @@ export function EntitiesView() {
   const entities = useDentimap((s) => s.entities);
   const addEntity = useDentimap((s) => s.addEntity);
   return (
-    <main className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Entities</h1>
-        <button
-          className="btn"
-          onClick={() => addEntity({ id: newId('entity'), name: 'New entity', entityType: 'landlord_holding', jurisdiction: 'North Carolina', associatedPropertyIds: [] })}
-        >
-          Add entity
-        </button>
-      </div>
-      <div className="stagger grid gap-6 md:grid-cols-2">
+    <PageShell>
+      <PageHeader
+        title="Entities"
+        count={entities.length}
+        actions={
+          <button
+            className="btn btn-primary"
+            onClick={() => addEntity({ id: newId('entity'), name: 'New entity', entityType: 'landlord_holding', jurisdiction: 'North Carolina', associatedPropertyIds: [] })}
+          >
+            Add entity
+          </button>
+        }
+      />
+      <div className="stagger grid gap-4 md:grid-cols-2">
         {entities.map((e) => <EntityCard key={e.id} e={e} />)}
       </div>
-    </main>
+    </PageShell>
   );
 }

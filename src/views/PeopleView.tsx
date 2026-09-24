@@ -353,7 +353,7 @@ export function PeopleView() {
     addPerson({ id: newId('person'), name: 'New person', roles: [], status: 'active', entityIds: [], propertyIds: [], actions: [] });
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-97px)] max-w-[1680px] flex-col lg:min-h-[calc(100vh-53px)] lg:flex-row">
+    <div className="mx-auto flex min-h-[calc(100vh-97px)] max-w-[1280px] flex-col lg:min-h-[calc(100vh-53px)] lg:flex-row">
       <aside className="border-b border-dm-border lg:sticky lg:top-[53px] lg:h-[calc(100vh-53px)] lg:w-80 lg:shrink-0 lg:self-start lg:overflow-y-auto lg:border-b-0 lg:border-r">
         <div className="space-y-3 border-b border-dm-border p-4">
           <div className="flex gap-2">

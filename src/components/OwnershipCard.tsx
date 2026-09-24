@@ -1,5 +1,4 @@
-import { ChevronRight } from 'lucide-react';
-import { compactUsd, fmtDate } from '@/lib/format';
+import { fmtDate } from '@/lib/format';
 import { chainBreaks, sortedDeeds } from '@/lib/store';
 import type { DeedRecord, Property, SourcedField } from '@/lib/types';
 import { ConfirmLabel, EDIT_RECORD_EVENT } from './ConfirmLabel';
@@ -11,9 +10,6 @@ export function OwnershipCard({ p, deeds, onViewChain }: { p: Property; deeds: D
   const breaks = chainBreaks(conveyances).length;
   const badStamps = conveyances.filter((d) => !d.isFormulaVerified).length;
   const doubt = [breaks ? (breaks === 1 ? 'chain gap' : `${breaks} chain gaps`) : '', badStamps ? 'stamp mismatch' : ''].filter(Boolean).join(' and ');
-  const gapIds = new Set(chainBreaks(conveyances).map((b) => b.deedId));
-  const shown = conveyances.slice(-3);
-  const hidden = conveyances.length - shown.length;
   const entityRows: { field: SourcedField; label: string; full: string; value?: string; mono?: boolean }[] = [
     { field: 'legalName', label: 'Legal name', full: 'Legal name', value: p.legalName },
     { field: 'dbaName', label: 'DBA', full: 'Doing business as', value: p.dbaName },
@@ -47,38 +43,6 @@ export function OwnershipCard({ p, deeds, onViewChain }: { p: Property; deeds: D
           </button>
         )}
       </div>
-
-      {conveyances.length > 1 && (
-        <ol className="scroll-thin mt-4 flex items-center gap-1 overflow-x-auto pb-1" aria-label="Ownership chain, oldest to newest">
-          {shown.map((d, i) => {
-            const last = i === shown.length - 1;
-            const gap = gapIds.has(d.id);
-            const badStamp = !d.isFormulaVerified;
-            return (
-              <li key={d.id} className="flex shrink-0 items-center gap-1">
-                {(i > 0 || hidden > 0) && (
-                  <span className={gap ? 'text-dm-amber' : 'text-dm-dim'} title={gap ? 'This deed’s grantor does not match the previous grantee' : undefined}>
-                    <ChevronRight className="h-3.5 w-3.5" aria-label={gap ? 'chain gap' : 'then'} />
-                  </span>
-                )}
-                {i === 0 && hidden > 0 && <span className="tnum mr-1 text-[12px] text-dm-dim">+{hidden}</span>}
-                <button
-                  type="button"
-                  onClick={onViewChain}
-                  title={badStamp ? 'Excise stamps do not match the price' : 'View title chain'}
-                  className={`max-w-[10.5rem] rounded-md border px-2 py-1 text-left transition-colors hover:bg-dm-hover ${last ? 'border-dm-blue/50 bg-dm-blue/5' : 'border-dm-border'} ${badStamp ? 'border-dm-amber' : ''}`}
-                >
-                  <span className={`block truncate text-label ${last ? 'font-medium text-dm-text' : 'text-dm-muted'}`}>{d.grantee}</span>
-                  <span className="tnum block text-[12px] text-dm-dim">
-                    {new Date(d.recordingDate).getUTCFullYear()}
-                    {d.consideration > 0 ? ` · ${compactUsd(d.consideration)}` : ''}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-      )}
 
       <div className="mt-4">
         <div className="border-b border-dm-border/70 pb-1 text-[12px] font-medium text-dm-muted">Business entity</div>

@@ -3,6 +3,7 @@ import { completionFor } from '@/lib/completion';
 import { useDentimap } from '@/lib/store';
 import type { Property, SourcedField } from '@/lib/types';
 import { Panel, StatusPill } from './Chips';
+import { ChainStrip } from './ChainStrip';
 import { EDIT_RECORD_EVENT } from './ConfirmLabel';
 import { FinancialsCard } from './FinancialsCard';
 import { OwnershipCard } from './OwnershipCard';
@@ -61,6 +62,18 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         <FinancialsCard p={p} />
         <OwnershipCard p={p} deeds={propDeeds} onViewChain={() => setTab('title')} />
       </div>
+
+      {tab !== 'title' && propDeeds.some((d) => d.deedType !== 'subdivision_plat') && (
+        <section id="chain" className="min-w-0 rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card">
+          <header className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-body font-semibold text-dm-text">Ownership chain</h2>
+            <button type="button" className="rounded text-label text-dm-blue hover:underline" onClick={() => setTab('title')}>
+              All deeds
+            </button>
+          </header>
+          <ChainStrip deeds={propDeeds} max={3} onSelect={() => setTab('title')} />
+        </section>
+      )}
 
       <div
         role="tablist"

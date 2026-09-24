@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { entityTypeLabel, personRoleLabel } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
+import { PageHeader, PageShell } from '@/components/Page';
 
 const ROW_H = 34;
 const NODE_W = 208;
@@ -140,17 +141,17 @@ export function NetworkView() {
   };
 
   return (
-    <main className="mx-auto max-w-[1680px] p-4 sm:p-6 lg:p-8">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Network</h1>
-          <p className="mt-1 text-label text-dm-dim">Who's connected to what — click a node to trace it, double-click to open it.</p>
-        </div>
-        <label className="flex items-center gap-2 text-label text-dm-muted">
-          <input type="checkbox" className="accent-dm-blue" checked={includeClosed} onChange={(e) => setIncludeClosed(e.target.checked)} />
-          Include closed locations
-        </label>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Network"
+        subtitle="Who's connected to what. Click a node to trace it, double-click to open it."
+        actions={
+          <label className="flex items-center gap-2 text-label text-dm-muted">
+            <input type="checkbox" className="h-4 w-4 accent-dm-blue" checked={includeClosed} onChange={(e) => setIncludeClosed(e.target.checked)} />
+            Include closed locations
+          </label>
+        }
+      />
 
       <div className="mb-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-label text-dm-dim">
         <span className="flex items-center gap-1.5"><i className="inline-block h-px w-4 bg-dm-border" /> Through an entity</span>
@@ -199,6 +200,6 @@ export function NetworkView() {
           <Column kind="property" x={col3x} items={visProperties} sub={(id) => properties.find((p) => p.id === id)?.address.city ?? ''} />
         </svg>
       </div>
-    </main>
+    </PageShell>
   );
 }

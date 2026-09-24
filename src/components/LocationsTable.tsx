@@ -6,6 +6,7 @@ import { compactUsd, facilityTypeLabel, fmtDate } from '@/lib/format';
 import { newId, sortedDeeds, useDentimap } from '@/lib/store';
 import type { FacilityType, Property } from '@/lib/types';
 import { DocumentIntake, UPLOAD_EVENT } from './DocumentIntake';
+import { PageHeader, PageShell } from './Page';
 
 type SortKey = 'type' | 'name' | 'owner' | 'assessed' | 'sale' | 'verified';
 type LocState = 'confirmed' | 'unconfirmed' | 'missing';
@@ -178,30 +179,27 @@ export function LocationsTable() {
   ];
 
   return (
-    <main className="mx-auto max-w-[1280px] p-4 sm:p-6 lg:px-8 lg:py-7">
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-[22px] font-semibold leading-8 tracking-tight">
-            Locations <span className="tnum font-normal text-dm-dim">{rows.length}</span>
-          </h1>
-          <p className="tnum text-label text-dm-muted">
-            {totals.n ? `${compactUsd(totals.sum)} assessed across ${totals.n} of ${rows.length} locations` : 'No assessed values yet'}
-          </p>
-        </div>
-        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
-          <div className="relative min-w-0 basis-full sm:basis-auto">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dm-dim" aria-hidden />
-            <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, owner, city, PIN" aria-label="Search locations" className="field w-full pl-9 sm:w-72" />
+    <PageShell>
+      <PageHeader
+        title="Locations"
+        count={rows.length}
+        subtitle={totals.n ? `${compactUsd(totals.sum)} assessed across ${totals.n} of ${rows.length} locations` : 'No assessed values yet'}
+        actions={
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+            <div className="relative min-w-0 basis-full sm:basis-auto">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dm-dim" aria-hidden />
+              <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, owner, city, PIN" aria-label="Search locations" className="field w-full pl-9 sm:w-72" />
+            </div>
+            <button className="btn whitespace-nowrap" onClick={() => window.dispatchEvent(new Event(UPLOAD_EVENT))} title="Read deeds, county pages or scans. Matches fill blank fields only; nothing already saved is overwritten.">
+              <Upload className="h-4 w-4" aria-hidden /> <span className="hidden sm:inline">Upload documents</span>
+              <span className="sm:hidden">Upload</span>
+            </button>
+            <button className="btn btn-primary whitespace-nowrap" onClick={create}>
+              <Plus className="h-4 w-4" aria-hidden /> Add location
+            </button>
           </div>
-          <button className="btn whitespace-nowrap" onClick={() => window.dispatchEvent(new Event(UPLOAD_EVENT))} title="Read deeds, county pages or scans. Matches fill blank fields only; nothing already saved is overwritten.">
-            <Upload className="h-4 w-4" aria-hidden /> <span className="hidden sm:inline">Upload documents</span>
-            <span className="sm:hidden">Upload</span>
-          </button>
-          <button className="btn btn-primary whitespace-nowrap" onClick={create}>
-            <Plus className="h-4 w-4" aria-hidden /> Add location
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       <DocumentIntake />
 
@@ -271,7 +269,7 @@ export function LocationsTable() {
           </tbody>
         </table>
       </div>
-    </main>
+    </PageShell>
   );
 }
 

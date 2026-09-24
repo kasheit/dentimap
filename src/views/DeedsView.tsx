@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, Search } from 'lucide-react';
 import { VerifyChip } from '@/components/Chips';
 import { expectedExcise } from '@/lib/deedParser';
+import { PageHeader, PageShell } from '@/components/Page';
 import { compactUsd, deedTypeLabel, fmtDate, usd } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 
@@ -25,13 +26,11 @@ export function DeedsView() {
 
 
   return (
-    <main className="mx-auto max-w-[1680px] space-y-6 p-4 sm:p-6 lg:p-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Deeds</h1>
-      </div>
+    <PageShell>
+      <PageHeader title="Deeds" count={rows.length} />
 
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="relative w-full sm:w-80">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dm-dim" />
           <input className="field pl-9" placeholder="Filter by party, instrument, location…" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -39,7 +38,6 @@ export function DeedsView() {
         <button className={`btn ${onlyFlagged ? 'text-dm-text' : ''}`} onClick={() => setOnlyFlagged((f) => !f)}>
           <AlertTriangle className="h-3.5 w-3.5" /> Excise mismatches
         </button>
-        <span className="ml-auto tnum text-label text-dm-dim">{rows.length} shown</span>
       </div>
 
       <div className="scroll-thin overflow-x-auto rounded-lg border border-dm-border bg-dm-surface">
@@ -60,7 +58,7 @@ export function DeedsView() {
             {rows.map(({ d, prop }) => (
               <tr key={d.id} className="border-b border-dm-border/60 align-top transition-colors last:border-0 hover:bg-dm-hover">
                 <td className="whitespace-nowrap px-4 py-3 tnum text-label">{fmtDate(d.recordingDate)}</td>
-                <td className="px-4 py-3">
+                <td className="whitespace-nowrap px-4 py-3">
                   {prop ? (
                     <button className="text-left font-medium transition-colors hover:text-dm-blue" onClick={() => openProperty(prop.id)}>{prop.name}</button>
                   ) : (
@@ -69,8 +67,14 @@ export function DeedsView() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="text-label">{deedTypeLabel[d.deedType]}{d.documentUrl && <> · <a href={d.documentUrl} target="_blank" rel="noreferrer" className="text-dm-blue hover:underline">Document</a></>}</div>
-                  <div className="mt-0.5 font-mono text-label text-dm-dim">
-                    {[d.instrumentNumber, d.book && d.page ? `Book ${d.book}, page ${d.page}` : undefined].filter(Boolean).join(' · ') || '—'}
+                  <div className="mt-0.5 flex flex-wrap gap-x-3 text-label text-dm-dim">
+                    {d.instrumentNumber && <span className="font-mono">{d.instrumentNumber}</span>}
+                    {d.book && d.page && (
+                      <span className="whitespace-nowrap">
+                        Book <span className="font-mono">{d.book}</span>, page <span className="font-mono">{d.page}</span>
+                      </span>
+                    )}
+                    {!d.instrumentNumber && !(d.book && d.page) && '—'}
                   </div>
                 </td>
                 <td className="px-4 py-3">
@@ -99,6 +103,6 @@ export function DeedsView() {
           </tbody>
         </table>
       </div>
-    </main>
+    </PageShell>
   );
 }

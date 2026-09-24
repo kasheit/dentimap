@@ -112,7 +112,7 @@ export function Header() {
 
   return (
     <header className="z-40 lg:sticky lg:top-0 border-b border-dm-border bg-dm-bg/90 backdrop-blur">
-      <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
+      <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6 lg:px-8">
         <button onClick={() => setTab('home')} aria-label="Go to home" className="transition-transform duration-150 ease-luxury hover:scale-[1.03] active:scale-[0.97]">
           <img src="/dentimap-logo.png" alt="Dentimap" className="h-8 w-auto select-none brightness-0" draggable={false} />
         </button>
