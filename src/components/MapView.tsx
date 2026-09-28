@@ -243,19 +243,15 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
               <InvalidateOnFullscreen fullscreen={isFullscreen} />
               {MAPBOX_TOKEN ? (
                 <TileLayer
-                  url={`https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=${MAPBOX_TOKEN}`}
+                  url={`https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/{z}/{x}/{y}?access_token=${MAPBOX_TOKEN}`}
                   tileSize={512}
                   zoomOffset={-1}
                   attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
               ) : (
-                // No-token fallback. CartoDB's basemap CDN was tried here first but now serves
-                // anonymous (keyless) requests as a watermarked "API KEY REQUIRED" tile instead of
-                // an error — it looked like a working dark map until you actually looked closely.
-                // Esri's ArcGIS Online dark-gray canvas is confirmed keyless and unwatermarked.
                 <TileLayer
-                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
-                  attribution='&copy; <a href="https://www.esri.com">Esri</a> &mdash; Esri, HERE, Garmin, FAO, NOAA, USGS'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
               )}
               <FitBounds rows={placedRows.length ? placedRows : rows} />
