@@ -39,7 +39,7 @@ export function attentionQueue(properties: Property[], deeds: DeedRecord[], enti
     if (p.status === 'closed') continue;
     const mine = deeds.filter((d) => d.propertyId === p.id);
     const gaps = chainBreaks(sortedDeeds(mine)).length;
-    if (gaps) items.push({ id: `chain-${p.id}`, severity: 'red', title: `${p.name} — title chain gap`, sub: `${gaps} break${gaps === 1 ? '' : 's'} between recorded deeds`, propertyId: p.id });
+    if (gaps) items.push({ id: `chain-${p.id}`, severity: 'red', title: `${p.name} — title chain gap`, sub: `${gaps} break${gaps === 1 ? '' : 's'} between recorded deeds`, propertyId: p.id, tab: 'title' });
 
     const seen = new Set<string>();
     let dupes = 0;
@@ -52,7 +52,7 @@ export function attentionQueue(properties: Property[], deeds: DeedRecord[], enti
     if (dupes) items.push({ id: `dupe-${p.id}`, severity: 'gray', title: `${p.name} \u2014 possible duplicate deed`, sub: `${dupes} deed${dupes === 1 ? '' : 's'} share a book and page with another`, propertyId: p.id, tab: 'title' });
 
     const mismatched = mine.filter((d) => !d.isFormulaVerified).length;
-    if (mismatched) items.push({ id: `excise-${p.id}`, severity: 'amber', title: `${p.name} — excise mismatch`, sub: `${mismatched} deed${mismatched === 1 ? "'s" : 's'} stamps don't formula-check`, propertyId: p.id });
+    if (mismatched) items.push({ id: `excise-${p.id}`, severity: 'amber', title: `${p.name} — excise mismatch`, sub: `${mismatched} deed${mismatched === 1 ? "'s" : 's'} stamps don't formula-check`, propertyId: p.id, tab: 'title' });
 
     const open = (p.noteLog ?? []).filter((n) => n.tag !== 'note' && !n.resolved);
     if (open.length) items.push({ id: `notes-${p.id}`, severity: 'amber', title: `${p.name} — ${open.length} open note${open.length === 1 ? '' : 's'}`, sub: open[0].text, propertyId: p.id });

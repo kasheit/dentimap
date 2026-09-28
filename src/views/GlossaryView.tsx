@@ -60,6 +60,7 @@ function TermCard({ t }: { t: GlossaryTerm }) {
   const updateTerm = useDentimap((s) => s.updateTerm);
   const deleteTerm = useDentimap((s) => s.deleteTerm);
   const [editing, setEditing] = useState(false);
+  const [arming, setArming] = useState(false);
 
   if (editing) {
     return (
@@ -87,13 +88,25 @@ function TermCard({ t }: { t: GlossaryTerm }) {
           <button className="rounded p-1.5 text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-blue" onClick={() => setEditing(true)} aria-label={`Edit ${t.term}`}>
             <Pencil className="h-3.5 w-3.5" />
           </button>
-          <button
-            className="rounded p-1.5 text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-red"
-            onClick={() => confirm(`Delete "${t.term}"?`) && deleteTerm(t.id)}
-            aria-label={`Delete ${t.term}`}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          {arming ? (
+            <button
+              className="rounded px-2 py-1 text-label font-medium text-dm-red transition-colors hover:bg-dm-hover"
+              onClick={() => deleteTerm(t.id)}
+              onBlur={() => setArming(false)}
+              aria-label={`Confirm delete ${t.term}`}
+              autoFocus
+            >
+              Delete?
+            </button>
+          ) : (
+            <button
+              className="rounded p-1.5 text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-red"
+              onClick={() => setArming(true)}
+              aria-label={`Delete ${t.term}`}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </header>
       <p className="mt-2 whitespace-pre-wrap text-sm text-dm-muted">{t.definition}</p>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, ArrowDown, ArrowRight, ArrowUp, Search } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ArrowDown, ArrowRight, ArrowUp, Plus, Search } from 'lucide-react';
 import { VerifyChip } from '@/components/Chips';
 import { expectedExcise } from '@/lib/deedParser';
 import { PageHeader, PageShell } from '@/components/Page';
@@ -11,6 +11,8 @@ export function DeedsView() {
   const [q, setQ] = useState('');
   const [desc, setDesc] = useState(true);
   const [onlyFlagged, setOnlyFlagged] = useState(false);
+  const [picking, setPicking] = useState(false);
+  const sortedProperties = useMemo(() => [...properties].sort((a, b) => a.name.localeCompare(b.name)), [properties]);
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -38,6 +40,29 @@ export function DeedsView() {
         <button className={`btn ${onlyFlagged ? 'text-dm-text' : ''}`} onClick={() => setOnlyFlagged((f) => !f)}>
           <AlertTriangle className="h-3.5 w-3.5" /> Excise mismatches
         </button>
+        <div className="ml-auto flex items-center gap-2">
+          {picking && (
+            <select
+              className="field"
+              aria-label="Location for the new deed"
+              value=""
+              onChange={(e) => {
+                setPicking(false);
+                if (e.target.value) openProperty(e.target.value, 'title');
+              }}
+              onBlur={() => setPicking(false)}
+              autoFocus
+            >
+              <option value="">Choose a location…</option>
+              {sortedProperties.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          )}
+          <button className="btn" onClick={() => setPicking((v) => !v)}>
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Add deed
+          </button>
+        </div>
       </div>
 
       <div className="scroll-thin overflow-x-auto rounded-lg border border-dm-border bg-dm-surface">

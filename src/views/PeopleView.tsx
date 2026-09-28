@@ -139,6 +139,7 @@ function LinkList({
 function Profile({ person }: { person: Person }) {
   const { entities, properties, deeds, updatePerson, deletePerson, openProperty, setTab } = useDentimap();
   const [editing, setEditing] = useState(person.name === 'New person');
+  const [arming, setArming] = useState(false);
   const [d, setD] = useState({ name: person.name, title: person.title ?? '', relevance: person.relevance ?? '', status: person.status, roles: person.roles });
   const [notes, setNotes] = useState(person.notes ?? '');
 
@@ -191,14 +192,15 @@ function Profile({ person }: { person: Person }) {
             <textarea className="field resize-y leading-relaxed" rows={3} value={d.relevance} onChange={(e) => setD({ ...d, relevance: e.target.value })} />
           </label>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <button
-              className="btn text-dm-red hover:text-dm-red"
-              onClick={() => {
-                if (confirm(`Delete ${person.name}? Their entries are deleted with them.`)) deletePerson(person.id);
-              }}
-            >
-              Delete person
-            </button>
+            {arming ? (
+              <button className="btn border-dm-red/40 text-dm-red" onClick={() => deletePerson(person.id)} onBlur={() => setArming(false)} autoFocus>
+                Delete {person.name}? Their entries go with them.
+              </button>
+            ) : (
+              <button className="btn text-dm-red hover:text-dm-red" onClick={() => setArming(true)}>
+                Delete person
+              </button>
+            )}
             <div className="flex gap-2">
               <button className="btn" onClick={() => setEditing(false)}>Cancel</button>
               <button

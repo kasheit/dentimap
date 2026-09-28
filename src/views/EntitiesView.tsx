@@ -9,6 +9,7 @@ import { EmptyState, PageHeader, PageShell } from '@/components/Page';
 function EntityHeader({ e }: { e: LegalEntity }) {
   const { updateEntity, deleteEntity } = useDentimap();
   const [editing, setEditing] = useState(e.name === 'New entity');
+  const [arming, setArming] = useState(false);
   const [d, setD] = useState({
     name: e.name,
     dbaName: e.dbaName ?? '',
@@ -65,14 +66,15 @@ function EntityHeader({ e }: { e: LegalEntity }) {
         </label>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <button
-          className="btn text-dm-red hover:text-dm-red"
-          onClick={() => {
-            if (confirm(`Delete "${e.name}"? Locations and people linked to it are kept.`)) deleteEntity(e.id);
-          }}
-        >
-          Delete entity
-        </button>
+        {arming ? (
+          <button className="btn border-dm-red/40 text-dm-red" onClick={() => deleteEntity(e.id)} onBlur={() => setArming(false)} autoFocus>
+            Delete "{e.name}"? Locations and people are kept.
+          </button>
+        ) : (
+          <button className="btn text-dm-red hover:text-dm-red" onClick={() => setArming(true)}>
+            Delete entity
+          </button>
+        )}
         <div className="flex gap-2">
           <button className="btn" onClick={() => setEditing(false)}>Cancel</button>
           <button
@@ -113,14 +115,12 @@ function EntityCard({ e }: { e: LegalEntity }) {
   const entityDeeds = deeds
     .filter((d) => isGrantee(d) || isGrantor(d))
     .sort((a, b) => b.recordingDate.localeCompare(a.recordingDate));
-  const acquired = entityDeeds.filter(isGrantee).length;
-  const sold = entityDeeds.filter(isGrantor).length;
 
   return (
     <article className="rounded-lg border border-dm-border bg-dm-surface">
       <EntityHeader e={e} />
 
-      <dl className="grid grid-cols-3 gap-4 border-b border-dm-border p-5">
+      <dl className="grid grid-cols-2 gap-4 border-b border-dm-border p-5">
         <div>
           <dt className="label">SOS ID</dt>
           <dd className="mt-1 font-mono text-label">{e.sosId ?? '—'}</dd>
@@ -128,10 +128,6 @@ function EntityCard({ e }: { e: LegalEntity }) {
         <div>
           <dt className="label">Formed</dt>
           <dd className="mt-1 tnum text-sm">{e.formationDate ? fmtDate(e.formationDate) : '—'}</dd>
-        </div>
-        <div>
-          <dt className="label">Deeds in / out</dt>
-          <dd className="mt-1 tnum text-sm">{acquired} / {sold}</dd>
         </div>
       </dl>
 
@@ -237,65 +233,6 @@ function EntityCard({ e }: { e: LegalEntity }) {
   );
 }
 
-const ROW = 34;
-const NODE_W = 200;
-const GAP = 96;
-const PAD = 12;
-
-/** People on the left, the entity in the middle, locations on the right, joined by hairlines. Nodes are real buttons. */
-function EntityDiagram({ e }: { e: LegalEntity }) {
-  const { properties, people, openProperty, openPerson } = useDentimap();
-  const locs = e.associatedPropertyIds.map((id) => properties.find((p) => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p);
-  const ppl = people.filter((p) => p.entityIds.includes(e.id));
-  const rows = Math.max(ppl.length, locs.length, 1);
-  const height = rows * ROW + PAD * 2;
-  const width = PAD * 2 + NODE_W * 3 + GAP * 2;
-  const cy = height / 2;
-  const colY = (i: number, n: number) => cy - (n * ROW) / 2 + i * ROW + ROW / 2;
-  const x2 = PAD + NODE_W + GAP;
-  const x3 = PAD + (NODE_W + GAP) * 2;
-  const link = (x1: number, y1: number, xb: number, y2: number) => `M ${x1} ${y1} C ${(x1 + xb) / 2} ${y1}, ${(x1 + xb) / 2} ${y2}, ${xb} ${y2}`;
-  const node = 'absolute flex h-7 items-center rounded-md border border-dm-border bg-dm-surface px-2.5 text-left text-label transition-colors hover:border-dm-dim hover:bg-dm-hover';
-
-  return (
-    <div className="scroll-thin overflow-x-auto">
-      <div className="relative" style={{ width, height }}>
-        <svg width={width} height={height} className="absolute inset-0" aria-hidden>
-          {ppl.map((_, i) => (
-            <path key={`p${i}`} d={link(PAD + NODE_W, colY(i, ppl.length), x2, cy)} className="fill-none stroke-dm-dim" strokeOpacity={0.65} strokeWidth={1.25} />
-          ))}
-          {locs.map((_, i) => (
-            <path key={`l${i}`} d={link(x2 + NODE_W, cy, x3, colY(i, locs.length))} className="fill-none stroke-dm-dim" strokeOpacity={0.65} strokeWidth={1.25} />
-          ))}
-        </svg>
-        {ppl.length === 0 && (
-          <span className="absolute text-label text-dm-dim" style={{ left: PAD, top: cy - 9 }}>
-            No people linked
-          </span>
-        )}
-        {ppl.map((p, i) => (
-          <button key={p.id} className={node} style={{ left: PAD, top: colY(i, ppl.length) - 14, width: NODE_W }} onClick={() => openPerson(p.id)} title={p.name}>
-            <span className="truncate">{p.name}</span>
-          </button>
-        ))}
-        <span className="absolute flex h-7 items-center rounded-md border border-dm-blue bg-dm-surface px-2.5 text-label font-medium" style={{ left: x2, top: cy - 14, width: NODE_W }} title={e.name}>
-          <span className="truncate">{e.name}</span>
-        </span>
-        {locs.length === 0 && (
-          <span className="absolute text-label text-dm-dim" style={{ left: x3, top: cy - 9 }}>
-            No locations linked
-          </span>
-        )}
-        {locs.map((p, i) => (
-          <button key={p.id} className={node} style={{ left: x3, top: colY(i, locs.length) - 14, width: NODE_W }} onClick={() => openProperty(p.id)} title={p.name}>
-            <span className="truncate">{p.name}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export function EntitiesView() {
   const entities = useDentimap((s) => s.entities);
   const addEntity = useDentimap((s) => s.addEntity);
@@ -369,10 +306,6 @@ export function EntitiesView() {
             )}
           </nav>
           <div key={selected.id} className="min-w-0 space-y-5">
-            <section className="rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card">
-              <h2 className="mb-3 text-body font-semibold">Connections</h2>
-              <EntityDiagram e={selected} />
-            </section>
             <EntityCard e={selected} />
           </div>
         </div>

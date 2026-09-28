@@ -4,6 +4,7 @@ import { attentionFor } from '@/lib/attention';
 import { completionFor, levelFor } from '@/lib/completion';
 import { compactUsd, facilityTypeLabel, fmtDate } from '@/lib/format';
 import { newId, sortedDeeds, useDentimap } from '@/lib/store';
+import type { DossierTab } from '@/lib/store';
 import type { FacilityType, Property } from '@/lib/types';
 import { DocumentIntake, UPLOAD_EVENT } from './DocumentIntake';
 import { MapView } from './MapView';
@@ -56,12 +57,12 @@ function Head({ label, k, sort, onSort, right, hideSmall }: { label: string; k: 
 }
 
 export function LocationsTable() {
-  const { properties, deeds, select, addProperty } = useDentimap();
+  const { properties, deeds, select, openProperty, addProperty } = useDentimap();
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [view, setView] = useState<'list' | 'map'>('list');
   const [wide, setWide] = useState(false);
-  const span = wide ? 9 : 5;
+  const span = wide ? 8 : 4;
   const [groupBy, setGroupBy] = useState<'type' | 'owner'>('type');
   const [unfolded, setUnfolded] = useState<Set<string>>(new Set());
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: 'type', dir: 1 });
@@ -285,7 +286,6 @@ export function LocationsTable() {
             <col className="w-[52%] sm:w-[27%]" />
             <col className="hidden sm:table-column" />
             <col className="w-28" />
-            <col className="hidden w-32 sm:table-column" />
             {wide && (
               <>
                 <col className="w-28" />
@@ -303,7 +303,6 @@ export function LocationsTable() {
               <Head label="Location" k="name" sort={sort} onSort={onSort} />
               <Head label="Owner of record" k="owner" sort={sort} onSort={onSort} hideSmall />
               <Head label="Assessed" k="assessed" sort={sort} onSort={onSort} right />
-              <Head label="Facts" k="verified" sort={sort} onSort={onSort} right hideSmall />
               {wide && (
                 <>
                   <Head label="Last sale" k="sale" sort={sort} onSort={onSort} right />
@@ -321,6 +320,7 @@ export function LocationsTable() {
                 label={g.label}
                 rows={g.rows}
                 select={select}
+                openProperty={openProperty}
                 wide={wide}
                 span={span}
                 foldable={foldable}
@@ -355,25 +355,11 @@ export function LocationsTable() {
 
 const isEmptyRow = (r: Row) => !r.owner && r.assessed === undefined && r.verified === 0;
 
-function FactsBar({ v, t }: { v: number; t: number }) {
-  return (
-    <span className="inline-flex items-center justify-end gap-2" title={`${v} of ${t} facts verified`}>
-      <span aria-hidden className="inline-flex gap-[2px]">
-        {Array.from({ length: t }, (_, i) => (
-          <i key={i} className={`h-2.5 w-[3px] rounded-[1px] ${i < v ? 'bg-dm-green' : 'bg-dm-dim/35'}`} />
-        ))}
-      </span>
-      <span className="tnum w-7 text-right">
-        {v}/{t}
-      </span>
-    </span>
-  );
-}
-
 function GroupRows({
   label,
   rows,
   select,
+  openProperty,
   wide,
   span,
   foldable,
@@ -383,6 +369,7 @@ function GroupRows({
   label: string;
   rows: Row[];
   select: (id: string) => void;
+  openProperty: (id: string, tab?: DossierTab) => void;
   wide: boolean;
   span: number;
   foldable: boolean;
@@ -392,6 +379,13 @@ function GroupRows({
   const empties = rows.filter(isEmptyRow);
   const fold = foldable && empties.length >= 3;
   const shown = fold && !unfolded ? rows.filter((r) => !isEmptyRow(r)) : rows;
+  // A row flagged with a chain gap or an excise mismatch opens straight to the Title chain tab — that's
+  // the section the icon is pointing at, so landing on Property first would just cost an extra click.
+  const openRow = (r: Row) => {
+    const chainIssue = r.issues.some((i) => i.includes('chain gap') || i.includes('Excise mismatch'));
+    if (chainIssue) openProperty(r.p.id, 'title');
+    else select(r.p.id);
+  };
   return (
     <>
       {label && (
@@ -403,9 +397,10 @@ function GroupRows({
       )}
       {shown.map((r) => {
         const { Icon, cls, label: stateLabel } = stateMeta[r.state];
-        const reason = r.issues.length ? `${stateLabel}: ${r.issues.join(', ')}` : stateLabel;
+        const facts = `${r.verified} of ${r.total} facts verified`;
+        const reason = r.issues.length ? `${stateLabel}: ${r.issues.join(', ')} · ${facts}` : `${stateLabel} · ${facts}`;
         return (
-          <tr key={r.p.id} onClick={() => select(r.p.id)} className="h-9 cursor-pointer border-b border-dm-border/70 transition-colors last:border-0 hover:bg-dm-hover/70 focus-within:bg-dm-hover">
+          <tr key={r.p.id} onClick={() => openRow(r)} className="h-9 cursor-pointer border-b border-dm-border/70 transition-colors last:border-0 hover:bg-dm-hover/70 focus-within:bg-dm-hover">
             <td className="pl-4">
               <span title={reason}>
                 <Icon className={`h-4 w-4 ${cls}`} aria-hidden />
@@ -418,7 +413,7 @@ function GroupRows({
                 className="max-w-full truncate rounded text-left font-medium text-dm-text"
                 onClick={(e) => {
                   e.stopPropagation();
-                  select(r.p.id);
+                  openRow(r);
                 }}
               >
                 {r.p.name}
@@ -433,9 +428,6 @@ function GroupRows({
               title={r.assessed !== undefined && !r.assessedSure ? 'Assessed value is unverified' : undefined}
             >
               {r.assessed !== undefined ? compactUsd(r.assessed) : '\u2014'}
-            </td>
-            <td className="hidden px-3 pr-4 text-right text-dm-muted sm:table-cell">
-              <FactsBar v={r.verified} t={r.total} />
             </td>
             {wide && (
               <>
