@@ -6,7 +6,7 @@ import { sortedDeeds, useDentimap } from '@/lib/store';
 import type { DeedRecord } from '@/lib/types';
 import { Empty, FormulaChip, VerifyChip } from './Chips';
 
-/** One compact row per instrument, newest first. The chain itself is drawn once, in the strip above the tabs. */
+/** One compact row per instrument, newest first. The chain itself is drawn once, in the Ownership card above the tabs. */
 export function TitleChainTimeline({ deeds, onEdit }: { deeds: DeedRecord[]; onEdit: (deedId: string) => void }) {
   const deleteDeed = useDentimap((s) => s.deleteDeed);
   const [arming, setArming] = useState<string | null>(null);
@@ -15,7 +15,7 @@ export function TitleChainTimeline({ deeds, onEdit }: { deeds: DeedRecord[]; onE
   if (!chain.length) return <Empty>No instruments recorded.</Empty>;
 
   return (
-    <ul className="divide-y divide-dm-border/70 rounded-lg border border-dm-border">
+    <ul aria-label="All deeds, newest first" className="divide-y divide-dm-border/70 rounded-lg border border-dm-border">
       {[...chain].reverse().map((d) => {
         const isPlat = d.deedType === 'subdivision_plat';
         const current = d.id === chain[chain.length - 1].id;

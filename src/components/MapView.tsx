@@ -70,6 +70,11 @@ function FitBounds({ rows }: { rows: MapRow[] }) {
 
 const NC_CENTER: [number, number] = [35.5, -79.1];
 
+// A public Mapbox token (pk.*) is meant to be embedded in client code — Mapbox's own
+// docs put it directly in frontend JS, restricted by the account's own token settings
+// rather than by keeping it secret. Falls back to plain OSM tiles if it's ever unset.
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined;
+
 const legend: { state: LocState; label: string }[] = [
   { state: 'confirmed', label: 'Verified' },
   { state: 'unconfirmed', label: 'Unverified' },
@@ -153,10 +158,19 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
         <>
           <div className="overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-card" style={{ height: 560 }}>
             <MapContainer center={NC_CENTER} zoom={7} scrollWheelZoom style={{ height: '100%', width: '100%' }} attributionControl>
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
+              {MAPBOX_TOKEN ? (
+                <TileLayer
+                  url={`https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/{z}/{x}/{y}?access_token=${MAPBOX_TOKEN}`}
+                  tileSize={512}
+                  zoomOffset={-1}
+                  attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+              ) : (
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+              )}
               <FitBounds rows={placedRows.length ? placedRows : rows} />
               {placedRows.map((r) => (
                 <Marker

@@ -4,7 +4,6 @@ import { newId, useDentimap } from '@/lib/store';
 import { fmtDate } from '@/lib/format';
 import type { DeedRecord, Property, SourcedField } from '@/lib/types';
 import { Panel, StatusPill } from './Chips';
-import { ChainStrip } from './ChainStrip';
 import type { MissingDeed } from './ChainStrip';
 import { DeedSheet } from './DeedSheet';
 import { EDIT_RECORD_EVENT } from './ConfirmLabel';
@@ -88,22 +87,10 @@ export function FacilityDossier({ property: p }: { property: Property }) {
         </div>
       </header>
 
-      <div className="stagger grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
+      <div className="stagger grid items-start gap-5 lg:grid-cols-[11fr_9fr]">
         <FinancialsCard p={p} />
-        <OwnershipCard p={p} deeds={propDeeds} />
+        <OwnershipCard p={p} deeds={propDeeds} onSelectDeed={editDeed} onAddMissing={addMissing} onViewChain={() => setTab('title')} />
       </div>
-
-      {propDeeds.some((d) => d.deedType !== 'subdivision_plat') && (
-        <section id="chain" className="min-w-0 rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card">
-          <header className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-body font-semibold text-dm-text">Ownership chain</h2>
-            <button type="button" className="rounded text-label text-dm-blue hover:underline" onClick={() => setTab('title')}>
-              All deeds
-            </button>
-          </header>
-          <ChainStrip deeds={propDeeds} max={4} onSelect={editDeed} onAddMissing={addMissing} />
-        </section>
-      )}
 
       {!propDeeds.some((d) => d.deedType !== 'subdivision_plat') && (
         <WhereToLook

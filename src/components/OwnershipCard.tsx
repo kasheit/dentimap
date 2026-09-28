@@ -2,10 +2,24 @@ import { fmtDate } from '@/lib/format';
 import { entityFor } from '@/lib/entities';
 import { chainBreaks, newId, sortedDeeds, useDentimap } from '@/lib/store';
 import type { DeedRecord, Property, SourcedField } from '@/lib/types';
+import { ChainStrip } from './ChainStrip';
+import type { MissingDeed } from './ChainStrip';
 import { ConfirmLabel, EDIT_RECORD_EVENT } from './ConfirmLabel';
 import { DetailRow, LevelLabel } from './Chips';
 
-export function OwnershipCard({ p, deeds }: { p: Property; deeds: DeedRecord[] }) {
+export function OwnershipCard({
+  p,
+  deeds,
+  onSelectDeed,
+  onAddMissing,
+  onViewChain,
+}: {
+  p: Property;
+  deeds: DeedRecord[];
+  onSelectDeed: (deedId: string) => void;
+  onAddMissing: (missing: MissingDeed) => void;
+  onViewChain: () => void;
+}) {
   const conveyances = sortedDeeds(deeds.filter((d) => d.deedType !== 'subdivision_plat'));
   const holder = conveyances[conveyances.length - 1];
   const { entities, addEntity, updateDeed, openEntity } = useDentimap();
@@ -62,8 +76,8 @@ export function OwnershipCard({ p, deeds }: { p: Property; deeds: DeedRecord[] }
           <div className="mt-1 text-label text-dm-muted">
             {ownerEntity ? (
               <>
-                {[ownerEntity.sosId && `SOS ${ownerEntity.sosId}`, ownerEntity.formationDate && `formed ${fmtDate(ownerEntity.formationDate)}`].filter(Boolean).join(' \u00b7 ') || 'No SOS ID on file'}
-                {' \u00b7 '}
+                {[ownerEntity.sosId && `SOS ${ownerEntity.sosId}`, ownerEntity.formationDate && `formed ${fmtDate(ownerEntity.formationDate)}`].filter(Boolean).join(' · ') || 'No SOS ID on file'}
+                {' · '}
                 <button type="button" className="rounded text-dm-blue hover:underline" onClick={() => openEntity(ownerEntity.id)}>
                   View entity
                 </button>
@@ -76,6 +90,20 @@ export function OwnershipCard({ p, deeds }: { p: Property; deeds: DeedRecord[] }
           </div>
         )}
       </div>
+
+      {conveyances.length > 0 && (
+        <div className="mt-4 border-t border-dm-border pt-3">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <span className="text-[12px] font-medium text-dm-muted">Title chain</span>
+            {conveyances.length > 1 && (
+              <button type="button" className="rounded text-label text-dm-blue hover:underline" onClick={onViewChain}>
+                All deeds
+              </button>
+            )}
+          </div>
+          <ChainStrip deeds={deeds} max={2} onSelect={onSelectDeed} onAddMissing={onAddMissing} hideCurrentName />
+        </div>
+      )}
 
       <div className="mt-4">
         <div className="border-b border-dm-border/70 pb-1 text-[12px] font-medium text-dm-muted">Business entity</div>
