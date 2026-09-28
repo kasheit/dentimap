@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import { EmptyState } from '@/components/Page';
 import { compactUsd } from '@/lib/format';
@@ -70,6 +71,16 @@ function FitBounds({ rows }: { rows: MapRow[] }) {
 
 const NC_CENTER: [number, number] = [35.5, -79.1];
 
+/** Leaflet sizes itself from its container on mount and on window resize, but the browser Fullscreen API changes that container's size without firing a resize event, so this calls it explicitly on the transition. */
+function InvalidateOnFullscreen({ fullscreen }: { fullscreen: boolean }) {
+  const map = useMap();
+  useEffect(() => {
+    const t = setTimeout(() => map.invalidateSize(), 60);
+    return () => clearTimeout(t);
+  }, [fullscreen, map]);
+  return null;
+}
+
 // A public Mapbox token (pk.*) is meant to be embedded in client code — Mapbox's own
 // docs put it directly in frontend JS, restricted by the account's own token settings
 // rather than by keeping it secret. Falls back to plain OSM tiles if it's ever unset.
@@ -96,6 +107,21 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
   const [unplacedOpen, setUnplacedOpen] = useState(false);
   const started = useRef(false);
   const markerRefs = useRef<Map<string, L.Marker>>(new Map());
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(document.fullscreenElement === wrapperRef.current);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    // some embedding contexts (an iframe without fullscreen delegated, certain browser policies) reject this;
+    // there's nothing useful to show the operator for a "nice to have" toggle failing, so just stay as-is
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else wrapperRef.current?.requestFullscreen().catch(() => {});
+  };
 
   // Geocode everything missing coordinates once per mount (i.e. once per time the map is opened), in the background, throttled to 1/sec.
   useEffect(() => {
@@ -156,8 +182,22 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
         <EmptyState title="Nothing placed on the map yet" hint="Locations need an address before they can be geocoded. Add addresses, then reopen Map." />
       ) : (
         <>
-          <div className="overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-card" style={{ height: 560 }}>
+          <div
+            ref={wrapperRef}
+            className={`relative overflow-hidden border-dm-border bg-dm-surface shadow-card ${isFullscreen ? 'border-0 rounded-none' : 'rounded-lg border'}`}
+            style={{ height: isFullscreen ? '100vh' : 560 }}
+          >
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              aria-label={isFullscreen ? 'Exit fullscreen' : 'Fill the screen with the map'}
+              title={isFullscreen ? 'Exit fullscreen' : 'Fill the screen with the map'}
+              className="absolute right-2 top-2 z-[1000] rounded-md border border-dm-border bg-dm-surface p-1.5 text-dm-muted shadow-card transition-colors hover:bg-dm-hover hover:text-dm-text"
+            >
+              {isFullscreen ? <Minimize2 className="h-4 w-4" aria-hidden /> : <Maximize2 className="h-4 w-4" aria-hidden />}
+            </button>
             <MapContainer center={NC_CENTER} zoom={7} scrollWheelZoom style={{ height: '100%', width: '100%' }} attributionControl>
+              <InvalidateOnFullscreen fullscreen={isFullscreen} />
               {MAPBOX_TOKEN ? (
                 <TileLayer
                   url={`https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/{z}/{x}/{y}?access_token=${MAPBOX_TOKEN}`}
