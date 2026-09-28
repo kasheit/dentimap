@@ -88,6 +88,8 @@ export interface Property {
     lat?: number;
     lng?: number;
     geocodedAt?: string;
+    /** The address text lat/lng were resolved from; if the address changes, the coordinates are stale. */
+    geocodedQuery?: string;
   };
   /** Legacy single county link; superseded by `sources`. */
   parcelUrl?: string;

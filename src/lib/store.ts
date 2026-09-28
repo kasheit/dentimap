@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { addressQuery } from './address';
 import { supabase } from './supabase';
 import type { ActivityEntry, DeedRecord, DentimapData, GlossaryTerm, LegalEntity, Person, Property } from './types';
 
@@ -141,7 +142,15 @@ export const useDentimap = create<State>()(
         set((s) => ({ properties: [...s.properties, p], selectedPropertyId: p.id, tab: 'properties', activity: logged(s.activity, 'Location created', p.id) })),
       updateProperty: (id, patch, logText) =>
         set((s) => ({
-          properties: s.properties.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+          properties: s.properties.map((p) => {
+            if (p.id !== id) return p;
+            const next = { ...p, ...patch };
+            // an address edit invalidates any coordinates geocoded from the old address, so the map re-geocodes it
+            if (patch.address && next.address.geocodedQuery !== undefined && next.address.geocodedQuery !== addressQuery(next)) {
+              next.address = { ...next.address, lat: undefined, lng: undefined, geocodedAt: undefined, geocodedQuery: undefined };
+            }
+            return next;
+          }),
           activity: logText ? logged(s.activity, logText, id) : s.activity,
         })),
       deleteProperty: (id) =>
@@ -159,11 +168,12 @@ export const useDentimap = create<State>()(
       setCoordinates: (propertyId, lat, lng) =>
         set((s) => ({
           properties: s.properties.map((p) =>
-            p.id === propertyId ? { ...p, address: { ...p.address, lat, lng, geocodedAt: new Date().toISOString() } } : p,
+            p.id === propertyId
+              ? { ...p, address: { ...p.address, lat, lng, geocodedAt: new Date().toISOString(), geocodedQuery: addressQuery(p) } }
+              : p,
           ),
           activity: logged(s.activity, 'Location placed on map', propertyId),
         })),
-
       addDeed: (d) =>
         set((s) => ({ deeds: [...s.deeds, d], activity: logged(s.activity, `Deed added (${d.recordingDate}, ${d.grantor} → ${d.grantee})`, d.propertyId) })),
       updateDeed: (id, d) =>

@@ -29,6 +29,7 @@ const stateMeta: Record<LocState, { label: string; Icon: typeof CircleCheck; cls
 interface Row {
   p: Property;
   owner?: string;
+  ownerSource?: string;
   ownerSure: boolean;
   assessed?: number;
   assessedSure: boolean;
@@ -90,7 +91,7 @@ export function LocationsTable() {
         const c = completionFor(p, deeds);
         const lastDeed = mine.map((d) => d.recordingDate).sort().slice(-1)[0];
         return {
-          p, owner: holder?.grantee, ownerSure, assessed, assessedSure, state, verified: c.counts.confirmed, total: c.items.length, issues,
+          p, owner: holder?.grantee, ownerSource: holder?.source, ownerSure, assessed, assessedSure, state, verified: c.counts.confirmed, total: c.items.length, issues,
           county: p.address.county.replace(/ County$/, ''), investment: p.metrics?.projectInvestment, lastDeed,
         };
       }),
@@ -141,9 +142,10 @@ export function LocationsTable() {
       .map(({ r }) => r);
   }, [rows, q, filter, sort]);
 
-  const toMapRow = (r: Row): MapRow => ({ p: r.p, owner: r.owner, assessed: r.assessed, state: r.state });
+  const toMapRow = (r: Row): MapRow => ({ p: r.p, owner: r.owner, ownerSource: r.ownerSource, assessed: r.assessed, assessedSure: r.assessedSure, state: r.state });
   const mapRows = useMemo(() => visible.map(toMapRow), [visible]);
   const mapAllRows = useMemo(() => rows.map(toMapRow), [rows]);
+  const unplacedCount = useMemo(() => mapAllRows.filter((r) => r.p.address.lat === undefined || r.p.address.lng === undefined).length, [mapAllRows]);
 
   const grouped = sort.key === 'type';
   const foldable = filter === 'all' && !q.trim();
@@ -266,6 +268,7 @@ export function LocationsTable() {
                 className={`rounded px-2.5 py-1 text-label capitalize transition-colors ${view === v ? 'bg-dm-hover font-medium text-dm-text' : 'text-dm-muted hover:bg-dm-hover/60 hover:text-dm-text'}`}
               >
                 {v}
+                {v === 'map' && unplacedCount > 0 && <span className="tnum ml-1 normal-case text-dm-dim">· {unplacedCount} unplaced</span>}
               </button>
             ))}
           </div>
@@ -273,7 +276,7 @@ export function LocationsTable() {
       </div>
 
       {view === 'map' ? (
-        <MapView rows={mapRows} allRows={mapAllRows} />
+        <MapView rows={mapRows} allRows={mapAllRows} searchActive={!!q.trim()} />
       ) : (
       <div className="scroll-thin overflow-x-auto rounded-lg border border-dm-border bg-dm-surface shadow-card" onKeyDown={onKeyDown}>
         <table className="w-full table-fixed border-collapse text-label sm:min-w-[720px]">
