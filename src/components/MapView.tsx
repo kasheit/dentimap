@@ -3,11 +3,11 @@ import L from 'leaflet';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import { EmptyState } from '@/components/Page';
-import { compactUsd } from '@/lib/format';
+import { compactUsd, facilityTypeLabel } from '@/lib/format';
 import { geocodeMissing, geocodeProperty, isCoords } from '@/lib/geocode';
 import type { GeocodeFailure } from '@/lib/geocode';
 import { useDentimap } from '@/lib/store';
-import type { Property } from '@/lib/types';
+import type { FacilityType, Property } from '@/lib/types';
 
 // Leaflet's default marker images resolve relative to the page and 404 under a
 // bundler; every marker here uses a custom divIcon, but this keeps L.Marker's
@@ -39,14 +39,50 @@ const pinLabel: Record<LocState, string> = {
   missing: 'Owner or value not found',
 };
 
-function pinIcon(state: LocState) {
+/**
+ * Pin color is verification state (unchanged); shape alone can't carry a third facility
+ * type at 16-20px, so each type gets its own icon instead. Sourced from real icon
+ * libraries already used in the app rather than hand-drawn: the tooth is Tabler's
+ * "dental" icon (MIT, same 24x24/2px-stroke language as lucide) with its small top
+ * decorative stroke dropped — it reads as noise at pin scale; syringe and stethoscope
+ * are lucide's own, unmodified.
+ */
+const facilityIconPaths: Record<FacilityType, { d: string[]; circle?: [string, string, string] }> = {
+  vfd_practice: {
+    d: [
+      'M12 5.5c-1.074 -.586 -2.583 -1.5 -4 -1.5c-2.1 0 -4 1.247 -4 5c0 4.899 1.056 8.41 2.671 10.537c.573 .756 1.97 .521 2.567 -.236c.398 -.505 .819 -1.439 1.262 -2.801c.292 -.771 .892 -1.504 1.5 -1.5c.602 0 1.21 .737 1.5 1.5c.443 1.362 .864 2.295 1.262 2.8c.597 .759 2 .993 2.567 .237c1.615 -2.127 2.671 -5.637 2.671 -10.537c0 -3.74 -1.908 -5 -4 -5c-1.423 0 -2.92 .911 -4 1.5',
+    ],
+  },
+  valleygate_asc: {
+    d: ['m18 2 4 4', 'm17 7 3-3', 'M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5', 'm9 11 4 4', 'm5 19-3 3', 'm14 4 6 6'],
+  },
+  affiliate: {
+    d: ['M11 2v2', 'M5 2v2', 'M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1', 'M8 15a6 6 0 0 0 12 0v-3'],
+    circle: ['20', '10', '2'],
+  },
+};
+
+function facilityIconSvg(type: FacilityType, stroke: string, strokeWidth: number) {
+  const icon = facilityIconPaths[type];
+  const paths = icon.d.map((d) => `<path d="${d}"/>`).join('');
+  const circle = icon.circle ? `<circle cx="${icon.circle[0]}" cy="${icon.circle[1]}" r="${icon.circle[2]}"/>` : '';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${paths}${circle}</svg>`;
+}
+
+function pinIcon(state: LocState, facilityType: FacilityType) {
+  const glyph = facilityIconSvg(facilityType, 'white', 2.75);
   return L.divIcon({
-    html: `<span class="block h-4 w-4 rounded-full border-2 border-white shadow-card ${pinColor[state]}"></span>`,
+    html: `<span class="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shadow-card ${pinColor[state]}"><span class="h-[11px] w-[11px]">${glyph}</span></span>`,
     className: '',
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-    popupAnchor: [0, -10],
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -12],
   });
+}
+
+/** Monochrome, unfilled — same glyph as the map pins, but drawn only in ink-dim so it can't be misread as a fourth state color. */
+function TypeGlyph({ type }: { type: FacilityType }) {
+  return <span aria-hidden className="inline-block h-3 w-3 text-dm-dim" dangerouslySetInnerHTML={{ __html: facilityIconSvg(type, 'currentColor', 2) }} />;
 }
 
 const placed = (r: MapRow) => r.p.address.lat !== undefined && r.p.address.lng !== undefined;
@@ -90,6 +126,12 @@ const legend: { state: LocState; label: string }[] = [
   { state: 'confirmed', label: 'Verified' },
   { state: 'unconfirmed', label: 'Unverified' },
   { state: 'missing', label: 'Not found' },
+];
+
+const typeLegend: { type: FacilityType; label: string }[] = [
+  { type: 'vfd_practice', label: facilityTypeLabel.vfd_practice },
+  { type: 'valleygate_asc', label: facilityTypeLabel.valleygate_asc },
+  { type: 'affiliate', label: facilityTypeLabel.affiliate },
 ];
 
 /**
@@ -216,7 +258,7 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
                 <Marker
                   key={r.p.id}
                   position={[r.p.address.lat!, r.p.address.lng!]}
-                  icon={pinIcon(r.state)}
+                  icon={pinIcon(r.state, r.p.facilityType)}
                   ref={(m) => {
                     if (m) markerRefs.current.set(r.p.id, m);
                     else markerRefs.current.delete(r.p.id);
@@ -226,7 +268,7 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
                       const el = e.target.getElement();
                       if (!el) return;
                       el.setAttribute('role', 'button');
-                      el.setAttribute('aria-label', `${r.p.name}, ${pinLabel[r.state]}`);
+                      el.setAttribute('aria-label', `${r.p.name}, ${facilityTypeLabel[r.p.facilityType]}, ${pinLabel[r.state]}`);
                       el.removeAttribute('alt');
                     },
                   }}
@@ -250,11 +292,19 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
             </MapContainer>
           </div>
 
-          <ul className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-label text-dm-muted" aria-label="Pin colors">
+          <ul className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-label text-dm-muted" aria-label="Pin colors, by verification state">
             {legend.map((l) => (
               <li key={l.state} className="flex items-center gap-1.5">
                 <span aria-hidden className={`inline-block h-2.5 w-2.5 rounded-full border border-white shadow-card ${pinColor[l.state]}`} />
                 {l.label}
+              </li>
+            ))}
+          </ul>
+          <ul className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-label text-dm-muted" aria-label="Pin icons, by facility type">
+            {typeLegend.map((t) => (
+              <li key={t.type} className="flex items-center gap-1.5">
+                <TypeGlyph type={t.type} />
+                {t.label}
               </li>
             ))}
           </ul>
