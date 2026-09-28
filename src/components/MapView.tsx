@@ -242,15 +242,17 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
               <InvalidateOnFullscreen fullscreen={isFullscreen} />
               {MAPBOX_TOKEN ? (
                 <TileLayer
-                  url={`https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/{z}/{x}/{y}?access_token=${MAPBOX_TOKEN}`}
+                  url={`https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=${MAPBOX_TOKEN}`}
                   tileSize={512}
                   zoomOffset={-1}
                   attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
               ) : (
+                // CartoDB's free dark basemap, used here only as the no-token fallback — same
+                // no-key, no-signup deal as the plain OSM tiles this replaces.
                 <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
               )}
               <FitBounds rows={placedRows.length ? placedRows : rows} />
