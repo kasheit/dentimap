@@ -149,6 +149,7 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
   const [unplacedOpen, setUnplacedOpen] = useState(false);
   const started = useRef(false);
   const markerRefs = useRef<Map<string, L.Marker>>(new Map());
+  const mapRef = useRef<L.Map>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -238,7 +239,7 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
             >
               {isFullscreen ? <Minimize2 className="h-4 w-4" aria-hidden /> : <Maximize2 className="h-4 w-4" aria-hidden />}
             </button>
-            <MapContainer center={NC_CENTER} zoom={7} scrollWheelZoom style={{ height: '100%', width: '100%' }} attributionControl>
+            <MapContainer ref={mapRef} center={NC_CENTER} zoom={7} scrollWheelZoom style={{ height: '100%', width: '100%' }} attributionControl>
               <InvalidateOnFullscreen fullscreen={isFullscreen} />
               {MAPBOX_TOKEN ? (
                 <TileLayer
@@ -248,11 +249,13 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
                   attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
               ) : (
-                // CartoDB's free dark basemap, used here only as the no-token fallback — same
-                // no-key, no-signup deal as the plain OSM tiles this replaces.
+                // No-token fallback. CartoDB's basemap CDN was tried here first but now serves
+                // anonymous (keyless) requests as a watermarked "API KEY REQUIRED" tile instead of
+                // an error — it looked like a working dark map until you actually looked closely.
+                // Esri's ArcGIS Online dark-gray canvas is confirmed keyless and unwatermarked.
                 <TileLayer
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+                  attribution='&copy; <a href="https://www.esri.com">Esri</a> &mdash; Esri, HERE, Garmin, FAO, NOAA, USGS'
                 />
               )}
               <FitBounds rows={placedRows.length ? placedRows : rows} />
@@ -272,6 +275,13 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
                       el.setAttribute('role', 'button');
                       el.setAttribute('aria-label', `${r.p.name}, ${facilityTypeLabel[r.p.facilityType]}, ${pinLabel[r.state]}`);
                       el.removeAttribute('alt');
+                    },
+                    // A click already opens the popup (Leaflet's default); ease in a bit closer too, but
+                    // never zoom back out if the operator's already zoomed in further than this.
+                    click: () => {
+                      const map = mapRef.current;
+                      if (!map) return;
+                      map.flyTo([r.p.address.lat!, r.p.address.lng!], Math.max(map.getZoom(), 15), { duration: 0.5 });
                     },
                   }}
                 >
