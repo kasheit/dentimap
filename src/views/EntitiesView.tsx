@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pencil, X } from 'lucide-react';
 import { entityTypeLabel, fmtDate, personRoleLabel } from '@/lib/format';
+import { unlinkedGrantees } from '@/lib/entities';
 import { newId, useDentimap } from '@/lib/store';
 import type { EntityType, LegalEntity } from '@/lib/types';
 import { EmptyState, PageHeader, PageShell } from '@/components/Page';
@@ -298,8 +299,16 @@ function EntityDiagram({ e }: { e: LegalEntity }) {
 export function EntitiesView() {
   const entities = useDentimap((s) => s.entities);
   const addEntity = useDentimap((s) => s.addEntity);
-  const [selectedId, setSelectedId] = useState('');
+  const deeds = useDentimap((s) => s.deeds);
+  const selectedId = useDentimap((s) => s.selectedEntityId);
+  const setSelectedId = useDentimap((s) => s.selectEntity);
   const selected = entities.find((x) => x.id === selectedId) ?? entities[0];
+  const orphans = unlinkedGrantees(entities, deeds);
+  const createFrom = (name: string) => {
+    const id = newId('entity');
+    addEntity({ id, name, entityType: 'landlord_holding', jurisdiction: 'North Carolina', associatedPropertyIds: [] });
+    setSelectedId(id);
+  };
 
   const add = () => {
     const id = newId('entity');
@@ -340,6 +349,24 @@ export function EntitiesView() {
                 </li>
               ))}
             </ul>
+            {orphans.length > 0 && (
+              <div className="border-t border-dm-border bg-dm-raised/60 px-4 py-2.5">
+                <div className="text-[12px] font-medium text-dm-muted">On deeds, no entity yet</div>
+                <ul className="mt-1 space-y-1">
+                  {orphans.slice(0, 5).map((o) => (
+                    <li key={o.name} className="flex items-center justify-between gap-2 text-label">
+                      <span className="min-w-0 truncate text-dm-muted" title={o.name}>
+                        {o.name}
+                      </span>
+                      <button className="shrink-0 rounded text-dm-blue hover:underline" onClick={() => createFrom(o.name)} aria-label={`Create an entity for ${o.name}`}>
+                        Create
+                      </button>
+                    </li>
+                  ))}
+                  {orphans.length > 5 && <li className="text-label text-dm-dim">+{orphans.length - 5} more</li>}
+                </ul>
+              </div>
+            )}
           </nav>
           <div key={selected.id} className="min-w-0 space-y-5">
             <section className="rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card">

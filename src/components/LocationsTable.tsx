@@ -6,6 +6,8 @@ import { compactUsd, facilityTypeLabel, fmtDate } from '@/lib/format';
 import { newId, sortedDeeds, useDentimap } from '@/lib/store';
 import type { FacilityType, Property } from '@/lib/types';
 import { DocumentIntake, UPLOAD_EVENT } from './DocumentIntake';
+import { MapView } from './MapView';
+import type { MapRow } from './MapView';
 import { EmptyState, PageHeader, PageShell } from './Page';
 
 type SortKey = 'type' | 'name' | 'owner' | 'assessed' | 'sale' | 'verified';
@@ -56,6 +58,7 @@ export function LocationsTable() {
   const { properties, deeds, select, addProperty } = useDentimap();
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
+  const [view, setView] = useState<'list' | 'map'>('list');
   const [wide, setWide] = useState(false);
   const span = wide ? 9 : 5;
   const [groupBy, setGroupBy] = useState<'type' | 'owner'>('type');
@@ -137,6 +140,10 @@ export function LocationsTable() {
       })
       .map(({ r }) => r);
   }, [rows, q, filter, sort]);
+
+  const toMapRow = (r: Row): MapRow => ({ p: r.p, owner: r.owner, assessed: r.assessed, state: r.state });
+  const mapRows = useMemo(() => visible.map(toMapRow), [visible]);
+  const mapAllRows = useMemo(() => rows.map(toMapRow), [rows]);
 
   const grouped = sort.key === 'type';
   const foldable = filter === 'all' && !q.trim();
@@ -244,11 +251,30 @@ export function LocationsTable() {
             ))}
           </div>
         )}
-        <button aria-pressed={wide} onClick={() => setWide((w) => !w)} className="ml-auto rounded-md px-2.5 py-1 text-label text-dm-muted transition-colors hover:bg-dm-hover/60 hover:text-dm-text">
-          {wide ? 'Fewer columns' : 'More columns'}
-        </button>
+        <div className="ml-auto flex items-center gap-1">
+          {view === 'list' && (
+            <button aria-pressed={wide} onClick={() => setWide((w) => !w)} className="rounded-md px-2.5 py-1 text-label text-dm-muted transition-colors hover:bg-dm-hover/60 hover:text-dm-text">
+              {wide ? 'Fewer columns' : 'More columns'}
+            </button>
+          )}
+          <div className="flex items-center gap-0.5 rounded-md border border-dm-border p-0.5" role="group" aria-label="Show as">
+            {(['list', 'map'] as const).map((v) => (
+              <button
+                key={v}
+                aria-pressed={view === v}
+                onClick={() => setView(v)}
+                className={`rounded px-2.5 py-1 text-label capitalize transition-colors ${view === v ? 'bg-dm-hover font-medium text-dm-text' : 'text-dm-muted hover:bg-dm-hover/60 hover:text-dm-text'}`}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
+      {view === 'map' ? (
+        <MapView rows={mapRows} allRows={mapAllRows} />
+      ) : (
       <div className="scroll-thin overflow-x-auto rounded-lg border border-dm-border bg-dm-surface shadow-card" onKeyDown={onKeyDown}>
         <table className="w-full table-fixed border-collapse text-label sm:min-w-[720px]">
           <colgroup>
@@ -319,6 +345,7 @@ export function LocationsTable() {
           </tbody>
         </table>
       </div>
+      )}
     </PageShell>
   );
 }

@@ -1,5 +1,6 @@
 import { fmtDate } from '@/lib/format';
-import { chainBreaks, sortedDeeds } from '@/lib/store';
+import { entityFor } from '@/lib/entities';
+import { chainBreaks, newId, sortedDeeds, useDentimap } from '@/lib/store';
 import type { DeedRecord, Property, SourcedField } from '@/lib/types';
 import { ConfirmLabel, EDIT_RECORD_EVENT } from './ConfirmLabel';
 import { DetailRow, LevelLabel } from './Chips';
@@ -7,6 +8,14 @@ import { DetailRow, LevelLabel } from './Chips';
 export function OwnershipCard({ p, deeds }: { p: Property; deeds: DeedRecord[] }) {
   const conveyances = sortedDeeds(deeds.filter((d) => d.deedType !== 'subdivision_plat'));
   const holder = conveyances[conveyances.length - 1];
+  const { entities, addEntity, updateDeed, openEntity } = useDentimap();
+  const ownerEntity = holder ? entityFor(entities, holder.grantee, holder.granteeEntityId) : undefined;
+  const createOwnerEntity = () => {
+    if (!holder) return;
+    const id = newId('entity');
+    addEntity({ id, name: holder.grantee, entityType: 'landlord_holding', jurisdiction: 'North Carolina', associatedPropertyIds: [p.id] });
+    updateDeed(holder.id, { ...holder, granteeEntityId: id });
+  };
   const breaks = chainBreaks(conveyances).length;
   const badStamps = conveyances.filter((d) => !d.isFormulaVerified).length;
   const doubt = [breaks ? (breaks === 1 ? 'chain gap' : `${breaks} chain gaps`) : '', badStamps ? 'stamp mismatch' : ''].filter(Boolean).join(' and ');
@@ -30,11 +39,40 @@ export function OwnershipCard({ p, deeds }: { p: Property; deeds: DeedRecord[] }
 
       <div className="mt-3">
         <div className="text-label text-dm-dim">Owner of record</div>
-        <div className="mt-0.5 text-[22px] font-semibold leading-7">{holder ? holder.grantee : <span className="text-dm-dim">—</span>}</div>
+        <div className="mt-0.5 text-[22px] font-semibold leading-7">
+          {holder ? (
+            ownerEntity ? (
+              <button type="button" className="rounded text-left hover:text-dm-blue" onClick={() => openEntity(ownerEntity.id)} title="Open this entity">
+                {holder.grantee}
+              </button>
+            ) : (
+              holder.grantee
+            )
+          ) : (
+            <span className="text-dm-dim">—</span>
+          )}
+        </div>
         {holder && (
           <div className="text-label text-dm-dim">
             since {fmtDate(holder.recordingDate)}
             {holder.source ? ` · ${holder.source}` : ' · no source'}
+          </div>
+        )}
+        {holder && (
+          <div className="mt-1 text-label text-dm-muted">
+            {ownerEntity ? (
+              <>
+                {[ownerEntity.sosId && `SOS ${ownerEntity.sosId}`, ownerEntity.formationDate && `formed ${fmtDate(ownerEntity.formationDate)}`].filter(Boolean).join(' \u00b7 ') || 'No SOS ID on file'}
+                {' \u00b7 '}
+                <button type="button" className="rounded text-dm-blue hover:underline" onClick={() => openEntity(ownerEntity.id)}>
+                  View entity
+                </button>
+              </>
+            ) : (
+              <button type="button" className="rounded text-dm-blue hover:underline" onClick={createOwnerEntity}>
+                Create entity from owner
+              </button>
+            )}
           </div>
         )}
       </div>

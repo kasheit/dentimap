@@ -15,6 +15,9 @@ interface State {
   people: Person[];
   glossary: GlossaryTerm[];
   selectedPersonId: string;
+  selectedEntityId: string;
+  openEntity: (id: string) => void;
+  selectEntity: (id: string) => void;
   selectedPropertyId: string;
   lastDeleted: DeedRecord | null;
   tab: TabId;
@@ -36,6 +39,7 @@ interface State {
   addProperty: (p: Property) => void;
   updateProperty: (id: string, patch: Partial<Property>, logText?: string) => void;
   deleteProperty: (id: string) => void;
+  setCoordinates: (propertyId: string, lat: number, lng: number) => void;
   addDeed: (d: DeedRecord) => void;
   updateDeed: (id: string, d: DeedRecord) => void;
   deleteDeed: (id: string) => void;
@@ -96,6 +100,9 @@ export const useDentimap = create<State>()(
       people: [],
       glossary: [],
       selectedPersonId: '',
+      selectedEntityId: '',
+      openEntity: (selectedEntityId) => set({ selectedEntityId, tab: 'entities' }),
+      selectEntity: (selectedEntityId) => set({ selectedEntityId }),
       selectedPropertyId: '',
       tab: 'home',
       lastDeleted: null,
@@ -149,6 +156,13 @@ export const useDentimap = create<State>()(
             activity: logged(s.activity, `Location deleted: ${nameOf(s, id)}`),
           };
         }),
+      setCoordinates: (propertyId, lat, lng) =>
+        set((s) => ({
+          properties: s.properties.map((p) =>
+            p.id === propertyId ? { ...p, address: { ...p.address, lat, lng, geocodedAt: new Date().toISOString() } } : p,
+          ),
+          activity: logged(s.activity, 'Location placed on map', propertyId),
+        })),
 
       addDeed: (d) =>
         set((s) => ({ deeds: [...s.deeds, d], activity: logged(s.activity, `Deed added (${d.recordingDate}, ${d.grantor} → ${d.grantee})`, d.propertyId) })),

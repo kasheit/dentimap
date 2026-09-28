@@ -10,6 +10,7 @@ import { DeedSheet } from './DeedSheet';
 import { EDIT_RECORD_EVENT } from './ConfirmLabel';
 import { FinancialsCard } from './FinancialsCard';
 import { OwnershipCard } from './OwnershipCard';
+import { WhereToLook } from './WhereToLook';
 import { DeedIngestionBuffer } from './DeedIngestionBuffer';
 import { HistoryLog } from './HistoryLog';
 import { KeyPeople } from './KeyPeople';
@@ -102,6 +103,16 @@ export function FacilityDossier({ property: p }: { property: Property }) {
           </header>
           <ChainStrip deeds={propDeeds} max={4} onSelect={editDeed} onAddMissing={addMissing} />
         </section>
+      )}
+
+      {!propDeeds.some((d) => d.deedType !== 'subdivision_plat') && (
+        <WhereToLook
+          p={p}
+          onAddDeed={() => {
+            setTab('title');
+            setAdding(true);
+          }}
+        />
       )}
 
       <div

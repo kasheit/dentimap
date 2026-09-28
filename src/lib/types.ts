@@ -85,6 +85,9 @@ export interface Property {
     zip: string;
     county: string;
     parcelPin: string;
+    lat?: number;
+    lng?: number;
+    geocodedAt?: string;
   };
   /** Legacy single county link; superseded by `sources`. */
   parcelUrl?: string;

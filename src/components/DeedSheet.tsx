@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { X } from 'lucide-react';
-import { canSaveDraft, DeedForm, draftFromDeed, draftToDeed } from './DeedForm';
+import { canSaveDraft, DeedForm, draftFromDeed, draftProblem, draftToDeed } from './DeedForm';
 import type { Draft } from './DeedForm';
 import type { DeedRecord } from '@/lib/types';
 import { fmtDate } from '@/lib/format';
@@ -108,7 +108,7 @@ export function DeedSheet({
             </div>
           ) : (
             <div className="flex items-center justify-between gap-3">
-              <span className="text-label text-dm-dim">{valid ? 'Ctrl+Enter saves' : 'Needs a recording date, grantor and grantee'}</span>
+              <span className="text-label text-dm-dim">{valid ? 'Ctrl+Enter saves' : draftProblem(draft)}</span>
               <span className="flex gap-2">
                 <button className="btn" onClick={attemptClose}>
                   Cancel

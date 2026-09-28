@@ -41,6 +41,16 @@ export function attentionQueue(properties: Property[], deeds: DeedRecord[], enti
     const gaps = chainBreaks(sortedDeeds(mine)).length;
     if (gaps) items.push({ id: `chain-${p.id}`, severity: 'red', title: `${p.name} — title chain gap`, sub: `${gaps} break${gaps === 1 ? '' : 's'} between recorded deeds`, propertyId: p.id });
 
+    const seen = new Set<string>();
+    let dupes = 0;
+    for (const d of mine) {
+      if (!d.book || !d.page) continue;
+      const k = `${d.book}/${d.page}`;
+      if (seen.has(k)) dupes += 1;
+      seen.add(k);
+    }
+    if (dupes) items.push({ id: `dupe-${p.id}`, severity: 'gray', title: `${p.name} \u2014 possible duplicate deed`, sub: `${dupes} deed${dupes === 1 ? '' : 's'} share a book and page with another`, propertyId: p.id, tab: 'title' });
+
     const mismatched = mine.filter((d) => !d.isFormulaVerified).length;
     if (mismatched) items.push({ id: `excise-${p.id}`, severity: 'amber', title: `${p.name} — excise mismatch`, sub: `${mismatched} deed${mismatched === 1 ? "'s" : 's'} stamps don't formula-check`, propertyId: p.id });
 

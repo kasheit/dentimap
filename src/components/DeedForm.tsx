@@ -61,8 +61,17 @@ export const draftFromDeed = (d: DeedRecord): Draft => ({
 
 const num = (s: string) => (s.trim() === '' || isNaN(Number(s)) ? undefined : Number(s));
 
-export const canSaveDraft = (d: Draft) =>
-  /^\d{4}-\d{2}-\d{2}$/.test(d.recordingDate) && d.grantor.trim() !== '' && d.grantee.trim() !== '';
+/** Why a draft can't be saved yet, or null when it can. */
+export const draftProblem = (d: Draft): string | null => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d.recordingDate) || d.grantor.trim() === '' || d.grantee.trim() === '') return 'Needs a recording date, grantor and grantee';
+  if (d.confidence === 'verified' && (!d.source.trim() || !d.documentUrl.trim())) return 'Verified needs a source and a document link';
+  return null;
+};
+
+export const canSaveDraft = (d: Draft) => draftProblem(d) === null;
+
+/** A deed counts as verified only when a document is on file. */
+export const hasEvidence = (d: Draft) => d.source.trim() !== '' && d.documentUrl.trim() !== '';
 
 export function draftToDeed(d: Draft, base: Pick<DeedRecord, 'id' | 'propertyId'> & Partial<DeedRecord>): DeedRecord {
   const c = num(d.consideration) ?? 0;
@@ -115,9 +124,12 @@ export function DeedForm({ draft, onChange, withConfidence }: { draft: Draft; on
             <span className="label">Verification</span>
             <select className="field" value={draft.confidence} onChange={(e) => set('confidence', e.target.value as VerificationState)}>
               <option value="unverified">Unverified</option>
-              <option value="verified">Verified</option>
+              <option value="verified" disabled={!hasEvidence(draft) && draft.confidence !== 'verified'}>
+                Verified
+              </option>
               <option value="unknown">Unknown</option>
             </select>
+            {!hasEvidence(draft) && <span className="block text-[12px] text-dm-dim">Verified needs a source and a document link.</span>}
           </label>
         ) : (
           <span />
