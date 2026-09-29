@@ -5,17 +5,24 @@
 @tailwind utilities;
 
 @layer base {
-  /* Light theme: white canvas, hairline borders, near-black text, indigo for the one accent. Contrast: dim 4.9:1, muted 7:1, text 16:1 on white. */
+  /* Light theme: a soft teal-tinted canvas (not pure white) with pure-white cards floating on
+     top of it — the card's own hairline + shadow used to be the only thing separating it from
+     an identical-white page; now the canvas itself does part of that work too. Teal (Trust Teal,
+     #0F766E) is the one accent, chosen from real estate/property-product data — same One Voice
+     Rule as before, just a different hue: it's still never a background wash, still spent only
+     on action/focus/links/the verified hero figure. Contrast: dim 4.9:1, muted 7:1, text 16:1 on
+     white; teal-on-white and white-on-teal both clear 5.4:1, so light mode needs no ink-swap the
+     way dark mode does below. */
   :root {
-    --dm-bg: 255 255 255;
+    --dm-bg: 246 250 249;
     --dm-surface: 255 255 255;
-    --dm-raised: 247 247 248;
-    --dm-border: 230 230 235;
-    --dm-hover: 243 243 246;
+    --dm-raised: 236 244 242;
+    --dm-border: 225 233 231;
+    --dm-hover: 233 242 240;
     --dm-text: 27 28 32;
     --dm-muted: 84 88 96;
     --dm-dim: 108 112 120;
-    --dm-blue: 84 96 200;
+    --dm-blue: 15 118 110;
     --dm-green: 22 128 76;
     --dm-amber: 168 96 0;
     --dm-red: 196 44 36;
@@ -24,9 +31,10 @@
     --dm-on-blue: 255 255 255;
     /* the tint box-shadow is built from; dark mode redefines this rather than the static shadow utilities themselves */
     --dm-shadow-rgb: 20 22 30;
-    --dm-shadow-a1: 0.05;
+    --dm-shadow-a1: 0.04;
     --dm-shadow-a2: 0.12;
     --dm-shadow-a3: 0.06;
+    --dm-shadow-a4: 0.07;
   }
   /* Dark theme: follows the OS setting by default; an explicit choice (the small toggle in
      Header) sets data-theme and wins over the OS either way, via `html`'s data-theme attribute
@@ -37,9 +45,9 @@
      invert direction on purpose — they still mean "a distinctly-toned panel" / "the heaviest
      interactive wash", but on a near-black canvas that has to mean lighter, not darker, or every
      elevated surface crushes toward black. --dm-blue is a separate, lighter shade here (the
-     light-mode indigo only hits ~3.5:1 as text on a dark canvas) — anywhere it sits as text/an
-     icon that's fine, but white text on that same lighter blue as a *fill* only clears ~2.7:1,
-     so --dm-on-blue flips to dark ink here instead. */
+     light-mode teal only hits ~3:1 as text on a dark canvas) — a bright teal (10:1+ as text/an
+     icon), but white text on that same lighter teal as a *fill* only clears ~1.9:1, so
+     --dm-on-blue flips to dark ink here instead (9:1+). */
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
       --dm-bg: 15 16 18;
@@ -50,7 +58,7 @@
       --dm-text: 237 238 240;
       --dm-muted: 150 154 162;
       --dm-dim: 128 132 140;
-      --dm-blue: 140 150 240;
+      --dm-blue: 45 212 191;
       --dm-green: 52 199 120;
       --dm-amber: 214 148 40;
       --dm-red: 255 92 82;
@@ -59,6 +67,7 @@
       --dm-shadow-a1: 0.4;
       --dm-shadow-a2: 0.55;
       --dm-shadow-a3: 0.35;
+      --dm-shadow-a4: 0.5;
     }
   }
   /* explicit override, regardless of OS preference */
@@ -71,7 +80,7 @@
     --dm-text: 237 238 240;
     --dm-muted: 150 154 162;
     --dm-dim: 128 132 140;
-    --dm-blue: 140 150 240;
+    --dm-blue: 45 212 191;
     --dm-green: 52 199 120;
     --dm-amber: 214 148 40;
     --dm-red: 255 92 82;
@@ -80,6 +89,7 @@
     --dm-shadow-a1: 0.4;
     --dm-shadow-a2: 0.55;
     --dm-shadow-a3: 0.35;
+    --dm-shadow-a4: 0.5;
   }
   html {
     color-scheme: light dark;
@@ -128,14 +138,14 @@
      (see MapView.tsx), and this dropdown is that map's own chrome, not app chrome. */
   .pac-container {
     margin-top: 4px;
-    border: 1px solid #e6e6eb;
-    border-radius: 8px;
+    border: 1px solid #e1e9e7;
+    border-radius: 10px;
     box-shadow: 0 8px 24px rgb(20 22 30 / 0.12), 0 2px 6px rgb(20 22 30 / 0.06);
     font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   }
   .pac-item {
     padding: 8px 12px;
-    border-top-color: #e6e6eb;
+    border-top-color: #e1e9e7;
     font-size: 13px;
     color: #545860;
   }
@@ -181,9 +191,11 @@
     /* color via --dm-on-blue, not Tailwind's text-white — same reasoning as the checked checkbox above */
     @apply border-dm-blue bg-dm-blue hover:bg-dm-blue/90;
     color: rgb(var(--dm-on-blue));
+    box-shadow: 0 2px 6px rgb(var(--dm-blue) / 0.32);
   }
   .btn-primary:hover {
     color: rgb(var(--dm-on-blue));
+    box-shadow: 0 3px 9px rgb(var(--dm-blue) / 0.4);
   }
   .label {
     @apply text-label font-medium text-dm-dim;

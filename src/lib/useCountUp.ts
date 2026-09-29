@@ -1,30 +1,43 @@
 import { useEffect, useRef, useState } from 'react';
 
-const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
-
-/** Animates a displayed integer toward `target` with a decelerating ease, honoring reduced-motion. */
-export function useCountUp(target: number, duration = 420) {
+/**
+ * Eases a displayed number from its previous value to `target` — the "hero figure feels
+ * alive" touch common to Stripe/Linear/Mercury-style dashboards. Deliberately restrained for
+ * an operator tool checked many times a day: it jumps straight to the value on first mount
+ * (nothing to animate from, and animating every time a location is opened would get old fast)
+ * and only eases when the underlying number actually changes while mounted — e.g. right after
+ * confirming a source or editing the assessed value. Skips the animation entirely under
+ * prefers-reduced-motion.
+ */
+export function useCountUp(target: number | undefined, duration = 700): number | undefined {
   const [value, setValue] = useState(target);
-  const fromRef = useRef(target);
+  const prevTarget = useRef(target);
+  const frame = useRef<number>();
 
   useEffect(() => {
-    if (target === fromRef.current) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setValue(target);
-      fromRef.current = target;
+    if (target === undefined) {
+      setValue(undefined);
+      prevTarget.current = undefined;
       return;
     }
-    const from = fromRef.current;
+    const from = prevTarget.current ?? target;
+    prevTarget.current = target;
+    const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (from === target || reduceMotion) {
+      setValue(target);
+      return;
+    }
     const start = performance.now();
-    let frame: number;
+    const ease = (t: number) => 1 - (1 - t) ** 3;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
-      setValue(Math.round(from + (target - from) * easeOutExpo(t)));
-      if (t < 1) frame = requestAnimationFrame(tick);
-      else fromRef.current = target;
+      setValue(Math.round(from + (target - from) * ease(t)));
+      if (t < 1) frame.current = requestAnimationFrame(tick);
     };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    frame.current = requestAnimationFrame(tick);
+    return () => {
+      if (frame.current) cancelAnimationFrame(frame.current);
+    };
   }, [target, duration]);
 
   return value;

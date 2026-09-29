@@ -1,5 +1,6 @@
 import { compactUsd, fmtDate } from '@/lib/format';
 import { levelFor } from '@/lib/completion';
+import { useCountUp } from '@/lib/useCountUp';
 import type { Property, SourcedField } from '@/lib/types';
 import { ConfirmLabel, ProvenanceTag } from './ConfirmLabel';
 
@@ -20,9 +21,10 @@ export function FinancialsCard({ p }: { p: Property }) {
   const m = p.metrics;
   const assessed = m?.currentAssessedValue;
   const confirmed = levelFor(assessed !== undefined, p.meta?.assessedValue) === 'confirmed';
+  const displayed = useCountUp(assessed);
 
   return (
-    <section id="financials" className="min-w-0 rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card">
+    <section id="financials" className="lift min-w-0 rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card">
       <header className="flex items-center justify-between gap-3">
         <h2 className="text-body font-semibold text-dm-text">Financials</h2>
         <ConfirmLabel property={p} field="assessedValue" label="Assessed value" has={assessed !== undefined} showDetail={false} />
@@ -31,10 +33,10 @@ export function FinancialsCard({ p }: { p: Property }) {
       <div className="mt-3">
         <div className="text-label text-dm-dim">Assessed value</div>
         <div
-          className={`tnum text-[44px] font-semibold leading-[50px] tracking-[-0.03em] ${assessed !== undefined && confirmed ? 'text-dm-blue' : 'text-dm-muted'}`}
+          className={`tnum text-[52px] font-semibold leading-[58px] tracking-[-0.03em] ${assessed !== undefined && confirmed ? 'text-dm-blue' : 'text-dm-muted'}`}
           title={assessed !== undefined ? `$${assessed.toLocaleString('en-US')}` : undefined}
         >
-          {assessed !== undefined ? compactUsd(assessed) : <span className="text-dm-dim">—</span>}
+          {displayed !== undefined ? compactUsd(displayed) : <span className="text-dm-dim">—</span>}
         </div>
         {assessed !== undefined && <ProvenanceTag property={p} field="assessedValue" />}
       </div>

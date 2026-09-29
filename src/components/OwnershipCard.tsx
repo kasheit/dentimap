@@ -42,7 +42,7 @@ export function OwnershipCard({
   const status = (field: SourcedField, label: string, has: boolean) => <ConfirmLabel property={p} field={field} label={label} has={has} />;
 
   return (
-    <section id="ownership" className="min-w-0 rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card">
+    <section id="ownership" className="lift min-w-0 rounded-lg border border-dm-border bg-dm-surface p-5 shadow-card">
       <header className="flex items-center justify-between gap-3">
         <h2 className="text-body font-semibold text-dm-text">Ownership</h2>
         <LevelLabel

@@ -25,8 +25,14 @@ export default {
         title: ['16px', '24px'],
         display: ['28px', '34px'],
       },
+      borderRadius: {
+        md: '8px',
+        lg: '10px',
+      },
       boxShadow: {
-        card: '0 1px 2px rgb(var(--dm-shadow-rgb) / var(--dm-shadow-a1))',
+        // two-layer now: a tight contact shadow plus a soft diffused lift, instead of one
+        // 1px whisper — a canvas that's no longer pure white needed real separation from it
+        card: '0 1px 2px rgb(var(--dm-shadow-rgb) / var(--dm-shadow-a1)), 0 8px 20px rgb(var(--dm-shadow-rgb) / var(--dm-shadow-a4))',
         pop: '0 8px 24px rgb(var(--dm-shadow-rgb) / var(--dm-shadow-a2)), 0 2px 6px rgb(var(--dm-shadow-rgb) / var(--dm-shadow-a3))',
       },
       transitionTimingFunction: {

@@ -2,12 +2,12 @@
 name: Dentimap
 description: A clean light operator app where owner of record and assessed value lead every screen and each fact shows its source.
 colors:
-  primary: "#5460C8"
-  canvas: "#FFFFFF"
+  primary: "#0F766E"
+  canvas: "#F6FAF9"
   surface: "#FFFFFF"
-  raised: "#F7F7F8"
-  hover: "#F3F3F6"
-  hairline: "#E6E6EB"
+  raised: "#ECF4F2"
+  hover: "#E9F2F0"
+  hairline: "#E1E9E7"
   ink: "#1B1C20"
   ink-muted: "#545860"
   ink-dim: "#6C7078"
@@ -113,27 +113,28 @@ components:
 
 Dentimap is a quiet, light operator tool for one person doing research at a desk. Owner of record and assessed value are the two loudest things on any screen, and every figure prints where it came from beside it. The category standard is played straight: a Linear-style dense grouped list for browsing locations, and a Stripe-style dossier hero (one large figure, soft cards) for a single location. The drafting-sheet direction that was rolled was not built; the user chose the category standard.
 
-Chrome recedes so data can lead. The canvas is white, structure is hairline borders, text is near-black, and one indigo carries the interface's only voice. Color otherwise appears only as state (green, amber, red), never as decoration. Numbers use tabular numerals so columns align; identifiers such as the parcel PIN use a monospace.
+Chrome recedes so data can lead. The canvas is a soft teal-tinted off-white with pure-white cards floating on top of it, structure is hairline borders plus a real two-layer lift, text is near-black, and one teal carries the interface's only voice. Color otherwise appears only as state (green, amber, red), never as decoration. Numbers use tabular numerals so columns align; identifiers such as the parcel PIN use a monospace.
 
 **Key Characteristics:**
-- White canvas, hairline borders, one soft card shadow.
-- One indigo accent, spent on primary action, active nav/tab underline, and the verified hero figure.
+- Soft teal-tinted canvas, white cards that actually float (two-layer shadow, not a 1px whisper), hairline borders.
+- One teal accent, spent on primary action, active nav/tab underline, and the verified hero figure.
 - Provenance printed inline; an unsourced value says "No source" instead of looking authoritative.
 - Dense 36px list rows; detail on demand, not on screen by default.
 - Missing data stays visibly missing (an em dash in dim ink).
 
 ## Colors
 
-A near-monochrome cool-neutral palette with a single indigo and three state colors. Channel triplets live as `--dm-*` custom properties in `src/index.css`; the frontmatter hex values are their exact equivalents.
+A near-monochrome cool-neutral palette with a single teal and three state colors. Channel triplets live as `--dm-*` custom properties in `src/index.css`; the frontmatter hex values are their exact equivalents.
 
 ### Primary
-- **Ledger Indigo** (`--dm-blue`, #5460C8): primary button fill, active nav underline (2px), active tab underline, focus ring and outline, link text (source links, "Add"), the verified assessed-value hero figure, land segment of the split bar, last-deed chip tint (at 5% fill / 50% border). Never a background wash, never a state color.
+- **Trust Teal** (`--dm-blue`, #0F766E): primary button fill (with a soft colored contact shadow), active nav underline (2px), active tab underline, focus ring and outline, link text (source links, "Add"), the verified assessed-value hero figure, last-deed chip tint (at 5% fill / 50% border). Never a background wash, never a state color. (Token name stays `--dm-blue`/`dm-blue` in code — historical, not worth a find-replace across the whole codebase for a hue swap.)
 
 ### Neutral
-- **Paper White** (`--dm-bg` / `--dm-surface`, #FFFFFF): page canvas, cards, table, inputs.
-- **Raised Wash** (`--dm-raised`, #F7F7F8): table header and group-label rows (used at 60% opacity).
-- **Hover Wash** (`--dm-hover`, #F3F3F6): row hover, button hover, selected filter chip fill.
-- **Hairline** (`--dm-border`, #E6E6EB): every border and divider; inner row dividers drop to 60-70% opacity.
+- **Canvas** (`--dm-bg`, #F6FAF9): page background only — a soft teal-tinted off-white, not pure white, so cards visibly float above it.
+- **Paper White** (`--dm-surface`, #FFFFFF): cards, table, inputs — stays pure white regardless of canvas.
+- **Raised Wash** (`--dm-raised`, #ECF4F2): table header and group-label rows (used at 60% opacity).
+- **Hover Wash** (`--dm-hover`, #E9F2F0): row hover, button hover, selected filter chip fill.
+- **Hairline** (`--dm-border`, #E1E9E7): every border and divider; inner row dividers drop to 60-70% opacity.
 - **Ink** (`--dm-text`, #1B1C20): primary text, verified values. About 16:1 on white.
 - **Ink Muted** (`--dm-muted`, #545860): secondary text, unverified values, default button text. About 7:1.
 - **Ink Dim** (`--dm-dim`, #6C7078): labels, placeholders, missing-value dashes, metadata. About 4.9:1; the floor for readable text.
@@ -144,11 +145,11 @@ A near-monochrome cool-neutral palette with a single indigo and three state colo
 - **Error Red** (`--dm-red`, #C42C24): sync conflict, failed stamp formula, form errors.
 
 ### Named Rules
-**The One Voice Rule.** Indigo is the only non-state hue. If a new element wants color and is not an action, an active location marker, or a verified hero figure, it stays ink.
+**The One Voice Rule.** Teal is the only non-state hue. If a new element wants color and is not an action, an active location marker, or a verified hero figure, it stays ink.
 
 **The State-Only Rule.** Green, amber and red mean verification or system state. They are never used for category, decoration, or emphasis.
 
-**The Earned Figure Rule.** The hero assessed value turns indigo only when verified; unverified it renders in Ink Muted, missing it is a dim dash. Color is evidence, not styling.
+**The Earned Figure Rule.** The hero assessed value turns teal only when verified; unverified it renders in Ink Muted, missing it is a dim dash. Color is evidence, not styling.
 
 ## Typography
 
@@ -193,34 +194,34 @@ Nearly flat: depth is a hairline border first and a whisper of shadow second. Ca
 
 ## Shapes
 
-Gently rounded and consistent. Cards, the table and menus use 8px; buttons, inputs, filter chips and ownership-chain chips use 6px; sort buttons use the 4px default. Status dots and the land/building split bar are fully round (6px dots, 6px bar height). Borders are always 1px hairline; the only 2px borders are the active indigo underlines and the dashed drop target.
+Gently rounded and consistent, one notch more than before: cards, the table and menus use 10px; buttons, inputs, filter chips and ownership-chain chips use 8px; sort buttons use the 4px default. Status dots are fully round (6px). Borders are always 1px hairline; the only 2px borders are the active teal underlines and the dashed drop target.
 
 ## Components
 
 ### Buttons
-- **Shape:** 6px radius, 1px border, 13px medium label, 6px 12px padding, 6px icon gap.
-- **Primary:** Ledger Indigo fill and border, white text; hover at 90% opacity. One per view (Add location, Save changes, Confirm).
+- **Shape:** 8px radius, 1px border, 13px medium label, 6px 12px padding, 6px icon gap.
+- **Primary:** Trust Teal fill and border, white text, a soft teal contact shadow; hover at 90% opacity with a deeper shadow. One per view (Add location, Save changes, Confirm).
 - **Default:** white fill, hairline border, Ink Muted text; hover fills Hover Wash and text goes to Ink.
-- **States:** pressed scales to 0.97; disabled 40% opacity; keyboard focus is a 2px indigo outline with 2px offset.
-- **Text buttons:** row names, "More columns", and "Add" are unbordered; links in indigo underline on hover.
+- **States:** pressed scales to 0.97; disabled 40% opacity; keyboard focus is a 2px teal outline with 2px offset.
+- **Text buttons:** row names, "More columns", and "Add" are unbordered; links in teal underline on hover.
 
 ### Chips and status
-- **Filter chips:** unbordered 6px-radius text buttons with a dim count; selected takes Hover Wash fill and Ink medium text (no indigo).
+- **Filter chips:** unbordered 6px-radius text buttons with a dim count; selected takes Hover Wash fill and Ink medium text (no teal).
 - **Status marks:** 6px dot plus a text label (Verified, Unverified, Not found, Recheck). Text carries the state color for verified and unverified; not-found text stays muted. The list uses a 16px state icon column instead (check circle, dashed circle, empty circle).
 - **Formula chip:** bordered 6px chip with 10% state tint for the NC excise-stamp check, green when matching, red with the expected value when not.
 
 ### Cards / Containers
-- **Corner Style:** 8px. **Background:** white. **Border:** 1px hairline. **Shadow:** Card. **Padding:** 20px.
+- **Corner Style:** 10px. **Background:** white, floating above the teal-tinted canvas. **Border:** 1px hairline. **Shadow:** Card (two-layer — a tight contact shadow plus a soft diffused lift). **Padding:** 20px. Financials and Ownership additionally lift and deepen their shadow on hover (`.lift`).
 - Card header: 14px semibold title left, a state label right. Sub-section titles inside are 12-13px medium muted with a 70% hairline underneath.
 
 ### Inputs / Fields
-- White fill, 1px hairline, 6px radius, 14px text (13px in dense forms), dim placeholder.
-- **Focus:** border shifts to indigo plus a 2px indigo ring at 25%. Errors are a 13px red line beneath.
+- White fill, 1px hairline, 8px radius, 14px text (13px in dense forms), dim placeholder.
+- **Focus:** border shifts to teal plus a 2px teal ring at 25%. Errors are a 13px red line beneath.
 - Source and as-of date sit beside fields so provenance is entered with the value.
 
 ### Navigation
-- Top bar: logo (rendered black), then Locations, Entities, People, Deeds as 13px medium text with a 14px icon. Active is Ink with a 2px indigo underline inset 8px; inactive is Ink Dim, hover Ink Muted. Search and Data are default buttons at the right, with a save-state text label.
-- Dossier tabs: 14px, bottom border hairline, active tab has a 2px indigo underline and Ink text; badges are dim, amber for open notes. Left/Right arrows switch tabs.
+- Top bar: logo (its own natural steel-blue, no longer forced black), then Locations, Entities, People, Deeds as 13px medium text with a 14px icon. Active is Ink with a 2px teal underline inset 8px; inactive is Ink Dim, hover Ink Muted. Search and Data are default buttons at the right, with a save-state text label.
+- Dossier tabs: 14px, bottom border hairline, active tab has a 2px teal underline and Ink text; badges are dim, amber for open notes. Left/Right arrows switch tabs.
 
 ### Locations table
 - 36px rows, 13px text, hairline row dividers at 70%, hover Hover Wash. Header is Raised Wash at 60% with 12px dim sortable heads (active head is Ink with an arrow). Owner text is Ink if verified, Muted if not, Dim "No owner on file" if absent; assessed follows the same three-step rule. Money right-aligned and tabular; a dash for missing.
@@ -229,13 +230,13 @@ Gently rounded and consistent. Cards, the table and menus use 8px; buttons, inpu
 Every figure is followed by a 13px source line ("County tax card · Mar 2026") in Ink Muted; with no source it reads "No source" in amber, dashed-underlined. Unverified facts expose an inline label that opens a popover asking for a source and as-of date before marking verified.
 
 ### Dossier hero
-Financials card: 44px assessed value with provenance, a land/building split bar, then a four-up strip of 16px figures. Ownership card: 22px owner-of-record name with "since date · source", up to three recent grantees as small chain chips (latest outlined in indigo at 50%), then entity detail rows.
+Financials card: 52px assessed value with provenance (eases from its previous value on change, not on every open — see `useCountUp`), then a two-up strip of 16px figures (Last sale, Investment). Ownership card: 22px owner-of-record name with "since date · source", up to three recent grantees as small chain chips (latest outlined in teal at 50%), then the practice's own operating-entity detail rows (a different legal party from the owner of record, labeled "Operating entity" so the two don't read as the same thing).
 
 ## Do's and Don'ts
 
 ### Do:
 - **Do** lead every screen with owner of record and assessed value, and show each fact's source and as-of date beside it.
-- **Do** use indigo only for primary action, active nav/tab underline, links, focus, and the verified hero figure.
+- **Do** use teal only for primary action, active nav/tab underline, links, focus, and the verified hero figure.
 - **Do** use `tnum` for all figures and compact USD with the exact value on hover.
 - **Do** separate with 1px hairlines and the Card shadow; use Pop only for floating layers.
 - **Do** show missing data as a dim em dash or "No owner on file"; never fabricate or fill.
