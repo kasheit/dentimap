@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Maximize2, Minimize2 } from 'lucide-react';
+import { AlertTriangle, Compass, Maximize2, Minimize2 } from 'lucide-react';
 import { APIProvider, InfoWindow, Map as GoogleMap, Marker, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { EmptyState } from '@/components/Page';
 import { compactUsd, facilityTypeLabel } from '@/lib/format';
@@ -61,8 +61,17 @@ const facilityIconPaths: Record<FacilityType, { d: string[]; circle?: [string, s
   },
   affiliate: {
     d: ['M11 2v2', 'M5 2v2', 'M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1', 'M8 15a6 6 0 0 0 12 0v-3'],
-    circle: ['20', '10', '2'],
+    circle: ['20', '10', '2.6'],
   },
+};
+
+// Same numeric stroke-width doesn't read as equal weight across all three: the tooth is one dense
+// curved silhouette, the syringe is six sparse diagonal segments (diagonals anti-alias softer than
+// verticals/horizontals), so it gets a bump to match perceived ink density at pin scale.
+const glyphStrokeWidth: Record<FacilityType, number> = {
+  vfd_practice: 2.25,
+  valleygate_asc: 2.6,
+  affiliate: 2.25,
 };
 
 function facilityIconSvg(type: FacilityType, stroke: string, strokeWidth: number) {
@@ -72,10 +81,16 @@ function facilityIconSvg(type: FacilityType, stroke: string, strokeWidth: number
   return `<svg viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${paths}${circle}</svg>`;
 }
 
-/** A self-contained image (colored ring + white glyph) for use as a Marker's icon.url — a data URI, since a Marker icon renders as a plain <img>, outside the page's own DOM/CSS. */
+/**
+ * A self-contained image (colored ring + white glyph) for use as a Marker's icon.url — a data URI,
+ * since a Marker icon renders as a plain <img>, outside the page's own DOM/CSS. 28px, up from an
+ * original 20px, with a soft contact shadow (map tiles are photographic/varied, not the app's flat
+ * white canvas, so the flat ring alone under-separates there) and a proportionally thinner stroke
+ * (a bigger glyph can carry less relative weight and still read crisp, rather than going chunky).
+ */
 function pinIconUrl(state: LocState, facilityType: FacilityType): string {
-  const glyph = facilityIconSvg(facilityType, '#ffffff', 2.75);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="${pinFillHex[state]}" stroke="#ffffff" stroke-width="2"/><svg x="4.5" y="4.5" width="11" height="11">${glyph}</svg></svg>`;
+  const glyph = facilityIconSvg(facilityType, '#ffffff', glyphStrokeWidth[facilityType]);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><defs><filter id="s" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="1" stdDeviation="1.4" flood-color="#14161e" flood-opacity="0.35"/></filter></defs><circle cx="14" cy="14" r="13" fill="${pinFillHex[state]}" stroke="#ffffff" stroke-width="2.5" filter="url(#s)"/><svg x="5" y="5" width="18" height="18">${glyph}</svg></svg>`;
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
@@ -147,13 +162,19 @@ function PlaceSearch() {
   }, [placesLib, map]);
 
   return (
-    <input
-      ref={inputRef}
-      type="text"
-      placeholder="Search any address…"
-      aria-label="Search any address on the map"
-      className="field absolute left-2 top-2 z-[1000] w-[min(15rem,calc(100%-3.5rem))] shadow-card"
-    />
+    <span className="absolute left-2 top-2 z-[1000] block w-[min(15rem,calc(100%-3.5rem))]">
+      <Compass className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dm-dim" aria-hidden />
+      {/* a distinct leading icon and verb from the portfolio search above the map (magnifying-glass
+          "Search") — this one only pans the camera to any real-world address, it doesn't filter
+          your saved locations, and looking identical to that other box was actively misleading */}
+      <input
+        ref={inputRef}
+        type="text"
+        placeholder="Fly to an address…"
+        aria-label="Fly the map to any address (does not search your saved locations)"
+        className="field w-full pl-8 shadow-card"
+      />
+    </span>
   );
 }
 
@@ -330,8 +351,8 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
                     title={`${r.p.name}, ${facilityTypeLabel[r.p.facilityType]}, ${pinLabel[r.state]}`}
                     icon={{
                       url: pinIconUrl(r.state, r.p.facilityType),
-                      scaledSize: { width: 20, height: 20 } as google.maps.Size,
-                      anchor: { x: 10, y: 10 } as google.maps.Point,
+                      scaledSize: { width: 28, height: 28 } as google.maps.Size,
+                      anchor: { x: 14, y: 14 } as google.maps.Point,
                     }}
                     ref={(m) => {
                       if (m) markerRefs.current.set(r.p.id, m);

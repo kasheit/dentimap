@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { AlertTriangle, Users, Building2, CloudOff, FileText, Landmark, Monitor, Moon, Sun } from 'lucide-react';
+import { AlertTriangle, Users, Building2, CloudOff, FileText, Home, Landmark, Monitor, Moon, Sun } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { OPEN_SEARCH_EVENT } from './SearchPalette';
 import { isValidData, useDentimap } from '@/lib/store';
@@ -35,7 +35,11 @@ function ThemeToggle() {
 // Glossary stays a real tab (routed in App.tsx, reachable via Ctrl+K — see SearchPalette's
 // "Go to Glossary" command and its own term search) but isn't a peer of the four screens that
 // actually answer "who owns what, worth what" — dropped from the primary nav for that reason.
+// Home IS a peer of those four (it's the triage queue meant to open every session) and needs
+// to be a real tab so the active-tab underline has something to point at while it's open —
+// previously it was reachable only via the unlabeled logo, with no "you are here" signal.
 const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
+  { id: 'home', label: 'Next up', icon: Home },
   { id: 'properties', label: 'Locations', icon: Building2 },
   { id: 'entities', label: 'Entities', icon: Landmark },
   { id: 'people', label: 'People', icon: Users },
@@ -44,8 +48,9 @@ const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
 
 // Routine states ('saving'/'synced') say nothing an operator needs mid-task and read as
 // unfinished if caught flickering — this only ever shows up for an actual problem.
-const csvKindFor = (tab: TabId): 'properties' | 'deeds' | 'entities' => (tab === 'deeds' ? 'deeds' : tab === 'entities' ? 'entities' : 'properties');
-const csvLabelFor = (tab: TabId) => (tab === 'deeds' ? 'deeds' : tab === 'entities' ? 'entities' : 'locations');
+const csvKindFor = (tab: TabId): 'properties' | 'deeds' | 'entities' | 'people' =>
+  tab === 'deeds' || tab === 'entities' || tab === 'people' ? tab : 'properties';
+const csvLabelFor = (tab: TabId) => (tab === 'deeds' || tab === 'entities' || tab === 'people' ? tab : 'locations');
 
 function SyncBadge() {
   const sync = useDentimap((s) => s.sync);

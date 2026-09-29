@@ -46,7 +46,7 @@ export function OwnershipCard({
       <header className="flex items-center justify-between gap-3">
         <h2 className="text-body font-semibold text-dm-text">Ownership</h2>
         <LevelLabel
-          level={holder ? (holder.confidence === 'verified' && !doubt ? 'confirmed' : 'partial') : 'missing'}
+          level={holder ? (doubt ? 'review' : holder.confidence === 'verified' ? 'confirmed' : 'partial') : 'missing'}
           detail={holder ? doubt || undefined : 'no deed on file'}
         />
       </header>
@@ -106,7 +106,7 @@ export function OwnershipCard({
       )}
 
       <div className="mt-4">
-        <div className="border-b border-dm-border/70 pb-1 text-[12px] font-medium text-dm-muted">Business entity</div>
+        <div className="border-b border-dm-border/70 pb-1 text-[12px] font-medium text-dm-muted">Operating entity</div>
         {entityRows.filter((r) => r.value).map((r) => (
           <DetailRow key={r.field} label={r.label} mono={r.mono} value={r.value} status={status(r.field, r.full, true)} />
         ))}

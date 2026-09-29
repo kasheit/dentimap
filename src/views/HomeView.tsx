@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { ArrowRight, Circle, CircleAlert, TriangleAlert } from 'lucide-react';
 import { EmptyState, PageHeader, PageShell } from '@/components/Page';
 import { attentionQueue } from '@/lib/attention';
@@ -15,18 +14,11 @@ const severity: Record<Severity, { Icon: typeof Circle; cls: string; label: stri
 /** A work queue: the next things worth doing, worst first. */
 export function HomeView() {
   const { properties, deeds, entities, openProperty, setTab } = useDentimap();
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(t);
-  }, []);
 
   const queue = attentionQueue(properties, deeds, entities);
-  const dateLine = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const withValue = properties.filter((p) => p.metrics?.currentAssessedValue !== undefined);
   const total = withValue.reduce((t, p) => t + (p.metrics?.currentAssessedValue ?? 0), 0);
-  const subtitle = withValue.length ? `${dateLine} · ${compactUsd(total)} assessed across ${withValue.length} of ${properties.length} locations` : dateLine;
+  const subtitle = withValue.length ? `${compactUsd(total)} assessed across ${withValue.length} of ${properties.length} locations` : undefined;
 
   const go = (item: (typeof queue)[number]) => {
     if (item.goToEntities) setTab('entities');

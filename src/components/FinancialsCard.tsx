@@ -19,8 +19,6 @@ function Figure({ label, value, sub, p, field }: { label: string; value?: number
 export function FinancialsCard({ p }: { p: Property }) {
   const m = p.metrics;
   const assessed = m?.currentAssessedValue;
-  const land = m?.landValue;
-  const building = m?.buildingValue;
   const confirmed = levelFor(assessed !== undefined, p.meta?.assessedValue) === 'confirmed';
 
   return (
@@ -43,8 +41,6 @@ export function FinancialsCard({ p }: { p: Property }) {
 
       {(() => {
         const figures = [
-          { label: 'Land', value: land, field: 'assessedValue' as const },
-          { label: 'Building', value: building, field: 'assessedValue' as const },
           { label: 'Last sale', value: p.lastSale?.price, sub: p.lastSale?.date ? fmtDate(p.lastSale.date) : undefined, field: 'lastSale' as const },
           { label: 'Investment', value: m?.projectInvestment, field: 'projectInvestment' as const },
         ];

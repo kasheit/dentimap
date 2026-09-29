@@ -1,10 +1,21 @@
 import { useState } from 'react';
-import { Pencil, X } from 'lucide-react';
+import { Circle, CircleCheck, CircleDashed, Pencil, X } from 'lucide-react';
 import { entityTypeLabel, fmtDate, personRoleLabel } from '@/lib/format';
 import { unlinkedGrantees } from '@/lib/entities';
 import { newId, useDentimap } from '@/lib/store';
 import type { EntityType, LegalEntity } from '@/lib/types';
 import { EmptyState, PageHeader, PageShell } from '@/components/Page';
+
+// Same state-dot vocabulary as the Locations list, so an incomplete entity is visible
+// without opening it — previously the sidebar gave no completeness signal at all.
+const entityStateMeta = (e: LegalEntity) => {
+  const have = [e.sosId, e.formationDate].filter(Boolean).length;
+  return have === 2
+    ? { Icon: CircleCheck, cls: 'text-dm-green', label: 'SOS ID and formation date on file' }
+    : have === 1
+      ? { Icon: CircleDashed, cls: 'text-dm-amber', label: 'SOS ID or formation date missing' }
+      : { Icon: Circle, cls: 'text-dm-dim', label: 'No SOS ID or formation date on file' };
+};
 
 function EntityHeader({ e }: { e: LegalEntity }) {
   const { updateEntity, deleteEntity } = useDentimap();
@@ -271,20 +282,27 @@ export function EntitiesView() {
         <div className="grid items-start gap-5 lg:grid-cols-[17rem_minmax(0,1fr)]">
           <nav aria-label="Entities" className="overflow-hidden rounded-lg border border-dm-border bg-dm-surface shadow-card">
             <ul className="divide-y divide-dm-border/70">
-              {entities.map((x) => (
-                <li key={x.id}>
-                  <button
-                    onClick={() => setSelectedId(x.id)}
-                    aria-current={x.id === selected.id ? 'true' : undefined}
-                    className={`block w-full px-4 py-2.5 text-left transition-colors ${x.id === selected.id ? 'bg-dm-hover' : 'hover:bg-dm-hover/60'}`}
-                  >
-                    <span className="block truncate text-body font-medium">{x.name}</span>
-                    <span className="tnum block truncate text-label text-dm-muted">
-                      {entityTypeLabel[x.entityType]} &middot; {x.associatedPropertyIds.length} location{x.associatedPropertyIds.length === 1 ? '' : 's'}
-                    </span>
-                  </button>
-                </li>
-              ))}
+              {entities.map((x) => {
+                const { Icon, cls, label } = entityStateMeta(x);
+                return (
+                  <li key={x.id}>
+                    <button
+                      onClick={() => setSelectedId(x.id)}
+                      aria-current={x.id === selected.id ? 'true' : undefined}
+                      className={`flex w-full items-start gap-2.5 px-4 py-2.5 text-left transition-colors ${x.id === selected.id ? 'bg-dm-hover' : 'hover:bg-dm-hover/60'}`}
+                    >
+                      <Icon className={`mt-1 h-4 w-4 shrink-0 ${cls}`} aria-hidden />
+                      <span className="min-w-0">
+                        <span className="sr-only">{label}: </span>
+                        <span className="block truncate text-body font-medium">{x.name}</span>
+                        <span className="tnum block truncate text-label text-dm-muted">
+                          {entityTypeLabel[x.entityType]} &middot; {x.associatedPropertyIds.length} location{x.associatedPropertyIds.length === 1 ? '' : 's'}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
             {orphans.length > 0 && (
               <div className="border-t border-dm-border bg-dm-raised/60 px-4 py-2.5">

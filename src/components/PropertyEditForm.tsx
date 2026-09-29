@@ -267,15 +267,6 @@ export function PropertyEditForm({
               <Field label="Project investment">{input('projectInvestment', 'tnum')}</Field>
               <SourceRow label="Project investment" meta={meta.projectInvestment} onMeta={setM('projectInvestment')} />
             </div>
-            <Field label="Land value (same source as assessed)">{input('landValue', 'tnum')}</Field>
-            <Field label="Building value (same source)">{input('buildingValue', 'tnum')}</Field>
-            <div className="text-label text-dm-dim sm:col-span-2">
-              Total value{' '}
-              <span className="tnum font-medium text-dm-text">
-                {num(d.landValue) !== undefined && num(d.buildingValue) !== undefined ? `$${((num(d.landValue) ?? 0) + (num(d.buildingValue) ?? 0)).toLocaleString('en-US')}` : '—'}
-              </span>{' '}
-              (land + building)
-            </div>
             <Field label="Target opening">{input('targetOpening')}</Field>
           </div>
         </div>

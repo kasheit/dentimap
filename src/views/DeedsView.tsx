@@ -50,7 +50,6 @@ export function DeedsView() {
                 setPicking(false);
                 if (e.target.value) openProperty(e.target.value, 'title');
               }}
-              onBlur={() => setPicking(false)}
               autoFocus
             >
               <option value="">Choose a location…</option>
@@ -74,7 +73,7 @@ export function DeedsView() {
                   Recorded {desc ? <ArrowDown className="h-3 w-3" /> : <ArrowUp className="h-3 w-3" />}
                 </button>
               </th>
-              {['Location', 'Instrument', 'Grantor → Grantee', 'Consideration', 'Excise check', 'Status'].map((h) => (
+              {['Location', 'Instrument', 'Grantor → Grantee', 'Consideration', 'Excise check', 'Source confirmed'].map((h) => (
                 <th key={h} className="label px-4 py-3 font-medium">{h}</th>
               ))}
             </tr>

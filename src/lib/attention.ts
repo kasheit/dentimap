@@ -76,8 +76,8 @@ export function attentionQueue(properties: Property[], deeds: DeedRecord[], enti
     if (p.status === 'closed') continue;
     const hasDeed = deeds.some((d) => d.propertyId === p.id && d.deedType !== 'subdivision_plat');
     const assessed = p.metrics?.currentAssessedValue;
-    if (hasDeed && assessed === undefined) items.push({ id: `assessed-${p.id}`, severity: 'gray', title: `${p.name} — no assessed value`, sub: 'Paste the county page to fill it in', propertyId: p.id });
-    else if (hasDeed && assessed !== undefined && p.meta?.assessedValue?.state !== 'verified') items.push({ id: `assessed-src-${p.id}`, severity: 'gray', title: `${p.name} — assessed value has no source`, sub: 'Confirm where the figure came from', propertyId: p.id });
+    if (hasDeed && assessed === undefined) items.push({ id: `assessed-${p.id}`, severity: 'gray', title: `${p.name} — assessed value missing`, sub: 'Paste the county page to fill it in', propertyId: p.id });
+    else if (hasDeed && assessed !== undefined && p.meta?.assessedValue?.state !== 'verified') items.push({ id: `assessed-src-${p.id}`, severity: 'gray', title: `${p.name} — assessed value isn't sourced yet`, sub: 'Confirm where the figure came from', propertyId: p.id });
   }
 
   for (const e of entities) {

@@ -62,7 +62,20 @@ export function ConfirmLabel({ property, field, label, has, extra, showDetail = 
   return (
     <span className="relative inline-block">
       <span ref={triggerRef} className="inline-flex items-center gap-3" title={has ? full : undefined}>
-        <LevelLabel level={level} stale={stale} detail={has && showDetail ? detail : undefined} onClick={level === 'confirmed' ? undefined : onClick} expanded={level === 'partial' ? open : undefined} />
+        {level === 'missing' ? (
+          // a distinct plain-text link, not the same badge-button confirming a partial value uses —
+          // clicking it does something more disruptive (jumps to the full editor), so it shouldn't look
+          // like the same interaction as the inline confirm popover
+          <span className="inline-flex items-center gap-1.5 text-label">
+            <i className="inline-block h-1.5 w-1.5 rounded-full bg-dm-dim" />
+            <span className="text-dm-muted">Not found</span>
+            <button type="button" onClick={onClick} className="rounded text-dm-blue hover:underline">
+              Add
+            </button>
+          </span>
+        ) : (
+          <LevelLabel level={level} stale={stale} detail={has && showDetail ? detail : undefined} onClick={level === 'confirmed' ? undefined : onClick} expanded={level === 'partial' ? open : undefined} />
+        )}
         {extra}
       </span>
       {open && (

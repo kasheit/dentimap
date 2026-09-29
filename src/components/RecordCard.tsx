@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
-import { addressLine, fmtDate } from '@/lib/format';
+import { addressLine } from '@/lib/format';
 import { safeUrl, sourcesOf } from '@/lib/sources';
 import { useDentimap } from '@/lib/store';
 import type { Property, SourcedField } from '@/lib/types';
@@ -39,44 +39,30 @@ export function RecordCard({ p, editSignal = 0, focusField }: { p: Property; edi
 
   return (
     <Panel id="record" title="Property" action={<button className="btn" onClick={() => setEditing(true)}>Edit</button>}>
-      <div className="grid gap-x-12 gap-y-6 lg:grid-cols-2">
-        <div>
-          <div className="mb-1 border-b border-dm-border/70 pb-1.5 text-label font-medium text-dm-muted">Parcel</div>
-          <DetailRow label="Address" value={hasAddress ? addressLine(p.address) : undefined} status={status('address', 'Address', hasAddress)} />
-          <DetailRow label="County" value={p.address.county.replace(/\s+County$/i, '') || undefined} status={status('county', 'County', !!p.address.county)} />
-          <DetailRow
-            label="Parcel PIN"
-            mono
-            value={p.address.parcelPin || undefined}
-            status={status('parcelPin', 'Parcel PIN', !!p.address.parcelPin)}
-          />
-          <DetailRow
-            label="Sources"
-            value={
-              sourcesOf(p).length ? (
-                <div className="flex flex-col gap-1">
-                  {sourcesOf(p).map((s) => (
-                    <a key={s.url} href={safeUrl(s.url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-normal text-dm-blue hover:underline">
-                      {s.label} <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ))}
-                </div>
-              ) : undefined
-            }
-          />
-        </div>
-
-        {(p.countyDeed?.book || p.countyDeed?.page || p.countyDeed?.date) && (
-        <div>
-          <div className="mb-1 border-b border-dm-border/70 pb-1.5 text-label font-medium text-dm-muted">County deed reference</div>
-          <DetailRow
-            label="Deed book / page"
-            mono
-            value={p.countyDeed?.book || p.countyDeed?.page ? [p.countyDeed?.book, p.countyDeed?.page].filter(Boolean).join(' / ') : undefined}
-          />
-          <DetailRow label="Deed date" value={p.countyDeed?.date ? fmtDate(p.countyDeed.date) : undefined} />
-        </div>
-        )}
+      <div className="max-w-xl">
+        <div className="mb-1 border-b border-dm-border/70 pb-1.5 text-label font-medium text-dm-muted">Parcel</div>
+        <DetailRow label="Address" value={hasAddress ? addressLine(p.address) : undefined} status={status('address', 'Address', hasAddress)} />
+        <DetailRow label="County" value={p.address.county.replace(/\s+County$/i, '') || undefined} status={status('county', 'County', !!p.address.county)} />
+        <DetailRow
+          label="Parcel PIN"
+          mono
+          value={p.address.parcelPin || undefined}
+          status={status('parcelPin', 'Parcel PIN', !!p.address.parcelPin)}
+        />
+        <DetailRow
+          label="Sources"
+          value={
+            sourcesOf(p).length ? (
+              <div className="flex flex-col gap-1">
+                {sourcesOf(p).map((s) => (
+                  <a key={s.url} href={safeUrl(s.url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-normal text-dm-blue hover:underline">
+                    {s.label} <ExternalLink className="h-3 w-3" />
+                  </a>
+                ))}
+              </div>
+            ) : undefined
+          }
+        />
       </div>
     </Panel>
   );

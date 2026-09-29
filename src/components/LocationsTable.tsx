@@ -63,7 +63,6 @@ export function LocationsTable() {
   const [view, setView] = useState<'list' | 'map'>('list');
   const [wide, setWide] = useState(false);
   const span = wide ? 8 : 4;
-  const [groupBy, setGroupBy] = useState<'type' | 'owner'>('type');
   const [unfolded, setUnfolded] = useState<Set<string>>(new Set());
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: 'type', dir: 1 });
   const inputRef = useRef<HTMLInputElement>(null);
@@ -153,18 +152,6 @@ export function LocationsTable() {
   const groups = useMemo(() => {
     if (!grouped) return [{ key: 'all', label: '', rows: visible }];
     const out: { key: string; label: string; rows: Row[] }[] = [];
-    if (groupBy === 'owner') {
-      const byOwner = new Map<string, Row[]>();
-      for (const r of visible) {
-        const k = r.owner ?? '';
-        byOwner.set(k, [...(byOwner.get(k) ?? []), r]);
-      }
-      const named = [...byOwner.entries()].filter(([k]) => k).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
-      for (const [k, rs] of named) out.push({ key: `o:${k}`, label: k, rows: rs });
-      const none = byOwner.get('');
-      if (none?.length) out.push({ key: 'o:none', label: 'No owner on file', rows: none });
-      return out;
-    }
     for (const type of ['valleygate_asc', 'vfd_practice', 'affiliate'] as FacilityType[]) {
       const inType = visible.filter((r) => r.p.facilityType === type && r.p.status === 'active');
       if (inType.length) out.push({ key: type, label: facilityTypeLabel[type], rows: inType });
@@ -172,7 +159,7 @@ export function LocationsTable() {
     const closed = visible.filter((r) => r.p.status === 'closed');
     if (closed.length) out.push({ key: 'closed', label: 'Closed', rows: closed });
     return out;
-  }, [visible, grouped, groupBy]);
+  }, [visible, grouped]);
 
   const onSort = (key: SortKey) =>
     setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: key === 'assessed' || key === 'sale' || key === 'verified' ? -1 : 1 }));
@@ -239,21 +226,6 @@ export function LocationsTable() {
             {label} <span className="text-dm-dim">{counts[id]}</span>
           </button>
         ))}
-        {grouped && (
-          <div className="ml-3 flex items-center gap-1 border-l border-dm-border pl-3" role="group" aria-label="Group by">
-            <span className="text-label text-dm-dim">Group</span>
-            {(['type', 'owner'] as const).map((g) => (
-              <button
-                key={g}
-                aria-pressed={groupBy === g}
-                onClick={() => setGroupBy(g)}
-                className={`rounded-md px-2 py-1 text-label capitalize transition-colors ${groupBy === g ? 'bg-dm-hover font-medium text-dm-text' : 'text-dm-muted hover:bg-dm-hover/60 hover:text-dm-text'}`}
-              >
-                {g}
-              </button>
-            ))}
-          </div>
-        )}
         <div className="ml-auto flex items-center gap-1">
           {view === 'list' && (
             <button aria-pressed={wide} onClick={() => setWide((w) => !w)} className="rounded-md px-2.5 py-1 text-label text-dm-muted transition-colors hover:bg-dm-hover/60 hover:text-dm-text">

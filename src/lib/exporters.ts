@@ -26,7 +26,7 @@ export const exportJson = (d: DentimapData) => {
   download(`dentimap-${stamp()}.json`, 'application/json', JSON.stringify(d, null, 2));
 };
 
-export function exportCsv(d: DentimapData, which: 'properties' | 'deeds' | 'entities') {
+export function exportCsv(d: DentimapData, which: 'properties' | 'deeds' | 'entities' | 'people') {
   let rows: Record<string, unknown>[];
   if (which === 'properties') {
     rows = d.properties.map((p) => ({
@@ -52,6 +52,18 @@ export function exportCsv(d: DentimapData, which: 'properties' | 'deeds' | 'enti
     }));
   } else if (which === 'deeds') {
     rows = d.deeds.map((x) => ({ ...x }));
+  } else if (which === 'people') {
+    rows = (d.people ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      title: p.title,
+      roles: p.roles.join('; '),
+      status: p.status,
+      relevance: p.relevance,
+      entityIds: p.entityIds.join('; '),
+      propertyIds: p.propertyIds.join('; '),
+      notes: p.notes,
+    }));
   } else {
     rows = d.entities.map((e) => ({
       ...e,

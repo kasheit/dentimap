@@ -86,7 +86,12 @@ export function Empty({ children }: { children: ReactNode }) {
 const levelStyle = {
   confirmed: { dot: 'bg-dm-green', text: 'text-dm-green', label: 'Verified' },
   partial: { dot: 'bg-dm-amber', text: 'text-dm-amber', label: 'Unverified' },
-  missing: { dot: 'bg-dm-red', text: 'text-dm-muted', label: 'Not found' },
+  // a structural problem (chain gap, stamp mismatch) — distinct from "partial" so the same
+  // word doesn't have to cover both "nobody's confirmed this yet" and "something's actually wrong"
+  review: { dot: 'bg-dm-amber', text: 'text-dm-amber', label: 'Needs review' },
+  // red is reserved for a real problem elsewhere (sync conflict, stamp mismatch); "nothing on
+  // file yet" isn't one, so this matches the dim treatment the Locations list already uses
+  missing: { dot: 'bg-dm-dim', text: 'text-dm-muted', label: 'Not found' },
 } as const;
 
 export function LevelLabel({
@@ -96,7 +101,7 @@ export function LevelLabel({
   onClick,
   expanded,
 }: {
-  level: 'confirmed' | 'partial' | 'missing';
+  level: 'confirmed' | 'partial' | 'review' | 'missing';
   detail?: ReactNode;
   stale?: boolean;
   onClick?: () => void;
