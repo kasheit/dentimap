@@ -130,13 +130,20 @@ function PlaceSearch() {
       componentRestrictions: { country: 'us' },
     });
     autocomplete.bindTo('bounds', map);
-    const listener = autocomplete.addListener('place_changed', () => {
+    autocomplete.addListener('place_changed', () => {
       const loc = autocomplete.getPlace().geometry?.location;
       if (!loc) return;
       map.panTo(loc);
       map.setZoom(Math.max(map.getZoom() ?? 0, 15));
     });
-    return () => listener.remove();
+    return () => {
+      // Autocomplete has no destroy() — it appends its dropdown straight to <body>, outside
+      // React's tree, so leaving the map view (or this map instance changing) would otherwise
+      // strand a floating .pac-container on screen over whatever's rendered next. Only one
+      // Autocomplete ever exists in this app, so clearing every .pac-container on unmount is safe.
+      google.maps.event.clearInstanceListeners(autocomplete);
+      document.querySelectorAll('.pac-container').forEach((el) => el.remove());
+    };
   }, [placesLib, map]);
 
   return (
@@ -305,6 +312,8 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
                 gestureHandling="greedy"
                 disableDefaultUI
                 zoomControl
+                mapTypeControl
+                streetViewControl
                 styles={MAP_STYLE}
                 style={{ height: '100%', width: '100%' }}
                 onIdle={(e) => {
