@@ -7,6 +7,15 @@
     <meta name="theme-color" content="#ffffff" />
     <title>Sign in</title>
     <meta name="robots" content="noindex, nofollow" />
+    <script>
+      // Runs before paint so there's no flash of the wrong theme. Kept out of React
+      // entirely and off the zustand-persisted (Supabase-synced) store on purpose —
+      // this is a per-browser display preference, not app data.
+      try {
+        var t = localStorage.getItem('dentimap-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

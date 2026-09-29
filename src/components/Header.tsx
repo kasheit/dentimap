@@ -1,11 +1,36 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { AlertTriangle, Users, Building2, CloudOff, FileText, Landmark } from 'lucide-react';
+import { AlertTriangle, Users, Building2, CloudOff, FileText, Landmark, Monitor, Moon, Sun } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { OPEN_SEARCH_EVENT } from './SearchPalette';
 import { isValidData, useDentimap } from '@/lib/store';
 import type { TabId } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
+import { applyTheme, getStoredTheme, nextTheme } from '@/lib/theme';
+import type { ThemePref } from '@/lib/theme';
 import type { DentimapData } from '@/lib/types';
+
+const themeIcon: Record<ThemePref, typeof Sun> = { system: Monitor, light: Sun, dark: Moon };
+const themeLabel: Record<ThemePref, string> = { system: 'Matching system', light: 'Light', dark: 'Dark' };
+
+function ThemeToggle() {
+  const [pref, setPref] = useState<ThemePref>('system');
+  useEffect(() => setPref(getStoredTheme()), []);
+  const Icon = themeIcon[pref];
+  return (
+    <button
+      className="btn px-2.5"
+      onClick={() => {
+        const next = nextTheme[pref];
+        applyTheme(next);
+        setPref(next);
+      }}
+      title={`Theme: ${themeLabel[pref]}. Click for ${themeLabel[nextTheme[pref]]}.`}
+      aria-label={`Theme: ${themeLabel[pref]}. Click to switch to ${themeLabel[nextTheme[pref]]}.`}
+    >
+      <Icon className="h-4 w-4" aria-hidden />
+    </button>
+  );
+}
 
 // Glossary stays a real tab (routed in App.tsx, reachable via Ctrl+K — see SearchPalette's
 // "Go to Glossary" command and its own term search) but isn't a peer of the four screens that
@@ -168,6 +193,7 @@ export function Header() {
         <div className="ml-auto flex items-center gap-3">
           <SyncBadge />
           {notice && <span className="hidden tnum text-label text-dm-dim md:inline">{notice}</span>}
+          <ThemeToggle />
           <button className="btn" onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))} aria-keyshortcuts="Control+K Meta+K">
             Search
             <kbd className="hidden rounded border border-dm-border px-1 font-sans text-[12px] text-dm-dim sm:inline">Ctrl K</kbd>

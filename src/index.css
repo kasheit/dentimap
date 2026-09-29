@@ -19,25 +19,29 @@
     --dm-green: 22 128 76;
     --dm-amber: 168 96 0;
     --dm-red: 196 44 36;
+    /* the ink that reads on a solid --dm-blue fill (.btn-primary, the checked checkbox) —
+       white in light mode; dark mode's own --dm-on-blue below is not white, see why there */
+    --dm-on-blue: 255 255 255;
     /* the tint box-shadow is built from; dark mode redefines this rather than the static shadow utilities themselves */
     --dm-shadow-rgb: 20 22 30;
     --dm-shadow-a1: 0.05;
     --dm-shadow-a2: 0.12;
     --dm-shadow-a3: 0.06;
   }
-  /* Dark theme: follows the OS setting only (no in-app toggle — a private single-operator
-     tool has no real audience for one, and it keeps theme out of the zustand-persisted,
-     Supabase-synced app state). Same restraint as light: a charcoal canvas rather than
-     stark OLED black, the same three text-weight contrast floors, state colors reserved
-     for verification only. `raised`/`hover` invert direction on purpose — they still mean
-     "a distinctly-toned panel" / "the heaviest interactive wash", but on a near-black
-     canvas that has to mean lighter, not darker, or every elevated surface crushes toward
-     black. --dm-blue is a separate, lighter shade here (the light-mode indigo only hits
-     ~3.5:1 as text on a dark canvas) — anywhere it sits as text/an icon that's fine, but a
-     *solid fill* with white or near-white text on it (`.btn-primary`, the checked checkbox)
-     needs dark ink instead, handled below, since white-on-this-blue only clears ~2.7:1. */
+  /* Dark theme: follows the OS setting by default; an explicit choice (the small toggle in
+     Header) sets data-theme and wins over the OS either way, via `html`'s data-theme attribute
+     set synchronously in index.html before paint. Kept out of the zustand-persisted,
+     Supabase-synced app state on purpose — it's a per-browser display preference, not app data.
+     Same restraint as light: a charcoal canvas rather than stark OLED black, the same three
+     text-weight contrast floors, state colors reserved for verification only. `raised`/`hover`
+     invert direction on purpose — they still mean "a distinctly-toned panel" / "the heaviest
+     interactive wash", but on a near-black canvas that has to mean lighter, not darker, or every
+     elevated surface crushes toward black. --dm-blue is a separate, lighter shade here (the
+     light-mode indigo only hits ~3.5:1 as text on a dark canvas) — anywhere it sits as text/an
+     icon that's fine, but white text on that same lighter blue as a *fill* only clears ~2.7:1,
+     so --dm-on-blue flips to dark ink here instead. */
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme='light']) {
       --dm-bg: 15 16 18;
       --dm-surface: 22 23 26;
       --dm-raised: 30 31 35;
@@ -50,16 +54,39 @@
       --dm-green: 52 199 120;
       --dm-amber: 214 148 40;
       --dm-red: 255 92 82;
+      --dm-on-blue: 27 28 32;
       --dm-shadow-rgb: 0 0 0;
       --dm-shadow-a1: 0.4;
       --dm-shadow-a2: 0.55;
       --dm-shadow-a3: 0.35;
     }
   }
+  /* explicit override, regardless of OS preference */
+  :root[data-theme='dark'] {
+    --dm-bg: 15 16 18;
+    --dm-surface: 22 23 26;
+    --dm-raised: 30 31 35;
+    --dm-hover: 38 39 44;
+    --dm-border: 48 50 56;
+    --dm-text: 237 238 240;
+    --dm-muted: 150 154 162;
+    --dm-dim: 128 132 140;
+    --dm-blue: 140 150 240;
+    --dm-green: 52 199 120;
+    --dm-amber: 214 148 40;
+    --dm-red: 255 92 82;
+    --dm-on-blue: 27 28 32;
+    --dm-shadow-rgb: 0 0 0;
+    --dm-shadow-a1: 0.4;
+    --dm-shadow-a2: 0.55;
+    --dm-shadow-a3: 0.35;
+  }
   html {
     color-scheme: light dark;
     scroll-behavior: smooth;
   }
+  html[data-theme='light'] { color-scheme: light; }
+  html[data-theme='dark'] { color-scheme: dark; }
   body {
     @apply bg-dm-bg font-sans text-body leading-relaxed text-dm-text antialiased;
     font-feature-settings: 'tnum';
@@ -91,14 +118,9 @@
   input[type='checkbox']:checked {
     border-color: rgb(var(--dm-blue));
     background-color: rgb(var(--dm-blue));
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
-  }
-  /* dark mode's --dm-blue is lightened for text/icon contrast, which means a white checkmark on that
-     same color as a fill only clears ~2.7:1 — dark ink instead, same fix as .btn-primary below */
-  @media (prefers-color-scheme: dark) {
-    input[type='checkbox']:checked {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231b1c20' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
-    }
+    /* currentColor picks up the `color` set below, so this needs no light/dark duplicate */
+    color: rgb(var(--dm-on-blue));
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
   }
   /* Google Places autocomplete dropdown, appended to <body> outside any component's own DOM —
      styled here to match the app rather than Google's own Arial/blue default. Hardcoded light
@@ -156,8 +178,12 @@
     @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-label font-medium text-dm-muted transition-all duration-150 ease-luxury hover:-translate-y-px hover:border-dm-muted/60 hover:bg-dm-hover hover:text-dm-text hover:shadow-card disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none active:scale-[0.97] active:duration-75;
   }
   .btn-primary {
-    /* same white-on-lightened-dark-blue contrast problem as the checkbox checkmark above */
-    @apply border-dm-blue bg-dm-blue text-white hover:bg-dm-blue/90 hover:text-white dark:text-[#1b1c20] dark:hover:text-[#1b1c20];
+    /* color via --dm-on-blue, not Tailwind's text-white — same reasoning as the checked checkbox above */
+    @apply border-dm-blue bg-dm-blue hover:bg-dm-blue/90;
+    color: rgb(var(--dm-on-blue));
+  }
+  .btn-primary:hover {
+    color: rgb(var(--dm-on-blue));
   }
   .label {
     @apply text-label font-medium text-dm-dim;
