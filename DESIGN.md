@@ -245,6 +245,6 @@ Financials card: 44px assessed value with provenance, a land/building split bar,
 - **Don't** add KPI tile strips or hero-metric clutter; one hero figure per dossier.
 - **Don't** reintroduce building details, the county-owner block, a preview pane, a separate Matrix view, REID, land class, acres, description or a specifications panel; the user removed these deliberately.
 - **Don't** use green, amber or red as decoration or category color.
-- **Don't** go dark-SaaS: no dark canvas, glow, or gradient chrome.
+- **Don't** add glow or gradient chrome, in either theme. (Dark mode itself — a charcoal canvas following the OS's `prefers-color-scheme`, no in-app toggle — shipped; see the `--dm-*` tokens' dark values in `src/index.css`. Same restraint rules apply: one accent, state colors reserved for verification only, no stark OLED black.)
 - **Don't** use monospace for anything but identifiers.
 - **Don't** let an unverified value present in the verified color or weight.

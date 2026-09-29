@@ -19,9 +19,45 @@
     --dm-green: 22 128 76;
     --dm-amber: 168 96 0;
     --dm-red: 196 44 36;
+    /* the tint box-shadow is built from; dark mode redefines this rather than the static shadow utilities themselves */
+    --dm-shadow-rgb: 20 22 30;
+    --dm-shadow-a1: 0.05;
+    --dm-shadow-a2: 0.12;
+    --dm-shadow-a3: 0.06;
+  }
+  /* Dark theme: follows the OS setting only (no in-app toggle — a private single-operator
+     tool has no real audience for one, and it keeps theme out of the zustand-persisted,
+     Supabase-synced app state). Same restraint as light: a charcoal canvas rather than
+     stark OLED black, the same three text-weight contrast floors, state colors reserved
+     for verification only. `raised`/`hover` invert direction on purpose — they still mean
+     "a distinctly-toned panel" / "the heaviest interactive wash", but on a near-black
+     canvas that has to mean lighter, not darker, or every elevated surface crushes toward
+     black. --dm-blue is a separate, lighter shade here (the light-mode indigo only hits
+     ~3.5:1 as text on a dark canvas) — anywhere it sits as text/an icon that's fine, but a
+     *solid fill* with white or near-white text on it (`.btn-primary`, the checked checkbox)
+     needs dark ink instead, handled below, since white-on-this-blue only clears ~2.7:1. */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --dm-bg: 15 16 18;
+      --dm-surface: 22 23 26;
+      --dm-raised: 30 31 35;
+      --dm-hover: 38 39 44;
+      --dm-border: 48 50 56;
+      --dm-text: 237 238 240;
+      --dm-muted: 150 154 162;
+      --dm-dim: 128 132 140;
+      --dm-blue: 140 150 240;
+      --dm-green: 52 199 120;
+      --dm-amber: 214 148 40;
+      --dm-red: 255 92 82;
+      --dm-shadow-rgb: 0 0 0;
+      --dm-shadow-a1: 0.4;
+      --dm-shadow-a2: 0.55;
+      --dm-shadow-a3: 0.35;
+    }
   }
   html {
-    color-scheme: light;
+    color-scheme: light dark;
     scroll-behavior: smooth;
   }
   body {
@@ -57,6 +93,13 @@
     background-color: rgb(var(--dm-blue));
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
   }
+  /* dark mode's --dm-blue is lightened for text/icon contrast, which means a white checkmark on that
+     same color as a fill only clears ~2.7:1 — dark ink instead, same fix as .btn-primary below */
+  @media (prefers-color-scheme: dark) {
+    input[type='checkbox']:checked {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231b1c20' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+    }
+  }
   ::selection {
     background: rgb(var(--dm-blue) / 0.22);
   }
@@ -79,7 +122,8 @@
     @apply inline-flex items-center gap-1.5 rounded-md border border-dm-border bg-dm-surface px-3 py-1.5 text-label font-medium text-dm-muted transition-all duration-150 ease-luxury hover:-translate-y-px hover:border-dm-muted/60 hover:bg-dm-hover hover:text-dm-text hover:shadow-card disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none active:scale-[0.97] active:duration-75;
   }
   .btn-primary {
-    @apply border-dm-blue bg-dm-blue text-white hover:bg-dm-blue/90 hover:text-white;
+    /* same white-on-lightened-dark-blue contrast problem as the checkbox checkmark above */
+    @apply border-dm-blue bg-dm-blue text-white hover:bg-dm-blue/90 hover:text-white dark:text-[#1b1c20] dark:hover:text-[#1b1c20];
   }
   .label {
     @apply text-label font-medium text-dm-dim;
