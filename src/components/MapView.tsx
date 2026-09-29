@@ -1,19 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import { Maximize2, Minimize2 } from 'lucide-react';
-import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import { AlertTriangle, Maximize2, Minimize2 } from 'lucide-react';
+import { APIProvider, InfoWindow, Map as GoogleMap, Marker, useMap } from '@vis.gl/react-google-maps';
 import { EmptyState } from '@/components/Page';
 import { compactUsd, facilityTypeLabel } from '@/lib/format';
 import { geocodeMissing, geocodeProperty, isCoords } from '@/lib/geocode';
 import type { GeocodeFailure } from '@/lib/geocode';
 import { useDentimap } from '@/lib/store';
 import type { FacilityType, Property } from '@/lib/types';
-
-// Leaflet's default marker images resolve relative to the page and 404 under a
-// bundler; every marker here uses a custom divIcon, but this keeps L.Marker's
-// own defaults (used internally, e.g. by the attribution control) from
-// requesting missing images.
-delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
 
 export type LocState = 'confirmed' | 'unconfirmed' | 'missing';
 
@@ -27,7 +20,18 @@ export interface MapRow {
   state: LocState;
 }
 
-const pinColor: Record<LocState, string> = {
+// Actual hex, not Tailwind classes — a Marker icon is a standalone image (data URI), not a DOM
+// node in this page, so it has no access to the app's compiled CSS. Deliberately fixed to the
+// LIGHT --dm-green/--dm-amber/--dm-dim values regardless of the app's theme: the pins sit on
+// map tiles (their own light/dark thing), not on the app's own surfaces, so there's no real
+// "wrong" here to fix by branching on theme — kept in sync with src/index.css by hand.
+const pinFillHex: Record<LocState, string> = {
+  confirmed: '#16804C',
+  unconfirmed: '#A86000',
+  missing: '#6C7078',
+};
+
+const pinColorClass: Record<LocState, string> = {
   confirmed: 'bg-dm-green',
   unconfirmed: 'bg-dm-amber',
   missing: 'bg-dm-dim',
@@ -40,12 +44,11 @@ const pinLabel: Record<LocState, string> = {
 };
 
 /**
- * Pin color is verification state (unchanged); shape alone can't carry a third facility
- * type at 16-20px, so each type gets its own icon instead. Sourced from real icon
- * libraries already used in the app rather than hand-drawn: the tooth is Tabler's
- * "dental" icon (MIT, same 24x24/2px-stroke language as lucide) with its small top
- * decorative stroke dropped — it reads as noise at pin scale; syringe and stethoscope
- * are lucide's own, unmodified.
+ * Pin color is verification state; shape alone can't carry a third facility type at
+ * pin scale, so each type gets its own icon instead. Sourced from real icon libraries
+ * rather than hand-drawn: the tooth is Tabler's "dental" icon (MIT, same 24x24/2px-stroke
+ * language as lucide) with its small top decorative stroke dropped — it reads as noise at
+ * pin scale; syringe and stethoscope are lucide's own, unmodified.
  */
 const facilityIconPaths: Record<FacilityType, { d: string[]; circle?: [string, string, string] }> = {
   vfd_practice: {
@@ -69,15 +72,11 @@ function facilityIconSvg(type: FacilityType, stroke: string, strokeWidth: number
   return `<svg viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${paths}${circle}</svg>`;
 }
 
-function pinIcon(state: LocState, facilityType: FacilityType) {
-  const glyph = facilityIconSvg(facilityType, 'white', 2.75);
-  return L.divIcon({
-    html: `<span class="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white shadow-card ${pinColor[state]}"><span class="h-[11px] w-[11px]">${glyph}</span></span>`,
-    className: '',
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-    popupAnchor: [0, -12],
-  });
+/** A self-contained image (colored ring + white glyph) for use as a Marker's icon.url — a data URI, since a Marker icon renders as a plain <img>, outside the page's own DOM/CSS. */
+function pinIconUrl(state: LocState, facilityType: FacilityType): string {
+  const glyph = facilityIconSvg(facilityType, '#ffffff', 2.75);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="${pinFillHex[state]}" stroke="#ffffff" stroke-width="2"/><svg x="4.5" y="4.5" width="11" height="11">${glyph}</svg></svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
 /** Monochrome, unfilled — same glyph as the map pins, but drawn only in ink-dim so it can't be misread as a fourth state color. */
@@ -92,35 +91,60 @@ function FitBounds({ rows }: { rows: MapRow[] }) {
   const map = useMap();
   const key = rows.map((r) => r.p.id).join(',');
   useEffect(() => {
+    if (!map) return;
     const pts = rows.filter(placed);
     if (!pts.length) return;
     if (pts.length === 1) {
-      map.setView([pts[0].p.address.lat!, pts[0].p.address.lng!], 13);
+      map.setCenter({ lat: pts[0].p.address.lat!, lng: pts[0].p.address.lng! });
+      map.setZoom(13);
     } else {
-      const bounds = L.latLngBounds(pts.map((r) => [r.p.address.lat!, r.p.address.lng!] as [number, number]));
-      map.fitBounds(bounds, { padding: [40, 40] });
+      const bounds = new google.maps.LatLngBounds();
+      pts.forEach((r) => bounds.extend({ lat: r.p.address.lat!, lng: r.p.address.lng! }));
+      map.fitBounds(bounds, 40);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [map, key]);
   return null;
 }
 
-const NC_CENTER: [number, number] = [35.5, -79.1];
-
-/** Leaflet sizes itself from its container on mount and on window resize, but the browser Fullscreen API changes that container's size without firing a resize event, so this calls it explicitly on the transition. */
+/** Google's map resizes itself on a ResizeObserver already, but this nudges it explicitly right after the Fullscreen API transition so it doesn't wait a frame. */
 function InvalidateOnFullscreen({ fullscreen }: { fullscreen: boolean }) {
   const map = useMap();
   useEffect(() => {
-    const t = setTimeout(() => map.invalidateSize(), 60);
+    if (!map) return;
+    const t = setTimeout(() => google.maps.event.trigger(map, 'resize'), 60);
     return () => clearTimeout(t);
   }, [fullscreen, map]);
   return null;
 }
 
-// A public Mapbox token (pk.*) is meant to be embedded in client code — Mapbox's own
-// docs put it directly in frontend JS, restricted by the account's own token settings
-// rather than by keeping it secret. Falls back to plain OSM tiles if it's ever unset.
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined;
+const NC_CENTER = { lat: 35.5, lng: -79.1 };
+
+// A restrained, decluttered style — Google's own default is busy with business POI icons and
+// heavy color; this reads closer to the rest of the app's light, hairline-bordered surfaces.
+// Deliberately light-only, same reasoning as pinFillHex above: this is map tile styling, not
+// app chrome, so it doesn't need a dark counterpart just because the rest of the app now has one.
+const MAP_STYLE: google.maps.MapTypeStyle[] = [
+  { elementType: 'geometry', stylers: [{ color: '#f7f7f8' }] },
+  { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#6c7078' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff' }] },
+  { featureType: 'administrative', elementType: 'geometry', stylers: [{ visibility: 'off' }] },
+  { featureType: 'administrative.land_parcel', stylers: [{ visibility: 'off' }] },
+  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#e6e6eb' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+  { featureType: 'road', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+  { featureType: 'road.arterial', elementType: 'labels.text.fill', stylers: [{ color: '#6c7078' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#e6e6eb' }] },
+  { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#545860' }] },
+  { featureType: 'road.local', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#d6e3f0' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#8a95a6' }] },
+];
+
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
 
 const legend: { state: LocState; label: string }[] = [
   { state: 'confirmed', label: 'Verified' },
@@ -139,7 +163,7 @@ const typeLegend: { type: FacilityType; label: string }[] = [
  * filtered set (pins shown + bounds); `allRows` is every location, used only
  * to list what still needs geocoding regardless of the current filter.
  * `searchActive` tells the map a search narrowed the set, so a single match
- * should open its own popup rather than just being panned to.
+ * should open its own info window rather than just being panned to.
  */
 export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRows: MapRow[]; searchActive?: boolean }) {
   const openProperty = useDentimap((s) => s.openProperty);
@@ -147,9 +171,10 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
   const [locating, setLocating] = useState<Set<string>>(new Set());
   const [failed, setFailed] = useState<Map<string, GeocodeFailure>>(new Map());
   const [unplacedOpen, setUnplacedOpen] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
   const started = useRef(false);
-  const markerRefs = useRef<Map<string, L.Marker>>(new Map());
-  const mapRef = useRef<L.Map>(null);
+  const markerRefs = useRef<Map<string, google.maps.Marker>>(new Map());
+  const mapRef = useRef<google.maps.Map | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -187,11 +212,10 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
   const placedRows = rows.filter(placed);
   const unplaced = allRows.filter((r) => !placed(r));
 
-  // a search that narrows to exactly one placed location opens its popup, so typing an address "pulls it up"
+  // a search that narrows to exactly one placed location opens its info window, so typing an address "pulls it up"
   useEffect(() => {
     if (!searchActive || placedRows.length !== 1) return;
-    const marker = markerRefs.current.get(placedRows[0].p.id);
-    marker?.openPopup();
+    setOpenId(placedRows[0].p.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchActive, placedRows.length === 1 ? placedRows[0]?.p.id : undefined]);
 
@@ -208,6 +232,7 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
   };
 
   const nothingPlacedYet = allRows.length > 0 && placedRows.length === 0 && !progress;
+  const openRow = openId ? placedRows.find((r) => r.p.id === openId) : undefined;
 
   return (
     <div>
@@ -219,7 +244,15 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
         </p>
       )}
 
-      {allRows.length === 0 ? (
+      {!GOOGLE_MAPS_API_KEY ? (
+        <div className="flex items-start gap-3 rounded-lg border border-dm-border bg-dm-surface p-5 text-label text-dm-muted">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-dm-amber" aria-hidden />
+          <div>
+            <p className="font-medium text-dm-text">The map needs a Google Maps API key.</p>
+            <p className="mt-1">Set <code className="font-mono text-dm-muted">VITE_GOOGLE_MAPS_API_KEY</code> and reload.</p>
+          </div>
+        </div>
+      ) : allRows.length === 0 ? (
         <EmptyState title="No locations yet" hint="Add a location to place it on the map." />
       ) : nothingPlacedYet ? (
         <EmptyState title="Nothing placed on the map yet" hint="Locations need an address before they can be geocoded. Add addresses, then reopen Map." />
@@ -239,71 +272,70 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
             >
               {isFullscreen ? <Minimize2 className="h-4 w-4" aria-hidden /> : <Maximize2 className="h-4 w-4" aria-hidden />}
             </button>
-            <MapContainer ref={mapRef} center={NC_CENTER} zoom={7} scrollWheelZoom style={{ height: '100%', width: '100%' }} attributionControl>
-              <InvalidateOnFullscreen fullscreen={isFullscreen} />
-              {MAPBOX_TOKEN ? (
-                <TileLayer
-                  url={`https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/{z}/{x}/{y}?access_token=${MAPBOX_TOKEN}`}
-                  tileSize={512}
-                  zoomOffset={-1}
-                  attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-              ) : (
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-              )}
-              <FitBounds rows={placedRows.length ? placedRows : rows} />
-              {placedRows.map((r) => (
-                <Marker
-                  key={r.p.id}
-                  position={[r.p.address.lat!, r.p.address.lng!]}
-                  icon={pinIcon(r.state, r.p.facilityType)}
-                  ref={(m) => {
-                    if (m) markerRefs.current.set(r.p.id, m);
-                    else markerRefs.current.delete(r.p.id);
-                  }}
-                  eventHandlers={{
-                    add: (e) => {
-                      const el = e.target.getElement();
-                      if (!el) return;
-                      el.setAttribute('role', 'button');
-                      el.setAttribute('aria-label', `${r.p.name}, ${facilityTypeLabel[r.p.facilityType]}, ${pinLabel[r.state]}`);
-                      el.removeAttribute('alt');
-                    },
-                    // A click already opens the popup (Leaflet's default); ease in a bit closer too, but
+            <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+              <GoogleMap
+                defaultCenter={NC_CENTER}
+                defaultZoom={7}
+                gestureHandling="greedy"
+                disableDefaultUI
+                zoomControl
+                styles={MAP_STYLE}
+                style={{ height: '100%', width: '100%' }}
+                onIdle={(e) => {
+                  mapRef.current = e.map;
+                }}
+              >
+                <InvalidateOnFullscreen fullscreen={isFullscreen} />
+                <FitBounds rows={placedRows.length ? placedRows : rows} />
+                {placedRows.map((r) => (
+                  <Marker
+                    key={r.p.id}
+                    position={{ lat: r.p.address.lat!, lng: r.p.address.lng! }}
+                    title={`${r.p.name}, ${facilityTypeLabel[r.p.facilityType]}, ${pinLabel[r.state]}`}
+                    icon={{
+                      url: pinIconUrl(r.state, r.p.facilityType),
+                      scaledSize: { width: 20, height: 20 } as google.maps.Size,
+                      anchor: { x: 10, y: 10 } as google.maps.Point,
+                    }}
+                    ref={(m) => {
+                      if (m) markerRefs.current.set(r.p.id, m);
+                      else markerRefs.current.delete(r.p.id);
+                    }}
+                    // A click already opens the info window (below); ease in a bit closer too, but
                     // never zoom back out if the operator's already zoomed in further than this.
-                    click: () => {
+                    onClick={() => {
+                      setOpenId(r.p.id);
                       const map = mapRef.current;
                       if (!map) return;
-                      map.flyTo([r.p.address.lat!, r.p.address.lng!], Math.max(map.getZoom(), 15), { duration: 0.5 });
-                    },
-                  }}
-                >
-                  <Popup>
+                      map.panTo({ lat: r.p.address.lat!, lng: r.p.address.lng! });
+                      map.setZoom(Math.max(map.getZoom() ?? 0, 15));
+                    }}
+                  />
+                ))}
+                {openRow && markerRefs.current.get(openRow.p.id) && (
+                  <InfoWindow anchor={markerRefs.current.get(openRow.p.id)!} onCloseClick={() => setOpenId(null)}>
                     <div className="min-w-[12rem]">
-                      <p className="text-title font-semibold">{r.p.name}</p>
-                      <p className={`mt-1 text-label ${r.owner ? 'text-dm-text' : 'text-dm-dim'}`}>{r.owner ?? 'No owner on file'}</p>
-                      <p className="text-label text-dm-muted">{r.owner ? r.ownerSource || 'No source' : ''}</p>
+                      <p className="text-title font-semibold">{openRow.p.name}</p>
+                      <p className={`mt-1 text-label ${openRow.owner ? 'text-dm-text' : 'text-dm-dim'}`}>{openRow.owner ?? 'No owner on file'}</p>
+                      <p className="text-label text-dm-muted">{openRow.owner ? openRow.ownerSource || 'No source' : ''}</p>
                       <p className="tnum text-label text-dm-muted">
-                        {r.assessed !== undefined ? compactUsd(r.assessed) : '—'}
-                        {r.assessed !== undefined && !r.assessedSure && <span className="text-dm-amber"> · unverified</span>}
+                        {openRow.assessed !== undefined ? compactUsd(openRow.assessed) : '—'}
+                        {openRow.assessed !== undefined && !openRow.assessedSure && <span className="text-dm-amber"> · unverified</span>}
                       </p>
-                      <button className="btn btn-primary mt-2 w-full justify-center" onClick={() => openProperty(r.p.id)}>
+                      <button className="btn btn-primary mt-2 w-full justify-center" onClick={() => openProperty(openRow.p.id)}>
                         View location
                       </button>
                     </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+                  </InfoWindow>
+                )}
+              </GoogleMap>
+            </APIProvider>
           </div>
 
           <ul className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-label text-dm-muted" aria-label="Pin colors, by verification state">
             {legend.map((l) => (
               <li key={l.state} className="flex items-center gap-1.5">
-                <span aria-hidden className={`inline-block h-2.5 w-2.5 rounded-full border border-white shadow-card ${pinColor[l.state]}`} />
+                <span aria-hidden className={`inline-block h-2.5 w-2.5 rounded-full border border-white shadow-card ${pinColorClass[l.state]}`} />
                 {l.label}
               </li>
             ))}
