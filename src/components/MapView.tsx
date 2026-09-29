@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Maximize2, Minimize2 } from 'lucide-react';
-import { APIProvider, InfoWindow, Map as GoogleMap, Marker, useMap } from '@vis.gl/react-google-maps';
+import { APIProvider, InfoWindow, Map as GoogleMap, Marker, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { EmptyState } from '@/components/Page';
 import { compactUsd, facilityTypeLabel } from '@/lib/format';
 import { geocodeMissing, geocodeProperty, isCoords } from '@/lib/geocode';
@@ -116,6 +116,43 @@ function InvalidateOnFullscreen({ fullscreen }: { fullscreen: boolean }) {
     return () => clearTimeout(t);
   }, [fullscreen, map]);
   return null;
+}
+
+/**
+ * Looks up any real-world address (Google Places), separate from the name/owner/city/PIN
+ * filter above the map, which only searches this portfolio's own saved locations. Picking a
+ * result pans/zooms the map there — it doesn't add or touch any location record.
+ */
+function PlaceSearch() {
+  const map = useMap();
+  const placesLib = useMapsLibrary('places');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!placesLib || !map || !inputRef.current) return;
+    const autocomplete = new placesLib.Autocomplete(inputRef.current, {
+      fields: ['geometry'],
+      componentRestrictions: { country: 'us' },
+    });
+    autocomplete.bindTo('bounds', map);
+    const listener = autocomplete.addListener('place_changed', () => {
+      const loc = autocomplete.getPlace().geometry?.location;
+      if (!loc) return;
+      map.panTo(loc);
+      map.setZoom(Math.max(map.getZoom() ?? 0, 15));
+    });
+    return () => listener.remove();
+  }, [placesLib, map]);
+
+  return (
+    <input
+      ref={inputRef}
+      type="text"
+      placeholder="Search any address…"
+      aria-label="Search any address on the map"
+      className="field absolute left-2 top-2 z-[1000] w-[min(15rem,calc(100%-3.5rem))] shadow-card"
+    />
+  );
 }
 
 const NC_CENTER = { lat: 35.5, lng: -79.1 };
@@ -287,6 +324,7 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
               >
                 <InvalidateOnFullscreen fullscreen={isFullscreen} />
                 <FitBounds rows={placedRows.length ? placedRows : rows} />
+                <PlaceSearch />
                 {placedRows.map((r) => (
                   <Marker
                     key={r.p.id}

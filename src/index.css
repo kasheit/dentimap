@@ -100,6 +100,40 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231b1c20' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
     }
   }
+  /* Google Places autocomplete dropdown, appended to <body> outside any component's own DOM —
+     styled here to match the app rather than Google's own Arial/blue default. Hardcoded light
+     hex, not the --dm-* tokens: the map itself is deliberately light-only in both app themes
+     (see MapView.tsx), and this dropdown is that map's own chrome, not app chrome. */
+  .pac-container {
+    margin-top: 4px;
+    border: 1px solid #e6e6eb;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgb(20 22 30 / 0.12), 0 2px 6px rgb(20 22 30 / 0.06);
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  }
+  .pac-item {
+    padding: 8px 12px;
+    border-top-color: #e6e6eb;
+    font-size: 13px;
+    color: #545860;
+  }
+  .pac-item:first-child {
+    border-top: none;
+  }
+  .pac-item:hover,
+  .pac-item-selected {
+    background-color: #f3f3f6;
+  }
+  .pac-item-query {
+    color: #1b1c20;
+    font-size: 13px;
+  }
+  .pac-icon {
+    display: none;
+  }
+  .pac-matched {
+    font-weight: 500;
+  }
   ::selection {
     background: rgb(var(--dm-blue) / 0.22);
   }
