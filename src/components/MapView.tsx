@@ -79,11 +79,6 @@ function pinIconUrl(state: LocState, facilityType: FacilityType): string {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
-/** Monochrome, unfilled — same glyph as the map pins, but drawn only in ink-dim so it can't be misread as a fourth state color. */
-function TypeGlyph({ type }: { type: FacilityType }) {
-  return <span aria-hidden className="inline-block h-3 w-3 text-dm-dim" dangerouslySetInnerHTML={{ __html: facilityIconSvg(type, 'currentColor', 2) }} />;
-}
-
 const placed = (r: MapRow) => r.p.address.lat !== undefined && r.p.address.lng !== undefined;
 
 /** Pans/fits the map to the given locations whenever the placed set changes. */
@@ -187,12 +182,6 @@ const legend: { state: LocState; label: string }[] = [
   { state: 'confirmed', label: 'Verified' },
   { state: 'unconfirmed', label: 'Unverified' },
   { state: 'missing', label: 'Not found' },
-];
-
-const typeLegend: { type: FacilityType; label: string }[] = [
-  { type: 'vfd_practice', label: facilityTypeLabel.vfd_practice },
-  { type: 'valleygate_asc', label: facilityTypeLabel.valleygate_asc },
-  { type: 'affiliate', label: facilityTypeLabel.affiliate },
 ];
 
 /**
@@ -370,19 +359,14 @@ export function MapView({ rows, allRows, searchActive }: { rows: MapRow[]; allRo
             </APIProvider>
           </div>
 
+          {/* Type used to get its own second legend row here; dropped — the pins' own icons
+              (tooth/syringe/stethoscope) are self-explanatory, and each marker's aria-label
+              already states its facility type for screen readers, so nothing accessible was lost. */}
           <ul className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-label text-dm-muted" aria-label="Pin colors, by verification state">
             {legend.map((l) => (
               <li key={l.state} className="flex items-center gap-1.5">
                 <span aria-hidden className={`inline-block h-2.5 w-2.5 rounded-full border border-white shadow-card ${pinColorClass[l.state]}`} />
                 {l.label}
-              </li>
-            ))}
-          </ul>
-          <ul className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-label text-dm-muted" aria-label="Pin icons, by facility type">
-            {typeLegend.map((t) => (
-              <li key={t.type} className="flex items-center gap-1.5">
-                <TypeGlyph type={t.type} />
-                {t.label}
               </li>
             ))}
           </ul>

@@ -13,6 +13,7 @@ export function NotesLog({ property }: { property: Property }) {
   const updateProperty = useDentimap((s) => s.updateProperty);
   const [text, setText] = useState('');
   const [tag, setTag] = useState<NoteTag>('note');
+  const [arming, setArming] = useState<string | null>(null);
 
   const log = useMemo(() => {
     const entries = [...(property.noteLog ?? [])];
@@ -96,14 +97,29 @@ export function NotesLog({ property }: { property: Property }) {
                     </div>
                     <p className={`mt-0.5 whitespace-pre-wrap text-body leading-relaxed ${n.resolved ? 'text-dm-dim line-through' : ''}`}>{n.text}</p>
                   </div>
-                  <button
-                    onClick={() => (legacy ? save(property.noteLog ?? [], 'Note deleted', true) : editReal((x) => (x.id === n.id ? null : x), 'Note deleted'))}
-                    className="rounded p-1.5 text-dm-dim transition-colors hover:bg-dm-hover hover:text-dm-red"
-                    title="Delete"
-                    aria-label="Delete note"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  {arming === n.id ? (
+                    <button
+                      className="btn shrink-0 border-dm-red/40 text-dm-red"
+                      onClick={() => {
+                        if (legacy) save(property.noteLog ?? [], 'Note deleted', true);
+                        else editReal((x) => (x.id === n.id ? null : x), 'Note deleted');
+                        setArming(null);
+                      }}
+                      onBlur={() => setArming(null)}
+                      autoFocus
+                    >
+                      Remove?
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setArming(n.id)}
+                      className="rounded p-1.5 text-dm-dim transition-colors hover:bg-dm-hover hover:text-dm-red"
+                      title="Delete"
+                      aria-label="Delete note"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </li>
               );
             })}

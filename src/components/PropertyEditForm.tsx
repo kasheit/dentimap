@@ -172,6 +172,7 @@ export function PropertyEditForm({
   const [d, setD] = useState<Draft>(() => toDraft(p));
   const [meta, setMeta] = useState<MetaDraft>(() => toMeta(p));
   const [sources, setSources] = useState<SourceLink[]>(() => sourcesOf(p));
+  const [arming, setArming] = useState(false);
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((prev) => ({ ...prev, [k]: v }));
   const setM = (k: SourcedField) => (m: FieldMeta) => setMeta((prev) => ({ ...prev, [k]: m }));
   const input = (k: keyof Draft, extra = '') => (
@@ -298,9 +299,15 @@ export function PropertyEditForm({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span />
           {onDelete && (
-            <button className="btn text-dm-red hover:text-dm-red" onClick={onDelete}>
-              Delete location
-            </button>
+            arming ? (
+              <button className="btn border-dm-red/40 text-dm-red" onClick={onDelete} onBlur={() => setArming(false)} autoFocus>
+                Delete "{p.name}" and all its deeds? This can't be undone.
+              </button>
+            ) : (
+              <button className="btn text-dm-red hover:text-dm-red" onClick={() => setArming(true)}>
+                Delete location
+              </button>
+            )
           )}
         </div>
       </div>

@@ -27,9 +27,7 @@ export function RecordCard({ p, editSignal = 0, focusField }: { p: Property; edi
           updateProperty(p.id, patch, 'Property details edited');
           setEditing(false);
         }}
-        onDelete={() => {
-          if (confirm(`Delete "${p.name}" and all of its deeds? This cannot be undone.`)) deleteProperty(p.id);
-        }}
+        onDelete={() => deleteProperty(p.id)}
       />
     );
   }

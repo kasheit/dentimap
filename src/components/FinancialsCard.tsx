@@ -21,7 +21,6 @@ export function FinancialsCard({ p }: { p: Property }) {
   const assessed = m?.currentAssessedValue;
   const land = m?.landValue;
   const building = m?.buildingValue;
-  const split = land !== undefined && building !== undefined && land + building > 0 ? Math.round((land / (land + building)) * 100) : undefined;
   const confirmed = levelFor(assessed !== undefined, p.meta?.assessedValue) === 'confirmed';
 
   return (
@@ -41,16 +40,6 @@ export function FinancialsCard({ p }: { p: Property }) {
         </div>
         {assessed !== undefined && <ProvenanceTag property={p} field="assessedValue" />}
       </div>
-
-      {split !== undefined && (
-        <div className="mt-4">
-          <div className="flex h-1.5 overflow-hidden rounded-full bg-dm-border" aria-hidden>
-            <div className="bg-dm-blue" style={{ width: `${split}%` }} />
-            <div className="bg-dm-blue/40" style={{ width: `${100 - split}%` }} />
-          </div>
-          <div className="tnum mt-1 text-label text-dm-dim">Land {split}% · building {100 - split}%</div>
-        </div>
-      )}
 
       {(() => {
         const figures = [

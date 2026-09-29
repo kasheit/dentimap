@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import { LevelLabel } from './Chips';
 import { fmtDate, personRoleLabel } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
@@ -16,8 +17,11 @@ export function KeyPeople({ property }: { property: Property }) {
         <ul className="divide-y divide-dm-border/70">
           {linked.map((p) => {
             const acts = p.actions.filter((a) => a.propertyId === property.id).sort((a, b) => b.date.localeCompare(a.date));
+            // a person can also show up here purely because of a logged action tied to this location
+            // (no direct link to remove) — the unlink control only makes sense for a real propertyIds link
+            const directlyLinked = p.propertyIds.includes(property.id);
             return (
-              <li key={p.id} className="py-3 first:pt-0">
+              <li key={p.id} className="group py-3 first:pt-0">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <button onClick={() => openPerson(p.id)} className="mr-auto text-left text-body font-medium hover:text-dm-blue">
                     {p.name}
@@ -26,6 +30,16 @@ export function KeyPeople({ property }: { property: Property }) {
                     {p.roles.map((r) => personRoleLabel[r]).join(' · ')}
                     {p.status === 'former' && ' · Former'}
                   </span>
+                  {directlyLinked && (
+                    <button
+                      onClick={() => updatePerson(p.id, { propertyIds: p.propertyIds.filter((id) => id !== property.id) })}
+                      className="rounded p-1 text-dm-muted opacity-0 transition hover:bg-dm-hover hover:text-dm-red focus-visible:opacity-100 group-hover:opacity-100"
+                      title="Remove from this location (the person is kept)"
+                      aria-label={`Remove ${p.name} from ${property.name}`}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </div>
                 {p.relevance && <p className="mt-1 text-label leading-relaxed text-dm-muted">{p.relevance}</p>}
                 {acts.length > 0 && (

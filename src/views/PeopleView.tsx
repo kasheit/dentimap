@@ -140,6 +140,7 @@ function Profile({ person }: { person: Person }) {
   const { entities, properties, deeds, updatePerson, deletePerson, openProperty, setTab } = useDentimap();
   const [editing, setEditing] = useState(person.name === 'New person');
   const [arming, setArming] = useState(false);
+  const [armingActionId, setArmingActionId] = useState<string | null>(null);
   const [d, setD] = useState({ name: person.name, title: person.title ?? '', relevance: person.relevance ?? '', status: person.status, roles: person.roles });
   const [notes, setNotes] = useState(person.notes ?? '');
 
@@ -254,13 +255,27 @@ function Profile({ person }: { person: Person }) {
                     <LevelLabel level={a.state === 'verified' ? 'confirmed' : 'partial'} detail={a.source} />
                   </div>
                 </div>
-                <button
-                  className="self-start rounded p-1.5 text-dm-muted transition-colors hover:text-dm-red"
-                  aria-label="Delete entry"
-                  onClick={() => updatePerson(person.id, { actions: person.actions.filter((x) => x.id !== a.id) })}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                {armingActionId === a.id ? (
+                  <button
+                    className="btn self-start border-dm-red/40 text-dm-red"
+                    onClick={() => {
+                      updatePerson(person.id, { actions: person.actions.filter((x) => x.id !== a.id) });
+                      setArmingActionId(null);
+                    }}
+                    onBlur={() => setArmingActionId(null)}
+                    autoFocus
+                  >
+                    Remove?
+                  </button>
+                ) : (
+                  <button
+                    className="self-start rounded p-1.5 text-dm-muted transition-colors hover:text-dm-red"
+                    aria-label="Delete entry"
+                    onClick={() => setArmingActionId(a.id)}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </li>
             ))}
           </ul>

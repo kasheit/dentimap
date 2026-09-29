@@ -1,30 +1,31 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { AlertTriangle, Users, Building2, CloudOff, FileText, Landmark, BookOpen } from 'lucide-react';
+import { AlertTriangle, Users, Building2, CloudOff, FileText, Landmark } from 'lucide-react';
 import { exportCsv, exportJson } from '@/lib/exporters';
 import { OPEN_SEARCH_EVENT } from './SearchPalette';
 import { isValidData, useDentimap } from '@/lib/store';
 import type { TabId } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
+import type { DentimapData } from '@/lib/types';
 
+// Glossary stays a real tab (routed in App.tsx, reachable via Ctrl+K — see SearchPalette's
+// "Go to Glossary" command and its own term search) but isn't a peer of the four screens that
+// actually answer "who owns what, worth what" — dropped from the primary nav for that reason.
 const tabs: { id: TabId; label: string; icon: typeof Building2 }[] = [
   { id: 'properties', label: 'Locations', icon: Building2 },
   { id: 'entities', label: 'Entities', icon: Landmark },
   { id: 'people', label: 'People', icon: Users },
   { id: 'deeds', label: 'Deeds', icon: FileText },
-  { id: 'glossary', label: 'Glossary', icon: BookOpen },
 ];
+
+// Routine states ('saving'/'synced') say nothing an operator needs mid-task and read as
+// unfinished if caught flickering — this only ever shows up for an actual problem.
+const csvKindFor = (tab: TabId): 'properties' | 'deeds' | 'entities' => (tab === 'deeds' ? 'deeds' : tab === 'entities' ? 'entities' : 'properties');
+const csvLabelFor = (tab: TabId) => (tab === 'deeds' ? 'deeds' : tab === 'entities' ? 'entities' : 'locations');
 
 function SyncBadge() {
   const sync = useDentimap((s) => s.sync);
   const message = useDentimap((s) => s.syncMessage);
-  if (sync === 'off' || sync === 'connecting') return null;
-  if (sync === 'saving' || sync === 'synced') {
-    return (
-      <span role="status" className="tnum text-label text-dm-dim">
-        {sync === 'saving' ? 'Saving…' : 'Saved'}
-      </span>
-    );
-  }
+  if (sync === 'off' || sync === 'connecting' || sync === 'saving' || sync === 'synced') return null;
   if (sync === 'conflict') {
     return (
       <span className="flex items-center gap-1.5 tnum text-label text-dm-red" title={message}>
@@ -46,6 +47,7 @@ export function Header() {
   const { tab, setTab, importData } = useDentimap();
   const [menu, setMenu] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [pendingImport, setPendingImport] = useState<{ fileName: string; data: DentimapData } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -98,13 +100,18 @@ export function Header() {
     try {
       const parsed = JSON.parse(await file.text());
       if (!isValidData(parsed)) throw new Error('shape');
-      if (!confirm(`Merge ${parsed.properties.length} locations, ${parsed.deeds.length} deeds and ${parsed.entities.length} entities from "${file.name}"? Records with a matching ID are overwritten by the file; nothing else is removed.`)) return;
-      const { added, updated } = importData(parsed);
-      setNotice(`Imported: ${added} new, ${updated} updated.`);
+      setPendingImport({ fileName: file.name, data: parsed });
     } catch {
       setNotice('Import failed — not a valid Dentimap JSON export.');
     }
     if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const confirmImport = () => {
+    if (!pendingImport) return;
+    const { added, updated } = importData(pendingImport.data);
+    setNotice(`Imported: ${added} new, ${updated} updated.`);
+    setPendingImport(null);
   };
 
   const menuItem = 'flex w-full items-center gap-2 px-3 py-2 text-left text-label text-dm-muted transition-colors hover:bg-dm-hover hover:text-dm-text';
@@ -178,11 +185,10 @@ export function Header() {
                 <button className={menuItem} onClick={() => { fileRef.current?.click(); setMenu(false); }}>
                   Restore from backup
                 </button>
-                {(['properties', 'deeds', 'entities'] as const).map((w) => (
-                  <button key={w} className={menuItem} onClick={() => { exportCsv(snapshot(), w); setMenu(false); }}>
-                    {(w === 'properties' ? 'Locations' : w[0].toUpperCase() + w.slice(1))} (CSV)
-                  </button>
-                ))}
+                {/* whichever list you're looking at is almost always the one you want as a spreadsheet — one row instead of enumerating all three */}
+                <button className={menuItem} onClick={() => { exportCsv(snapshot(), csvKindFor(tab)); setMenu(false); }}>
+                  Export {csvLabelFor(tab)} (CSV)
+                </button>
                 <div className="border-t border-dm-border" />
                 {supabase && (
                   <button className={menuItem} onClick={() => supabase?.auth.signOut()}>
@@ -194,6 +200,17 @@ export function Header() {
           </div>
         </div>
       </div>
+      {pendingImport && (
+        <div role="alertdialog" aria-label="Confirm import" className="animate-fade-in border-t border-dm-border bg-dm-raised px-4 py-2.5 text-label sm:px-6">
+          <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="flex-1 text-dm-muted">
+              Merge {pendingImport.data.properties.length} locations, {pendingImport.data.deeds.length} deeds and {pendingImport.data.entities.length} entities from "{pendingImport.fileName}"? Records with a matching ID are overwritten by the file; nothing else is removed.
+            </span>
+            <button className="btn" onClick={() => setPendingImport(null)} autoFocus>Cancel</button>
+            <button className="btn btn-primary" onClick={confirmImport}>Merge</button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

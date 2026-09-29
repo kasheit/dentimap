@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { AlertTriangle, CheckCircle2, ArrowDown, ArrowRight, ArrowUp, Plus, Search } from 'lucide-react';
 import { VerifyChip } from '@/components/Chips';
 import { expectedExcise } from '@/lib/deedParser';
-import { PageHeader, PageShell } from '@/components/Page';
+import { EmptyState, PageHeader, PageShell } from '@/components/Page';
 import { compactUsd, deedTypeLabel, fmtDate, usd } from '@/lib/format';
 import { useDentimap } from '@/lib/store';
 
@@ -135,7 +135,14 @@ export function DeedsView() {
               </tr>
             ))}
             {!rows.length && (
-              <tr><td colSpan={7} className="px-4 py-12 text-center text-dm-dim">No instruments match.</td></tr>
+              <tr>
+                <td colSpan={7}>
+                  <EmptyState
+                    title={deeds.length ? 'No deeds match' : 'No deeds yet'}
+                    hint={deeds.length ? 'Clear the search or filter.' : 'Add a deed from a location’s Title chain tab, or use Upload documents to read one in.'}
+                  />
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
